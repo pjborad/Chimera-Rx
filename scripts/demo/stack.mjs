@@ -1,9 +1,9 @@
 /**
- * Own stack for the demo video, on ports 4660-4669 only (never 4000, 5173, 5174):
- *   4660 app + API (the e2e harness: fresh synthetic database, two stores, MFA on, mock AI provider)
- *   4661 harness control port (reseed, scenario fixtures, printable labels)   test tooling, loopback only
- *   4662 local Kokoro speech server (voicemail audio, same voice as the narrator)
- *   4663 stand-in model (OpenAI-compatible, invents one lot so the Coroner gate visibly drops it)
+ * Own stack for the demo video, on ports 4690-4699 only (never 4000, 5173, 5174):
+ *   4690 app + API (the e2e harness: fresh synthetic database, two stores, MFA on, mock AI provider)
+ *   4691 harness control port (reseed, scenario fixtures, printable labels)   test tooling, loopback only
+ *   4692 local Kokoro speech server (voicemail audio, same voice as the narrator)
+ *   4693 stand-in model (OpenAI-compatible, invents one lot so the Coroner gate visibly drops it)
  * Library: startStack() / stopStack(). CLI: `node scripts/demo/stack.mjs up|down` (pids in demo-video/work/stack.json).
  * Stops only the processes it started, by pid.
  */
@@ -13,7 +13,7 @@ import http from "node:http";
 import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
-export const PORTS = { app: 4660, control: 4661, kokoro: 4662, stub: 4663 };
+export const PORTS = { app: 4690, control: 4691, kokoro: 4692, stub: 4693 };
 const STATE = path.join(ROOT, "demo-video/work/stack.json");
 const venvPy = path.join(ROOT, ".venv-voice/bin/python");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

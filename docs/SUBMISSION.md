@@ -81,17 +81,17 @@ TypeScript, Node 22+, Fastify, node:sqlite, React, Vite, zod, tesseract.js, bwip
 
 ## 3-minute demo video shot list
 
-The submission video is `demo-video/chimera-rx-submission.mp4` (gitignored; 1920x1080, H.264 and AAC, 2:50, one male Kokoro voice, no music) with `chimera-rx-submission.srt`. Rebuild with `pnpm demo:record:submission`. The spoken script is [DEMO_VIDEO_SCRIPT.md](DEMO_VIDEO_SCRIPT.md). Confirm the length limit and upload site on the live rules page before uploading.
+The submission video is `demo-video/chimera-rx-submission.mp4` (gitignored; 1920x1080, H.264 and AAC, 2:54, one male Kokoro voice `am_onyx`, no music) with `chimera-rx-submission.srt`. Story: about 45 percent modernization of pharmacy systems (the recall is one example of the gap legacy systems leave), about 35 percent AI agents with a pharmacist in the loop, the rest a tab tour by role. Rebuild with `pnpm demo:record:submission`. The spoken script is [DEMO_VIDEO_SCRIPT.md](DEMO_VIDEO_SCRIPT.md). Confirm the length of the uploaded file is under 3:00.
 
 | Time | Shot | Voice-over |
 | --- | --- | --- |
-| 0:00 | Sign-in, typed login, six-digit code, Today | A recall hits; nobody knows who got the lot. Chimera Rx captures it at receiving and at fill. |
-| 0:21 | Technician: scan, lot gate, put-away. Pharmacist: Rx Watcher and Rx Guardian, accept one. Cashier: register, short menu. Admin: Integrations | Each role sees a different pharmacy. |
-| 1:12 | Recalls D-0611-2026: fax OCR, lots, confirm, quarantine, patients, messages, sandbox outbox | Verbatim gate, pharmacist attests, voicemail rendered never dialed, refills blocked. |
-| 1:52 | AI agents, provider selector, Rx Guardian Run now | Rules decide, the model explains, a gate checks the model, a pharmacist decides. |
-| 2:13 | Integrations and the placeholder caption | REST, MCP, FHIR, webhooks, DSCSA/EPCIS, two stores. Designed seams, sandboxed. |
-| 2:35 | Audit chain | Encrypted PHI, server-side roles, hash-chained audit, eight review findings fixed. |
-| 2:48 | Kiro card, end card | Specs, steering, hooks, custom agent, Kiro Crew. Repo URL, synthetic data only. |
+| 0:00 | Sign-in, typed login, six-digit code, Today | Fax, phone and paper vs one connected ledger linking lot, patient and prescription. |
+| 0:19 | Technician receiving, pharmacist inventory and fill, cashier register, refills and patients | A quick tour by role. |
+| 0:43 | Recall D-0611-2026: fax OCR, lots, confirm, quarantine, patients, messages | The gap old systems leave (the lot was never captured) and how a connected system closes it. |
+| 0:57 | DSCSA and EPCIS export and verifier, partners and MCP, two-store transfer, outbound placeholder list | Open standards, signed webhooks, designed seams sandboxed today. |
+| 1:31 | AI agents page, Rx Guardian Run now, suggestions with evidence and accept, Coroner gate, provider selector | Rules decide, the model explains, a gate checks the model, a pharmacist decides. |
+| 2:28 | Audit chain | Encrypted PHI, server-side roles, hash-chained audit. HIPAA-style safeguards, not certified. |
+| 2:38 | Animated Kiro card, animated end card | Specs, steering, hooks, custom agent, Kiro Crew. Repo URLs, synthetic data only. |
 
 ## Rules check (2026 submission requirements)
 

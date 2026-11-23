@@ -15,8 +15,8 @@ import path from "node:path";
 import { createRequire } from "node:module";
 
 export const ROOT = path.resolve(import.meta.dirname, "../..");
-export const BASE = "http://localhost:4660";
-export const CONTROL = "http://127.0.0.1:4661";
+export const BASE = "http://localhost:4690";
+export const CONTROL = "http://127.0.0.1:4691";
 export const PW = "moonlight-rx-2026";
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const require = createRequire(path.join(ROOT, "apps/api/package.json"));
