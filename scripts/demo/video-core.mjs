@@ -60,13 +60,27 @@ export const OVERLAY = () => {
   window.addEventListener("mousemove", (e) => { make(); const d = document.getElementById("__cur"); if (d) d.style.transform = `translate(${e.clientX}px,${e.clientY}px)`; sessionStorage.setItem("__pos", `${e.clientX},${e.clientY}`); }, true);
   document.addEventListener("DOMContentLoaded", make); if (document.readyState !== "loading") make();
   window.__lt = (html) => { make(); sessionStorage.setItem("__lt", html); const b = document.getElementById("__lt"); if (b) { b.innerHTML = html; b.style.display = html ? "block" : "none"; } };
-  window.__ring = (x, y, w, h) => {
-    make();
-    const r = document.createElement("div");
-    r.style.cssText = `position:fixed;left:${x - 6}px;top:${y - 6}px;width:${w + 12}px;height:${h + 12}px;border:3px solid #ffb020;border-radius:10px;box-shadow:0 0 0 4px rgba(255,176,32,.28);z-index:2147483644;pointer-events:none;transition:opacity .35s`;
+  // Highlight ring: tied to its element (rect recomputed every frame), at most 700 ms, never kept across page loads,
+  // and removed on scroll, resize, route change and by __clearRings() before every step, card and navigation.
+  window.__clearRings = () => { document.querySelectorAll(".__ring").forEach((n) => n.remove()); };
+  window.__ring = (node) => {
+    make(); window.__clearRings();
+    if (!node || !document.body) return;
+    const r = document.createElement("div"); r.className = "__ring";
+    r.style.cssText = "position:fixed;border:3px solid #ffb020;border-radius:10px;box-shadow:0 0 0 4px rgba(255,176,32,.28);z-index:2147483644;pointer-events:none;transition:opacity .25s";
     document.body.append(r);
-    setTimeout(() => { r.style.opacity = "0"; }, 900); setTimeout(() => r.remove(), 1300);
+    const t0 = performance.now();
+    const tick = () => {
+      if (!r.isConnected) return;
+      const b = node.isConnected ? node.getBoundingClientRect() : null, age = performance.now() - t0;
+      if (!b || b.width < 2 || b.height < 2 || age > 700) { r.remove(); return; }
+      r.style.left = `${b.left - 6}px`; r.style.top = `${b.top - 6}px`; r.style.width = `${b.width + 12}px`; r.style.height = `${b.height + 12}px`;
+      if (age > 450) r.style.opacity = "0";
+      requestAnimationFrame(tick);
+    };
+    tick();
   };
+  for (const ev of ["scroll", "resize", "hashchange", "popstate", "pagehide"]) window.addEventListener(ev, () => window.__clearRings?.(), true);
 };
 
 export const gs1 = (l, withSerial = true) => `(01)${l.gtin}(17)${l.expiry.replace(/-/g, "").slice(2, 8)}(10)${l.lot}${withSerial ? `(21)${l.serial}` : ""}`;
@@ -141,8 +155,11 @@ export class Recorder {
   async labels() { this._labels ??= (await this.control("GET", "/labels")).labels; return this._labels; }
 
   // ---- on-camera primitives ------------------------------------------------------------------------------------------
+  /** Remove every highlight ring and wait until a frame without one has been captured. */
+  async clearRings(settle = 160) { await this.page.evaluate(() => window.__clearRings?.()).catch(() => {}); if (settle) await sleep(settle); }
   async lt(html) { this.ltText = html; await this.page.evaluate((h) => window.__lt?.(h), html).catch(() => {}); }
   async go(route, waitFor) {
+    await this.clearRings(0);
     await this.page.goto(`${BASE}/#${route}`);
     if (waitFor) await this.page.waitForSelector(waitFor, { timeout: 20000 });
     await this.page.waitForTimeout(250);
@@ -160,7 +177,7 @@ export class Recorder {
     const b = await el.boundingBox();
     if (b) {
       await this.moveTo(b.x + b.width / 2, b.y + b.height / 2);
-      if (ring) await this.page.evaluate(([x, y, w, h]) => window.__ring?.(x, y, w, h), [b.x, b.y, b.width, b.height]).catch(() => {});
+      if (ring) await el.evaluate((n) => window.__ring?.(n)).catch(() => {});
     }
     await el.click();
     await sleep(180);
@@ -171,15 +188,17 @@ export class Recorder {
     await el.pressSequentially(text, { delay: 28 });
   }
   async point(loc) { const el = typeof loc === "string" ? this.page.locator(loc).first() : loc.first(); const b = await el.boundingBox(); if (b) await this.moveTo(b.x + b.width / 2, b.y + b.height / 2); }
-  async scrollTo(loc) { const el = typeof loc === "string" ? this.page.locator(loc).first() : loc.first(); await el.scrollIntoViewIfNeeded().catch(() => {}); await sleep(250); }
+  async scrollTo(loc) { const el = typeof loc === "string" ? this.page.locator(loc).first() : loc.first(); await this.clearRings(0); await el.scrollIntoViewIfNeeded().catch(() => {}); await sleep(250); }
   async hold(ms) { await sleep(ms); }
   async hasText(t, timeout = 8000) { return this.page.getByText(t).first().waitFor({ timeout }).then(() => true, () => false); }
 
   /** Run one narrated step. A failing step is logged and the recording goes on. */
   async step(seg, u, name, fn) {
+    await this.clearRings();
     const s = { seg, u, name, t0: this.now(), t1: 0, cuts: [], ok: true };
     this.cur = s;
     try { await fn(); } catch (e) { s.ok = false; s.error = String(e).split("\n")[0]; this.failed.push(`${seg}#${u} ${name}: ${s.error}`); console.log("  FAIL", seg, u, name, s.error); await this.page.screenshot({ path: path.join(this.work, `fail-${seg}-${u}.png`) }).catch(() => {}); }
+    await this.clearRings(); // the last frame of a step is held or sped past: it must not carry a ring into the next scene
     s.t1 = this.now(); this.steps.push(s); this.cur = null;
     console.log(`  ${s.ok ? "ok  " : "FAIL"} ${seg}#${u} ${name} ${(s.t1 - s.t0).toFixed(1)}s`);
   }

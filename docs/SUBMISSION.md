@@ -81,17 +81,17 @@ TypeScript, Node 22+, Fastify, node:sqlite, React, Vite, zod, tesseract.js, bwip
 
 ## 3-minute demo video shot list
 
-The submission video is `demo-video/chimera-rx-submission.mp4` (gitignored; 1920x1080, H.264 and AAC, 2:54, one male Kokoro voice `am_onyx`, no music) with `chimera-rx-submission.srt`. Story: about 45 percent modernization of pharmacy systems (the recall is one example of the gap legacy systems leave), about 35 percent AI agents with a pharmacist in the loop, the rest a tab tour by role. Rebuild with `pnpm demo:record:submission`. The spoken script is [DEMO_VIDEO_SCRIPT.md](DEMO_VIDEO_SCRIPT.md). Confirm the length of the uploaded file is under 3:00.
+The submission video is `demo-video/chimera-rx-submission.mp4` (gitignored; 1920x1080, H.264 and AAC, 2:53, two male Kokoro voices (A `am_onyx` gives the why, B `am_michael` gives the how; env `VOICE_A` and `VOICE_B`), no music) with `chimera-rx-submission.srt`. Story: modernization of pharmacy systems first (the recall is one example of the gap legacy systems leave), then a tab tour by role and about 30 percent AI agents with a pharmacist in the loop. Rebuild with `pnpm demo:record:submission`. The spoken script is [DEMO_VIDEO_SCRIPT.md](DEMO_VIDEO_SCRIPT.md). Confirm the length of the uploaded file is under 3:00.
 
 | Time | Shot | Voice-over |
 | --- | --- | --- |
-| 0:00 | Sign-in, typed login, six-digit code, Today | Fax, phone and paper vs one connected ledger linking lot, patient and prescription. |
-| 0:19 | Technician receiving, pharmacist inventory and fill, cashier register, refills and patients | A quick tour by role. |
-| 0:43 | Recall D-0611-2026: fax OCR, lots, confirm, quarantine, patients, messages | The gap old systems leave (the lot was never captured) and how a connected system closes it. |
-| 0:57 | DSCSA and EPCIS export and verifier, partners and MCP, two-store transfer, outbound placeholder list | Open standards, signed webhooks, designed seams sandboxed today. |
-| 1:31 | AI agents page, Rx Guardian Run now, suggestions with evidence and accept, Coroner gate, provider selector | Rules decide, the model explains, a gate checks the model, a pharmacist decides. |
-| 2:28 | Audit chain | Encrypted PHI, server-side roles, hash-chained audit. HIPAA-style safeguards, not certified. |
-| 2:38 | Animated Kiro card, animated end card | Specs, steering, hooks, custom agent, Kiro Crew. Repo URLs, synthetic data only. |
+| 0:00 | Sign-in, typed login, six-digit code, Today | A: fax, phone and paper vs one connected ledger. B: sign-in with a code, Today per role. |
+| 0:24 | Technician receiving, pharmacist inventory and fill, cashier register, refills and patients | B walks the roles; A explains least privilege. |
+| 0:47 | Recall D-0611-2026: fax OCR, lots, confirm, quarantine, patients, messages | A: the gap old systems leave. B: how a connected system closes it. |
+| 1:03 | DSCSA and EPCIS export, then the sandbox verifier (a real serial, then a spoofed one), partners and MCP, two-store transfer, outbound placeholder list | A: open standards. B: the verifier says verified, then not verified, on screen; partners. A: two stores, designed seams sandboxed today. |
+| 1:38 | AI agents page, Rx Guardian Run now, suggestions with evidence and accept, Coroner gate, provider selector | A: rules decide, the model explains, a gate checks, a pharmacist decides. B: how Guardian and providers work. |
+| 2:27 | Audit chain | A: encrypted PHI, server-side roles, hash-chained audit. HIPAA-style safeguards, not certified. |
+| 2:37 | Animated Kiro card, animated end card | A: specs, steering, hooks, custom agent, Kiro Crew. Repo URLs, synthetic data only. |
 
 ## Rules check (2026 submission requirements)
 
@@ -102,7 +102,7 @@ From the requirements the owner pasted on 2026-11-23. Status as of that day.
 | Project built with Kiro | Yes. `.kiro/` (specs, steering, hooks, agents) and `docs/KIRO_USAGE.md` |
 | URL to a functional application, login details in the form | **https://pjborad.github.io/Chimera-Rx/app/** (browser preview: the real app and API code run inside the page, no server, no login to GitHub; built by `.github/workflows/pages.yml`). Full server version: `docker compose up` or Codespaces. Logins: the seeded staff accounts, shared password `moonlight-rx-2026` (synthetic) |
 | Text description of features | Devpost write-up above |
-| Video under 3 minutes, on YouTube, public, link in the form | **Video ready, not uploaded.** `chimera-rx-submission.mp4` is 2:50. Only the owner can upload it to YouTube as public |
+| Video under 3 minutes, on YouTube, public, link in the form | **Video ready, not uploaded.** `chimera-rx-submission.mp4` is 2:53. Only the owner can upload it to YouTube as public |
 | Video shows the project running on its device | The video is a browser screen recording of the running app |
 | No third-party trademarks or copyrighted music | No music; the voice is a locally generated open model. Frames checked, no logos |
 | Public GitHub repo with source, assets and instructions | Public: `pjborad/Chimera-Rx`. README has setup |
