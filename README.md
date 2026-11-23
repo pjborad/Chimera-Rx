@@ -8,6 +8,12 @@
 
 **Try it in the browser:** open the Codespace above (free with a GitHub account). It installs, seeds synthetic data and opens the app on port 5173. Project page: https://pjborad.github.io/Chimera-Rx/
 
+## Demo video (2:50)
+
+[![Watch the Chimera Rx demo](docs/media/chimera-rx-demo-poster.jpg)](https://pjborad.github.io/Chimera-Rx/#demo-video)
+
+Click the picture to play it on the project page, or [download the MP4](docs/media/chimera-rx-demo.mp4) ([captions](docs/media/chimera-rx-demo.srt)). It covers receiving, fill, the cashier and admin roles, a recall end to end, the AI agents and the integration placeholders.
+
 ![Sign-in page with the demo notice](docs/img/sign-in.jpg)
 
 ## The pharmacy runs on yesterday's software
