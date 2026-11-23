@@ -133,14 +133,14 @@ An independent reviewer (handle `ict-intelligence`, 2026-11-22, commit 30408a6) 
 
 | Id | Priority | Finding | Status | Commit |
 |---|---|---|---|---|
-| F01 | P1 | Automatic review overwrites a pharmacist hold | fixed in branch fix/review-2026-11-22 | |
-| F02 | P1 | Pending destination recall blocks confirmation propagation | fixed in branch fix/review-2026-11-22 | |
-| F03 | P1 | Clinical reads bypass cashier and admin role restrictions | fixed in branch fix/review-2026-11-22 | |
-| F04 | P1 | Current locally sold medicines omitted from some safety rules | fixed in branch fix/review-2026-11-22 | |
-| F05 | P1 | Interrupted cross-store transfer duplicates stock | fixed in branch fix/review-2026-11-22 | |
-| F06 | P2 | Store 2 outputs retain Store 7 identity and contact details | fixed in branch fix/review-2026-11-22 | |
-| F07 | P2 | Provider destination policy accepts mapped link-local addresses | fixed in branch fix/review-2026-11-22 | |
-| F08 | P2 | Windows file-key permissions do not meet the owner-only claim | fixed in branch fix/review-2026-11-22 (Windows path tested with a fake `icacls` only) | |
+| F01 | P1 | Automatic review overwrites a pharmacist hold | fixed in branch fix/review-2026-11-22 | `f44da20` |
+| F02 | P1 | Pending destination recall blocks confirmation propagation | fixed in branch fix/review-2026-11-22 | `2e5d2eb` |
+| F03 | P1 | Clinical reads bypass cashier and admin role restrictions | fixed in branch fix/review-2026-11-22 | `a257b3f` |
+| F04 | P1 | Current locally sold medicines omitted from some safety rules | fixed in branch fix/review-2026-11-22 | `f44da20` |
+| F05 | P1 | Interrupted cross-store transfer duplicates stock | fixed in branch fix/review-2026-11-22 | `2e5d2eb` |
+| F06 | P2 | Store 2 outputs retain Store 7 identity and contact details | fixed in branch fix/review-2026-11-22 | `2e5d2eb` |
+| F07 | P2 | Provider destination policy accepts mapped link-local addresses | fixed in branch fix/review-2026-11-22 | `a257b3f` |
+| F08 | P2 | Windows file-key permissions do not meet the owner-only claim | fixed in branch fix/review-2026-11-22 (Windows path tested with a fake `icacls` only) | `f231803` |
 
 "Fixed in branch" means the change is in the review branch with tests; it is not a statement about any deployed system. The review did not cover: Docker, a physical scanner, live providers other than the one live Bedrock check, a full backup restore, keyboard and screen reader review, or an exhaustive penetration test.
 
