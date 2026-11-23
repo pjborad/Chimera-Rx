@@ -43,6 +43,7 @@ export function Integrations({ user }: { user: User }) {
         {edit && <button className="btn primary" onClick={() => setNewOpen(!newOpen)}>+ New connection</button>}
       </PageHeader>
       <main className="page">
+        <div className="finding" role="note"><span className="ico sm info" aria-hidden="true">i</span><p className="sub" style={{ flex: 1 }}>These partners call into Chimera Rx. Outbound connections a real deployment would need (SMS, email, voice calls, wholesaler, DSCSA verification, e-prescribing, PMS, EHR, payer, secrets, KMS, SSO) are placeholders and not wired in this demo: see <span className="mono">docs/INTEGRATION_PLACEHOLDERS.md</span> in the repo. Messages go only to the sandbox outbox.</p></div>
         {!edit && <div className="finding" role="note"><span className="ico sm info" aria-hidden="true">i</span><p className="sub" style={{ flex: 1 }}>You can look, but only an admin (S. Grant in this demo) can change partners, scopes or keys.</p></div>}
         <ErrorBox e={err} />
         {secret && (

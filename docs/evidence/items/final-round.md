@@ -43,9 +43,15 @@ Demo recording material stays outside the product, on the owner's instruction: `
 | `bash scripts/phi-guard.sh --all` | exit 0 |
 | `pnpm e2e` | 49 of 49 passed (MFA checks skipped, MFA off) |
 | `MFA=1 pnpm e2e` | 51 of 51 passed |
-| `git grep -il koinarc` | only `aidlc/spaces/default/memory/project.md` |
+| Case-insensitive `git grep` for the forbidden company name | only `aidlc/spaces/default/memory/project.md` |
 | Relative links in `README.md`, `docs/*.md`, `docs/index.html`, `docs/reviews/` | none dead |
 
 On a fresh seed, recall `D-0611-2026` holds 17 units and names 5 patients, and Rx Guardian Run now raises 5 suggestions on the seeded orders. Those numbers back the "three things to try" in `README.md`.
 
 `docs/img/sign-in.jpg` was re-taken from the e2e harness (empty form, no badge button). The live Kiroween rules page answered HTTP 403 again, so the video length limit and upload site are still for the owner to confirm.
+
+## Follow-up items (same day)
+
+- **Kokoro voice** (commit after `94eab3a`): `KokoroVoice` in `apps/api/src/voice.ts` (`VOICE_PROVIDER=kokoro`, `KOKORO_URL` loopback only, `KOKORO_VOICE` default `am_michael`), tests in `apps/api/test/voice-kokoro.test.ts` with a stubbed fetch. `scripts/voiceover` defaults to `am_michael`, takes `--kokoro-url`, and `--segments` writes one WAV per beat with no edge silence (checked against a local stub server: 0.0 s lead and tail on every segment).
+- **Integration placeholders**: `docs/INTEGRATION_PLACEHOLDERS.md`, commented `PLACEHOLDER_...` entries in `.env.example`, the unwired seam `apps/api/src/channels.ts`, and `apps/api/test/channels.test.ts`, which checks that the code, doc and `.env.example` agree and that the app reads none of these names.
+- After both: `pnpm typecheck` clean, `pnpm test` 26 files and 476 tests passed, `pnpm build:web` built, PHI guard exit 0.

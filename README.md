@@ -257,7 +257,7 @@ Measured on 2026-11-23 on the machine that built this repo:
 
 | Command | Result |
 | --- | --- |
-| `pnpm test` | 24 files, 469 tests passed |
+| `pnpm test` | 26 files, 476 tests passed |
 | `pnpm typecheck` | clean in all workspaces |
 | `pnpm build:web` | builds |
 | `pnpm e2e` | 49 of 49 passed; with `MFA=1`, 51 of 51 (the two MFA checks only run when MFA is on). See [docs/evidence/items/final-round.md](docs/evidence/items/final-round.md) |
@@ -347,7 +347,7 @@ Steering files hold the safety rules and the stack, specs cover the Coroner and 
 
 - No real patient data, ever. All names, ids, phones and addresses are invented.
 - No real messaging: SMS, email and voice are sandbox stand-ins. Nothing is dialled or sent.
-- The prescriber loop, the DSCSA verifier and the key provider `kms` are sandbox stand-ins. Nothing is filed with any regulator or trading partner.
+- The prescriber loop, the DSCSA verifier and the key provider `kms` are sandbox stand-ins. Nothing is filed with any regulator or trading partner. Every outside connection a real deployment would need (SMS, email, voice calls, wholesaler feed, verification router, e-prescribing, PMS, EHR, payer, secrets manager, KMS, SSO) is listed, unwired, in [docs/INTEGRATION_PLACEHOLDERS.md](docs/INTEGRATION_PLACEHOLDERS.md).
 - The drug rules are a small curated table, not a licensed interaction database. The Rx Guardian's interaction and age-band tables are synthetic demo tables, not clinical content.
 - The cold-chain temperature is simulated.
 - No payment is processed; over-the-counter stock is not tracked.

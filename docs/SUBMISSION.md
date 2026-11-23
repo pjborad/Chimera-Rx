@@ -53,7 +53,7 @@ The honest account, including gaps, is in `docs/KIRO_USAGE.md`.
 ### Accomplishments
 
 - A recall goes from a faxed notice to a patient list and approved messages, end to end, in one flow.
-- 469 unit, API and property tests pass in 24 files, and the end-to-end browser run passes against the real UI (49 of 49; 51 of 51 with `MFA=1`; see `docs/evidence/items/final-round.md`).
+- 476 unit, API and property tests pass in 26 files, and the end-to-end browser run passes against the real UI (49 of 49; 51 of 51 with `MFA=1`; see `docs/evidence/items/final-round.md`).
 - Every safety rule has an enforcing file and a proving test.
 - An agent platform where a lying model cannot remove a rule hit, add a lot, or put a name into a voicemail.
 

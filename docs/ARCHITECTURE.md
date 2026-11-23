@@ -142,6 +142,10 @@ The role of each route is checked on the server. `apps/api/test/review-matrix.te
 
 Patient data needs the `patient.read` scope, a BAA flag on the partner record and an admin's approval. Every partner call is written to `api_log`.
 
+## Outside connections (placeholders, not wired)
+
+Every outbound connection a real deployment would need is listed in [INTEGRATION_PLACEHOLDERS.md](INTEGRATION_PLACEHOLDERS.md), with its purpose, trigger, allowed data, consent, `PLACEHOLDER_...` env names and today's sandbox stand-in. The seam is `apps/api/src/channels.ts` (`NotConfiguredChannel` throws "not configured in this demo"); nothing constructs it, and no provider code or SDK exists.
+
 ## Serving and deployment
 
 In production the API serves the built web app from `apps/web/dist`, looked up on disk per request, so a rebuild needs no restart. The Dockerfile builds the web app and runs the API on port 4000. `docker-compose.yml` adds a volume for `/app/data`, a health check on `/api/health` and the `DATASET`, `MFA`, `TWO_STORES` and `SEED_SYNTHETIC` switches (`SEED_SYNTHETIC=1`, the default, seeds the synthetic dataset on a fresh database). In development, Vite on 5173 proxies `/api`, `/v1`, `/mcp`, `/fhir`, `/oauth` and `/hooks` to the API. If the web app runs on another origin, add it to `CORS_ORIGINS`.
