@@ -12,7 +12,7 @@ TypeScript 5, Node 22.5+ (developed on 26), pnpm 12 workspaces. Packages are con
 | State | SQLite through built-in `node:sqlite` (loaded with `createRequire`), file `data/chimera-rx.sqlite` |
 | Jobs | `node-cron` in `apps/api/src/server.ts` (Rx Watcher, outreach agent, Night Watch) |
 | AI | Amazon Bedrock Converse or Anthropic behind one `LlmClient`; `LLM_PROVIDER=none` = regex/rules only |
-| Voice | ElevenLabs, OpenAI, macOS `say` or browser speech behind one `VoiceProvider` |
+| Voice | ElevenLabs, OpenAI, local Kokoro-82M (loopback `KOKORO_URL` only), macOS `say` or browser speech behind one `VoiceProvider` |
 | Documents | `pdfkit` (audit report), `bwip-js` (DataMatrix) |
 | Web | React 18, Vite 7, React Router (hash), TanStack Query, `@zxing/browser`, `tesseract.js` (local assets in `apps/web/public/ocr`) |
 | Tests | Vitest 3 + fast-check; Playwright for `pnpm e2e` |

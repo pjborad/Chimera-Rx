@@ -195,7 +195,7 @@ flowchart LR
   DSC --> EPC
 ```
 
-Other parts stitched in: openFDA (live, with fixtures as fallback), the Coroner lot extractor (regex plus optional LLM, keeps a lot only if it is printed in the source), recall voicemail with ElevenLabs, OpenAI, macOS or browser voice (nothing is dialled), and a sandbox NCPDP SCRIPT-shaped `RxChangeRequest` to the prescriber. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Other parts stitched in: openFDA (live, with fixtures as fallback), the Coroner lot extractor (regex plus optional LLM, keeps a lot only if it is printed in the source), recall voicemail with ElevenLabs, OpenAI, a local Kokoro-82M model, macOS or browser voice (nothing is dialled), and a sandbox NCPDP SCRIPT-shaped `RxChangeRequest` to the prescriber. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## AI agents
 
@@ -298,7 +298,8 @@ Every variable is optional. Copy `.env.example` to `.env` to set them.
 | `AWS_REGION`, `AWS_PROFILE`, `BEDROCK_MODEL_ID` | `us-east-1`, none, `us.anthropic.claude-sonnet-5` | Bedrock |
 | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` | none, `claude-3-5-haiku-latest` | Anthropic |
 | `OPENAI_BASE_URL`, `OPENAI_API_KEY`, `OPENAI_MODEL` | OpenAI URL, none, `gpt-4o-mini` | OpenAI-compatible; the key also serves OpenAI voice |
-| `VOICE_PROVIDER` | `auto` | Voicemail voice: ElevenLabs, OpenAI, macOS, then the browser |
+| `VOICE_PROVIDER` | `auto` | Voicemail voice: ElevenLabs, OpenAI, Kokoro (when `KOKORO_URL` is set), macOS, then the browser. `kokoro` forces the local Kokoro model |
+| `KOKORO_URL`, `KOKORO_VOICE`, `KOKORO_SPEED` | none, `am_michael`, `1` | Local Kokoro-82M speech server (OpenAI-compatible `/v1/audio/speech`); `http://127.0.0.1` or `localhost` only. Male voices `am_michael`, `am_adam`. Renders audio; nothing is dialled |
 | `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `ELEVENLABS_MODEL` | none | ElevenLabs voice |
 | `OPENAI_TTS_VOICE`, `OPENAI_TTS_MODEL` | `coral`, `gpt-4o-mini-tts` | OpenAI voice |
 | `MAC_VOICE` | none | Force a macOS voice |
