@@ -470,7 +470,7 @@ describe("provider adapters against stubs", () => {
     expect(seen.url).toBe("http://localhost:11434/v1/chat/completions");
     expect(seen.init.headers.authorization).toBeUndefined();
     expect(JSON.parse(seen.init.body)).toMatchObject({ model: "llama3", messages: [{ role: "system", content: "S" }, { role: "user", content: "U" }] });
-    await new OpenAiCompatibleProvider("https://x.openai.azure.com/openai/v1", "azure-key", "gpt", f).complete("S", "U");
+    await new OpenAiCompatibleProvider("https://x.openai.azure.com/openai/v1", "azure-key", "gpt", f, async () => [{ address: "93.184.216.34", family: 4 }]).complete("S", "U");
     expect(seen.init.headers.authorization).toBe("Bearer azure-key");
     expect(seen.init.headers["api-key"]).toBe("azure-key");
   });

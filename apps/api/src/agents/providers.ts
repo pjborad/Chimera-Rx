@@ -1,4 +1,5 @@
 import { loadBedrockSdk, type LlmClient } from "@chimera-rx/coroner";
+import { assertDestination, type LookupFn } from "./destination";
 
 /**
  * Provider registry for the AI agents. One interface (`ProviderClient`), five providers:
@@ -97,14 +98,18 @@ export class AnthropicProvider implements ProviderClient {
 export class OpenAiCompatibleProvider implements ProviderClient {
   readonly id = "openai-compatible" as const;
   readonly name = "openai-compatible";
-  constructor(private baseUrl: string, private apiKey: string, readonly model: string, private fetchFn: typeof fetch = fetch) {}
+  constructor(private baseUrl: string, private apiKey: string, readonly model: string, private fetchFn: typeof fetch = fetch, private lookup?: LookupFn) {}
   async complete(system: string, user: string): Promise<string> {
     const url = `${this.baseUrl.replace(/\/+$/, "")}/chat/completions`;
+    // Destination policy again, right before the request (the saved URL may predate the policy or come from OPENAI_BASE_URL).
+    // A refused destination gets no request and never sees the key.
+    try { await assertDestination(url, this.lookup); } catch (e) { throw new Error(`openai-compatible base URL refused: ${(e as Error).message}`); }
     const headers: Record<string, string> = { "content-type": "application/json" };
     if (this.apiKey) { headers.authorization = `Bearer ${this.apiKey}`; headers["api-key"] = this.apiKey; } // "api-key" is what Azure OpenAI reads
     const res = await this.fetchFn(url, {
       method: "POST", headers,
       body: JSON.stringify({ model: this.model, temperature: 0, max_tokens: 1024, messages: [{ role: "system", content: system }, { role: "user", content: user }] }),
+      redirect: "error", // a redirect could point at a blocked address after the check; never follow one
       signal: AbortSignal.timeout(TIMEOUT_MS)
     });
     if (!res.ok) throw new Error(`openai-compatible server returned HTTP ${res.status}`);
@@ -237,7 +242,7 @@ function mockCopilot(d: any): string {
 
 // ------------------------------------------------------------------ the runtime
 
-export interface RuntimeDeps { fetch?: typeof fetch; bedrockSdk?: () => Promise<BedrockSdk>; now?: () => number }
+export interface RuntimeDeps { fetch?: typeof fetch; bedrockSdk?: () => Promise<BedrockSdk>; now?: () => number; lookup?: LookupFn }
 
 export interface PublicSettings {
   provider: ProviderId;
@@ -350,7 +355,7 @@ export class AgentRuntime {
         if (!k) return new MissingKey("anthropic", model);
         return new AnthropicProvider(k, model, this.deps.fetch);
       }
-      case "openai-compatible": return new OpenAiCompatibleProvider(baseUrl, this.keys.get("openai-compatible")?.key ?? "", model, this.deps.fetch);
+      case "openai-compatible": return new OpenAiCompatibleProvider(baseUrl, this.keys.get("openai-compatible")?.key ?? "", model, this.deps.fetch, this.deps.lookup);
     }
   }
 

@@ -80,7 +80,7 @@ export function Shell({ user, children }: { user: User; children: ReactNode }) {
             {item("/fill", "Fill & pickup", Icon.rx(), flagged ? <span className="count amber" aria-label={`${flagged} need review`}>{flagged}</span> : null)}
             <span className="nav-label">Care</span>
             {user.role !== "cashier" && item("/patients", "Patients", NavIcon.patients)}
-            {item("/recalls", "Recalls", Icon.shield(), badges.recalls ? <span className="count red">{badges.recalls}</span> : null)}
+            {user.role !== "cashier" && item("/recalls", "Recalls", Icon.shield(), badges.recalls ? <span className="count red">{badges.recalls}</span> : null)}
             {(user.role === "technician" || user.role === "pharmacist") && item("/refills", "Refills", Icon.rx())}
             {(user.role === "technician" || user.role === "pharmacist") && item("/dscsa", "DSCSA & trace", Icon.shield())}
           </>}

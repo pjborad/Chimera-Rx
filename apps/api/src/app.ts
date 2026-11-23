@@ -17,6 +17,7 @@ import { addWebhook, deliveries, WEBHOOK_EVENTS } from "./webhooks";
 import { ALL_SCOPES, apiActivity, createPartner, listPartners, rotateSecret, SCOPES, securityPosture, seedPartners, updatePartner, type Scope } from "./integrations";
 import { registerPartnerApi } from "./partner-api";
 import { registerAgentRoutes, listSuggestions } from "./agents";
+import { ruleFor, rolesOf } from "./access";
 import { registerEpcisRoutes } from "./epcis";
 import { registerRefillRoutes } from "./refills-routes";
 import { findPatientByPhone, patientProfile, refillSync, searchPatients } from "./patients";
@@ -34,7 +35,7 @@ import { otherStores, transferPackages } from "./crossstore";
 import { corsOriginsFrom, publicError, registerSecurity } from "./security";
 import { listScenarios, resetDemo, scenarioLabels, startScenario } from "./scenarios";
 
-declare module "fastify" { interface FastifyRequest { actor?: Actor; user?: SessionUser } }
+declare module "fastify" { interface FastifyRequest { actor?: Actor; user?: SessionUser } interface FastifyInstance { routeTable: { method: string; url: string }[] } }
 
 const COOKIE = "lg_session";
 const scanBody = z.object({
@@ -46,6 +47,10 @@ const witnessBody = z.object({ email: z.string().email(), password: z.string().m
 
 export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
   const app = Fastify({ logger: false, bodyLimit: 2_000_000, trustProxy: process.env.TRUST_PROXY === "1" });
+  // Every route that gets registered, so a test can prove each one has a row in the access matrix (access.ts).
+  const routeTable: { method: string; url: string }[] = [];
+  app.decorate("routeTable", routeTable);
+  app.addHook("onRoute", (r) => { for (const m of ([] as string[]).concat(r.method as string | string[])) if (m !== "HEAD" && m !== "OPTIONS") routeTable.push({ method: m, url: r.url }); });
   await app.register(cookie);
   // Only the listed origins may call the API from a browser (CORS_ORIGINS); same-origin and non-browser callers need no CORS.
   const corsOrigins = corsOriginsFrom();
@@ -80,6 +85,10 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
     if (!s) return reply.code(401).send({ error: "Please sign in.", code: "unauthenticated" });
     req.actor = s.actor;
     req.user = s.user;
+    // Read authorization matrix (access.ts): a route with no row is refused, a row that does not list the role is refused.
+    const roles = rolesOf(ruleFor(req.method, req.routeOptions?.url));
+    if (!roles) return reply.code(403).send({ error: "That route is not open to any role.", code: "route_unlisted" });
+    if (!roles.includes(s.actor.role)) return reply.code(403).send({ error: `A ${s.actor.role} cannot do that.`, code: "forbidden" });
   });
   const A = (req: FastifyRequest) => req.actor!;
   const only = (req: FastifyRequest, ...roles: Actor["role"][]) => {

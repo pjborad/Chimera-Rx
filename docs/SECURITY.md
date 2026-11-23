@@ -100,6 +100,33 @@ Implemented in `apps/api/src/security.ts` and wired in `app.ts`.
 - **Roles** are checked on the server in each route.
 - **Audit log** (hash chained, `GET /api/audit/verify`) holds patient ids, Rx numbers and counts, never names, phones or dates of birth. It records profile views with the reason (`patient.view`), order views (`phi.view`), and key rotation (`keys.rotate`). The free-text reason is encrypted at rest.
 
+## Read authorization matrix
+
+One table decides who may call each route: `ACCESS` in `apps/api/src/access.ts` (key `METHOD /route/pattern`, value the allowed roles). A `preHandler` in `app.ts` applies it after the session check: no session is 401, a role that is not listed is 403, and a route with no row is 403 `route_unlisted` (default deny). A handler may be stricter than its row (a pharmacist-only action inside a route open to technicians), never looser. `apps/api/test/review-f03-f07.test.ts` walks the live route table for anonymous and all four roles, fails on any route without a row or any row without a route, and fails if a cashier or admin can read a patient id, allergy or date of birth outside the listed pickup and audit reads.
+
+Reads, by who may call them:
+
+| Who | Reads |
+| --- | --- |
+| Anyone signed in | `/api/me`, `/api/voice`, `/api/today` (counts and generic tasks; tasks that name a patient or an Rx Watcher flag go to pharmacist and technician only), `/api/search` (lots; fill-queue rows except for the admin), `/api/agents` (agent names and what the caller may run) |
+| Pharmacist, technician, cashier | `/api/rx` and `/api/rx/:rx` (cashier: pickup columns, no allergies, DOB or email), `/api/lots`, `/api/deliveries`, `/api/demo/labels` |
+| Pharmacist, cashier | `/api/register/*` |
+| Pharmacist, technician | Agent run history `/api/agents/runs`, per-agent records `/api/agents/:id`, `/api/suggestions`, `/api/recalls`, `/api/recalls/:id`, `/results`, `/messages`, `/api/fax`, `/api/audio/:id`, `/api/outbox`, `/api/patients*`, `/api/refills*`, `/api/dscsa/*`, `/api/epcis/*`, `/api/stock-help`, `/api/rx/:rx/review`, `/api/prescriber-messages`, `/api/demo/scenarios` |
+| Pharmacist only | Recall voicemail draft, call list, audit PDF and trace export; agent drafts; `/api/rx/:rx/change-draft`; `/api/stores` |
+| Pharmacist, admin | `/api/audit`, `/api/audit/verify`, `/api/integrations` |
+| Pharmacist, technician, admin | `/api/agents/provider` |
+| Admin only | `/api/audit/export` |
+
+A cashier or admin gets 403 on every clinical read. Where a role needs a number, the Today screen already carries counts without names. Partner surfaces (`/v1`, `/mcp`, `/fhir/r4`, `/oauth/token`, `/hooks/sink`) do not use sessions: they check an OAuth bearer and its scopes in `partner-api.ts`, and the test confirms a staff session alone does not open them. `/fax/:file` serves synthetic fax images and no patient data.
+
+Not changed on purpose: `POST /api/calls/inbound` (the front desk takes a callback) and `POST /api/sms/inbound` (a simulated STOP reply) stay open to the roles listed in the table because the pickup desk and the sandbox use them; they return an id, a name and a recall id, not clinical history.
+
+### Provider destination policy
+
+The OpenAI-compatible provider calls a URL an operator typed. `apps/api/src/agents/destination.ts` refuses credentials in the URL, any scheme but http(s), link-local addresses (169.254.0.0/16 and fe80::/10) in every spelling the URL parser can produce (IPv4-mapped IPv6 in dotted and hex form, decimal, octal and hex IPv4, trailing dot, upper case, bracketed hosts, NAT64 and IPv4-compatible forms), and the metadata addresses and names (169.254.169.254, fd00:ec2::/32, `metadata.*`). It runs in the settings route and again before every request; for a host name it resolves with `dns.lookup` and refuses if any answer is blocked. Redirects are not followed (`redirect: "error"`). Localhost and 127.0.0.0/8 stay allowed for Ollama and LM Studio.
+
+Residual risk: DNS rebinding. The name is resolved for the check and resolved again by `fetch`, so a hostile resolver could answer differently the second time. Pinning the checked address needs a custom HTTP dispatcher and is not done. A stored key is also not bound to an origin: an operator who changes the base URL sends the same key to the new host.
+
 ## What is NOT covered
 
 - **No TLS in the app.** The API speaks HTTP. Put it behind a TLS-terminating proxy and set `COOKIE_SECURE=1` and `TRUST_PROXY=1`. Traffic between browser and API is unprotected without it.
