@@ -56,7 +56,7 @@ export function Today({ user }: { user: User }) {
     <>
       <PageHeader title={t?.greeting.title ?? "Today"} sub={t?.greeting.line}><ScanOrSearch /></PageHeader>
       <main style={mainStyle()}>
-        {t?.banner && (
+        {t?.banner && (user.role === "pharmacist" || user.role === "technician") && (
           <Link to={user.role === "pharmacist" ? "/recalls" : "/inventory?filter=recall"} className="glow" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 14, border: "1px solid var(--danger)", background: "linear-gradient(90deg, var(--danger-soft), var(--danger-soft))", color: C.ink, textDecoration: "none" }}>
             <span style={{ width: 44, height: 44, flexShrink: 0, borderRadius: 12, background: "var(--danger-soft)", display: "flex", alignItems: "center", justifyContent: "center" }}>{Icon.shield("var(--danger-text)", 22)}</span>
             <span style={{ flex: "1 1 360px", minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}>
