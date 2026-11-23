@@ -24,7 +24,8 @@
     <nav aria-label="Sections">
       <ul>
         <li><a href="#demo-video">Demo</a></li>
-        <li><a href="#gap">The gap</a></li>
+        <li><a href="#modernization">Modernization</a></li>
+        <li><a href="#gap">The gaps</a></li>
         <li><a href="#flow">How it works</a></li>
         <li><a href="#roles">Roles</a></li>
         <li><a href="#agents">Agents</a></li>
@@ -52,10 +53,10 @@
     <div>
       <p class="eyebrow">Kiroween 2026 · Frankenstein category</p>
       <h1>Chimera <span>Rx</span></h1>
-      <p class="tag">When a lot is recalled, know the exact units on your shelf and the exact patients who took one home.</p>
+      <p class="tag">A modern pharmacy system: one connected ledger for every lot, patient and prescription, AI agents working in the background, and a pharmacist who decides.</p>
       <div class="btns">
         <a class="btn primary" href="app/">Open the app</a>
-        <a class="btn" href="#demo-video">Watch the demo (2:50)</a>
+        <a class="btn" href="#demo-video">Watch the demo (under 3 min)</a>
         <a class="btn" href="https://codespaces.new/pjborad/Chimera-Rx?quickstart=1">Try it in Codespaces</a>
         <a class="btn" href="https://github.com/pjborad/Chimera-Rx">GitHub repo</a>
       </div>
@@ -78,8 +79,8 @@
   <div class="wrap">
     <div class="head">
       <p class="eyebrow">Demo video</p>
-      <h2>See a recall from fax to patient list</h2>
-      <p class="lead">A 2:50 walkthrough of the running app: receiving, fill, cashier, admin, a recall end to end, the AI agents and the integration placeholders. Synthetic data only, with captions.</p>
+      <h2>Pharmacy software, rebuilt around the lot</h2>
+      <p class="lead">A walkthrough of the running app, under three minutes: why pharmacy systems need modernizing, every tab by role, the AI agents at work in the background and the integration seams. Synthetic data only, with captions.</p>
     </div>
     <div class="video">
       <video controls preload="metadata" poster="media/chimera-rx-demo-poster.jpg">
@@ -91,12 +92,38 @@
   </div>
 </section>
 
-<section id="gap">
+<section id="modernization">
   <div class="wrap">
     <div class="head">
-      <p class="eyebrow">The gap</p>
-      <h2>Nothing links the lot to the patient</h2>
-      <p class="lead">Wholesalers track a package by lot and serial. Dispensing software tracks the patient and the drug. The two never meet, so a recall means warning everyone or no one.</p>
+      <p class="eyebrow">Modernization</p>
+      <h2>The pharmacy runs on yesterday's software</h2>
+      <p class="lead">Most pharmacies still run on fax machines, phone calls, paper logs and separate systems that never talk to each other. Chimera Rx replaces those islands with one connected ledger, open standards and agents that watch it all day, with a pharmacist making every decision.</p>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th scope="col">Area</th><th scope="col">Today</th><th scope="col">With Chimera Rx</th></tr></thead>
+        <tbody>
+          <tr><td>Lot and serial</td><td>On the carton. The wholesaler knows it, the pharmacy system does not.</td><td>Scanned from the GS1 DataMatrix at receiving and at fill, tied to the patient.</td></tr>
+          <tr><td>Prescription checks</td><td>One popup at a time, mostly overridden.</td><td>Deterministic rules plus the Rx Guardian, an agent that checks the whole history and cites its evidence.</td></tr>
+          <tr><td>Prescriber contact</td><td>Fax and phone.</td><td>NCPDP SCRIPT-shaped change requests (sandbox).</td></tr>
+          <tr><td>Refills</td><td>A reminder on the due date.</td><td>Adherence (PDC), med sync, and refills held when a lot is recalled.</td></tr>
+          <tr><td>Traceability</td><td>A separate system or paper.</td><td>DSCSA-style EPCIS 2.0 export and import, a sandbox verifier and suspect cases.</td></tr>
+          <tr><td>Front store and stores</td><td>A separate till. Phone and spreadsheet between stores.</td><td>A register that knows verified prescriptions. Two stores, with transfers that keep lot and serial.</td></tr>
+          <tr><td>Integration</td><td>Batch files and screen scraping.</td><td>REST, MCP and FHIR R4 behind scoped OAuth, plus signed webhooks.</td></tr>
+          <tr><td>Audit</td><td>Logs anyone can edit.</td><td>A hash-chained audit log with a verify route.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="flowrow">The full current-state and future-state map, the agent roadmap and a 90-day pilot plan: <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/MODERNIZATION.md">docs/MODERNIZATION.md</a>.</p>
+  </div>
+</section>
+
+<section id="gap" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">The gaps</p>
+      <h2>What disconnected systems leave behind</h2>
+      <p class="lead">When systems don't share data, people fill the gaps by hand. The sharpest example is the recall: wholesalers track a package by lot and serial, dispensing software tracks the patient, and the two never meet, so a recall means warning everyone or no one.</p>
     </div>
     <div class="cards">
       <div class="card"><div class="stat">289 / 510</div><h3>Alerts overridden</h3><p>Relevant drug interaction alerts in community pharmacies were overridden with no action.</p><p class="src"><a href="https://pubmed.ncbi.nlm.nih.gov/17381663/">Source: PubMed 17381663</a></p></div>
@@ -108,7 +135,7 @@
   </div>
 </section>
 
-<section id="flow" class="alt">
+<section id="flow">
   <div class="wrap">
     <div class="head">
       <p class="eyebrow">How it works</p>
@@ -133,7 +160,7 @@
   </div>
 </section>
 
-<section id="roles">
+<section id="roles" class="alt">
   <div class="wrap">
     <div class="head">
       <p class="eyebrow">Roles</p>
@@ -156,7 +183,7 @@
   </div>
 </section>
 
-<section id="agents" class="alt">
+<section id="agents">
   <div class="wrap">
     <div class="head">
       <p class="eyebrow">AI agents</p>
@@ -188,7 +215,7 @@
   </div>
 </section>
 
-<section id="integrations">
+<section id="integrations" class="alt">
   <div class="wrap">
     <div class="head">
       <p class="eyebrow">Integrations</p>
@@ -222,7 +249,7 @@
   </div>
 </section>
 
-<section id="security" class="alt">
+<section id="security">
   <div class="wrap">
     <div class="head">
       <p class="eyebrow">Security and safety</p>
@@ -250,7 +277,7 @@
   </div>
 </section>
 
-<section id="kiro">
+<section id="kiro" class="alt">
   <div class="wrap">
     <div class="head">
       <p class="eyebrow">Built with Kiro</p>
@@ -269,7 +296,7 @@
   </div>
 </section>
 
-<section id="screens" class="alt">
+<section id="screens">
   <div class="wrap">
     <div class="head">
       <p class="eyebrow">Screens</p>
@@ -286,7 +313,7 @@
   </div>
 </section>
 
-<section id="try">
+<section id="try" class="alt">
   <div class="wrap">
     <div class="head">
       <p class="eyebrow">Try it</p>

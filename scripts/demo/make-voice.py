@@ -8,11 +8,14 @@ screen follow this audio.
 
   .venv-voice/bin/python scripts/demo/make-voice.py full            -> demo-video/work/full/{voice.wav,timeline.json,narration.srt}
   .venv-voice/bin/python scripts/demo/make-voice.py cut
-Options: --voice am_michael|am_adam  --speed 1.1  --compare (renders a short sample with both voices)
+Two narrators: a unit that starts with "A: " is spoken by VOICE_A (default am_onyx, the "why"), "B: " by VOICE_B (default
+am_michael, the "how"). Override with the VOICE_A / VOICE_B environment variables or --voice-a / --voice-b. Each turn is
+generated on its own, trimmed and normalised to -16 LUFS so both voices match.
+Options: --speed 1.1  --compare (renders a short sample with both voices)
 """
 from __future__ import annotations
 
-import argparse, hashlib, json, re, sys
+import argparse, hashlib, json, os, re, sys
 from pathlib import Path
 
 import numpy as np
@@ -106,6 +109,26 @@ def say_unit(pipe, text, voice, speed, cache: Path, rng) -> np.ndarray:
     return a
 
 
+TARGET_LUFS = -16.0
+
+
+def match_loudness(a: np.ndarray) -> np.ndarray:
+    """Gain one turn to -16 LUFS (integrated), with a soft ceiling so a loud voice cannot clip."""
+    import pyloudnorm as pyln
+    meter = pyln.Meter(SR)
+    lufs = meter.integrated_loudness(a)
+    if not np.isfinite(lufs):
+        return a
+    g = a * (10 ** ((TARGET_LUFS - lufs) / 20))
+    peak = float(np.max(np.abs(g)))
+    return g / peak * 0.89 if peak > 0.89 else g
+
+
+def split_speaker(text: str):
+    m = re.match(r"^([AB]):\s+(.*)$", text, re.S)
+    return (m.group(1), m.group(2)) if m else ("A", text)
+
+
 def srt_time(t: float) -> str:
     ms = int(round(t * 1000))
     return f"{ms // 3600000:02d}:{ms // 60000 % 60:02d}:{ms // 1000 % 60:02d},{ms % 1000:03d}"
@@ -114,7 +137,8 @@ def srt_time(t: float) -> str:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("mode", choices=["full", "cut"], nargs="?", default="full")
-    ap.add_argument("--voice", default="am_onyx")
+    ap.add_argument("--voice-a", default=os.environ.get("VOICE_A", "am_onyx"))
+    ap.add_argument("--voice-b", default=os.environ.get("VOICE_B", "am_michael"))
     ap.add_argument("--speed", type=float, default=1.1)
     ap.add_argument("--compare", action="store_true")
     ap.add_argument("--script", default=str(ROOT / "docs/DEMO_VIDEO_SCRIPT.md"))
@@ -129,7 +153,7 @@ def main():
 
     if a.compare:
         text = "Receiving starts at the dock. The camera reads the lot, serial and expiry. Four checks run: the invoice, the transaction information and statement, the expiry, and the recall list."
-        for v in ("am_michael", "am_adam"):
+        for v in (a.voice_a, a.voice_b):
             audio = say_unit(pipe, text, v, a.speed, cache, random.Random(3))
             sf.write(work / f"compare-{v}.wav", audio, SR)
             w = count_words(text)
@@ -145,10 +169,11 @@ def main():
         seg_start = t
         units = []
         for i, text in enumerate(seg["units"]):
+            who, text = split_speaker(text)
             text, _, caption = text.partition(" ||| ")
-            audio = say_unit(pipe, text, a.voice, a.speed, cache, rng)
+            audio = match_loudness(say_unit(pipe, text, a.voice_a if who == "A" else a.voice_b, a.speed, cache, rng))
             d = len(audio) / SR
-            units.append({"i": i, "text": text, "caption": caption or text, "start": round(t, 3), "end": round(t + d, 3)})
+            units.append({"i": i, "speaker": who, "text": text, "caption": caption or text, "start": round(t, 3), "end": round(t + d, 3)})
             words += count_words(text)
             track.append(audio)
             t += d
@@ -162,7 +187,7 @@ def main():
     vo.sh(vo.FFMPEG, "-y", "-loglevel", "error", "-i", str(raw), "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-ar", "44100", "-ac", "1", str(out_dir / "voice.wav"))
     raw.unlink()
     total = len(audio) / SR
-    (out_dir / "timeline.json").write_text(json.dumps({"voice": a.voice, "speed": a.speed, "seconds": round(total, 2), "words": words, "wpm": round(words / total * 60, 1), "segments": timeline}, indent=1))
+    (out_dir / "timeline.json").write_text(json.dumps({"voice_a": a.voice_a, "voice_b": a.voice_b, "speed": a.speed, "seconds": round(total, 2), "words": words, "wpm": round(words / total * 60, 1), "segments": timeline}, indent=1))
     n = 1
     with open(out_dir / "narration.srt", "w") as f:
         for seg in timeline:
@@ -173,10 +198,10 @@ def main():
                 c = u["start"]
                 for p in parts:
                     d = span * count_words(p) / tot
-                    f.write(f"{n}\n{srt_time(c)} --> {srt_time(c + d)}\n{p}\n\n")
+                    f.write(f"{n}\n{srt_time(c)} --> {srt_time(c + d)}\n{u['speaker']}: {p}\n\n")
                     n += 1
                     c += d
-    print(f"voice {a.voice} speed {a.speed}: {total:.1f}s ({int(total // 60)}:{int(total % 60):02d}), {words} words, {words / total * 60:.0f} wpm")
+    print(f"voices {a.voice_a}/{a.voice_b} speed {a.speed}: {total:.1f}s ({int(total // 60)}:{int(total % 60):02d}), {words} words, {words / total * 60:.0f} wpm")
 
 
 if __name__ == "__main__":
