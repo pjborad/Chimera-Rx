@@ -28,9 +28,8 @@ export const ACCESS: Record<string, Rule> = {
   "GET /api/auth/config": "public",           // the sign-in screen needs the demo flag before anyone signs in
   "POST /api/auth/login": "public",           // creates the session
   "POST /api/auth/verify": "public",          // second step of sign-in
-  "POST /api/auth/sso": "public",             // sign-in
   "POST /api/auth/logout": "public",          // clearing a cookie leaks nothing
-  "GET /api/auth/demo-code/:challenge": "public", // demo-mode only code hint, challenge-bound
+  "GET /api/auth/demo-code/:challenge": "public", // sandbox-only MFA code hint (needs MFA=1 and SEED_SYNTHETIC on), challenge-bound
   // ---- surfaces with their own authentication, checked in partner-api.ts (OAuth bearer + scopes), never a session
   "POST /oauth/token": "partner", "GET /v1/availability": "partner", "GET /v1/inventory": "partner", "GET /v1/recalls/:fda/status": "partner",
   "GET /v1/recalled-lots": "partner", "GET /v1/rx/:rx/change-requests": "partner", "GET /v1/change-requests": "partner",
@@ -56,7 +55,7 @@ export const ACCESS: Record<string, Rule> = {
   "GET /api/deliveries": FLOOR, "GET /api/deliveries/:id": FLOOR,
   "POST /api/deliveries/:id/scan": ST, "POST /api/packages/:id/putaway": ST, "POST /api/packages/:id/problem": ST,
   "GET /api/lots": FLOOR, "GET /api/lots/:id": FLOOR, "POST /api/lots/:id/move": ST, "POST /api/lots/:id/adjust": ST,
-  "GET /api/demo/labels": FLOOR, "POST /api/ocr/parse": FLOOR,
+  "POST /api/ocr/parse": FLOOR,
   "GET /api/stores": PH, "POST /api/transfers": PH, "GET /api/transfers": PH, "POST /api/transfers/recover": PH,
 
   // ---- fill and pickup
@@ -101,10 +100,7 @@ export const ACCESS: Record<string, Rule> = {
   // ---- integrations and audit (admin changes; the pharmacist can look)
   "GET /api/integrations": [A, P], "POST /api/integrations": [A], "POST /api/integrations/:id": [A],
   "POST /api/integrations/:id/rotate": [A], "POST /api/integrations/:id/webhooks": [A],
-  "GET /api/audit": [P, A], "GET /api/audit/verify": [P, A], "GET /api/audit/export": [A],
-
-  // ---- demo tools
-  "GET /api/demo/scenarios": ST, "POST /api/demo/scenarios/:id": PH, "POST /api/demo/reset": PH
+  "GET /api/audit": [P, A], "GET /api/audit/verify": [P, A], "GET /api/audit/export": [A]
 };
 
 export function ruleFor(method: string, pattern: string | undefined): Rule | undefined {

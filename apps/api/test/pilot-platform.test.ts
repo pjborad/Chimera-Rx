@@ -72,10 +72,10 @@ describe("FR7 second sign-in factor", () => {
     expect((await login(app, "m.diaz")).statusCode).toBe(423);
   });
 
-  it("FR7.3 the demo can read the code without a session; the badge stand-in is off while MFA is on", async () => {
+  it("FR7.3 the sandbox code hint works without a session; there is no badge/SSO stand-in", async () => {
     const { challenge } = (await login(app, "j.rivera")).json();
     expect((await app.inject({ url: `/api/auth/demo-code/${challenge}` })).json().code).toMatch(/^\d{6}$/);
-    expect((await app.inject({ method: "POST", url: "/api/auth/sso" })).statusCode).toBe(501);
+    expect([401, 404]).toContain((await app.inject({ method: "POST", url: "/api/auth/sso" })).statusCode);
   });
 
   it("without MFA, sign-in is unchanged", async () => {

@@ -1,3 +1,4 @@
+import { resetDemo } from "./scenario-fixtures";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { buildApp, Db, ingestFaxInbox, loadConfig, SandboxNotifier, seedDatabase, type Ctx } from "../src/index";
@@ -412,10 +413,8 @@ describe("scenario: Agent catches it", () => {
     seedDatabase(db2, cfg, NOW);
     await ingestFaxInbox(c2);
     const app2 = await buildApp(c2);
-    const login = await app2.inject({ method: "POST", url: "/api/auth/login", payload: { storeId: "store-7", email: "j.rivera@elmstreetrx.example", password: PW, trusted: true } });
-    const ck = login.cookies.map((c) => `${c.name}=${c.value}`).join("; ");
-    const start = await app2.inject({ method: "POST", url: "/api/demo/scenarios/agent-catches-it", headers: { cookie: ck } });
-    expect(start.statusCode).toBe(200);
+    const pharmacist = { id: "u-jrivera", name: "J. Rivera", role: "pharmacist" as const, storeId: "store-7", workstation: "test" };
+    await resetDemo(c2, pharmacist, "agent-catches-it"); // in-process fixture; the product has no scenario route
     const ck2 = (await app2.inject({ method: "POST", url: "/api/auth/login", payload: { storeId: "store-7", email: "j.rivera@elmstreetrx.example", password: PW, trusted: true } })).cookies.map((c) => `${c.name}=${c.value}`).join("; ");
     const before = (await app2.inject({ url: "/api/today", headers: { cookie: ck2 } })).json();
     expect(before.agentsOn).toBeGreaterThan(0); // the Guardian is on after the reset (demo seed)

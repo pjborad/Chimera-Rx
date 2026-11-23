@@ -2,7 +2,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import fc from "fast-check";
 import type { FastifyInstance } from "fastify";
 import { buildApp, Db, ingestFaxInbox, loadConfig, SandboxNotifier, seedDatabase, type Ctx } from "../src/index";
-import { resetDemo } from "../src/scenarios";
+import { resetDemo } from "./scenario-fixtures";
 import { AgentRuntime, draftQueue, refillDraftProblem, runAgent, type ProviderClient } from "../src/agents";
 import { addDays, pdc, refillReport, syncSuggestions, PDC_FLAG_BELOW } from "../src/refills";
 import type { Actor } from "../src/core";

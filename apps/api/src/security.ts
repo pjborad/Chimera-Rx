@@ -58,12 +58,12 @@ export function corsOriginsFrom(env: Record<string, string | undefined> = proces
   return x.length ? x : DEFAULT_CORS;
 }
 
-const LOGIN_PATHS = new Set(["/api/auth/login", "/api/auth/verify", "/api/auth/sso"]);
+const LOGIN_PATHS = new Set(["/api/auth/login", "/api/auth/verify"]);
 /** POST routes that take no body: anything but an empty body is refused, so a stray payload is never silently ignored. */
 const NO_BODY = [
   /^\/api\/rx\/[^/]+\/review$/, /^\/api\/dispenses\/\d+\/label$/, /^\/api\/recalls\/[^/]+\/(return-pickup|manufacturer-response|close)$/,
   /^\/api\/integrations\/[^/]+\/rotate$/, /^\/api\/patients\/[^/]+\/refill-sync$/, /^\/api\/outreach\/run$/, /^\/api\/night-watch\/run$/,
-  /^\/api\/demo\/reset$/, /^\/api\/demo\/scenarios\/[^/]+$/, /^\/api\/auth\/(logout|sso)$/
+  /^\/api\/auth\/logout$/
 ];
 
 // ---------------------------------------------------------------------------------------------- request log

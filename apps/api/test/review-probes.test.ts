@@ -109,7 +109,7 @@ describe("REV-API proxy headers, origin and cookies", () => {
   it("a foreign Origin, a lookalike Origin and a null Origin cannot change state", async () => {
     const { call } = await rig();
     for (const origin of ["https://evil.example", "http://localhost:5173.evil.example", "null", "http://localhost:51730"]) {
-      const r = await call("j.rivera", "POST", "/api/demo/reset", undefined, { origin });
+      const r = await call("j.rivera", "POST", "/api/outreach/run", undefined, { origin });
       expect(r.statusCode, origin).toBe(403);
     }
   });
@@ -131,7 +131,7 @@ describe("REV-API proxy headers, origin and cookies", () => {
 });
 
 describe("REV-API MFA: the first factor alone opens nothing", () => {
-  it("password-only gives no session cookie, every API route stays 401, and the badge stand-in is off", async () => {
+  it("password-only gives no session cookie, every API route stays 401, and there is no badge stand-in", async () => {
     const { app } = await rig({ mfa: true });
     const r = await app.inject({ method: "POST", url: "/api/auth/login", payload: { storeId: "store-7", email: "j.rivera@elmstreetrx.example", password: PW } });
     expect(r.statusCode).toBe(202);
@@ -140,7 +140,7 @@ describe("REV-API MFA: the first factor alone opens nothing", () => {
     for (const u of ["/api/me", "/api/rx", "/api/patients?q=a", "/api/outbox"]) {
       expect((await app.inject({ url: u, headers: { cookie: `lg_session=${challenge}` } })).statusCode, u).toBe(401);
     }
-    expect((await app.inject({ method: "POST", url: "/api/auth/sso" })).statusCode).toBe(501);
+    expect([401, 404]).toContain((await app.inject({ method: "POST", url: "/api/auth/sso" })).statusCode);
     // a wrong code many times locks the challenge (limiter), it never opens a session
     let code = 0;
     for (let i = 0; i < 12; i++) code = (await app.inject({ method: "POST", url: "/api/auth/verify", payload: { challenge, code: String(100000 + i) } })).statusCode;

@@ -12,7 +12,7 @@ const SHOTS = process.env.SHOTS ?? "/tmp/lg-crawl";
 fs.mkdirSync(SHOTS, { recursive: true });
 const PW = "moonlight-rx-2026";
 const NOTICE = "Demo environment · synthetic data only · not for clinical use · not HIPAA-compliant · a pharmacist approves every message";
-const ROUTES = ["/", "/receiving", "/inventory", "/fill", "/register", "/patients", "/recalls", "/refills", "/dscsa", "/agents", "/stock", "/transfers", "/integrations", "/demo", "/labels", "/outbox"];
+const ROUTES = ["/", "/receiving", "/inventory", "/fill", "/register", "/patients", "/recalls", "/refills", "/dscsa", "/agents", "/stock", "/transfers", "/integrations", "/outbox"];
 const ACCOUNTS = [
   ["store-7", "j.rivera@elmstreetrx.example"], ["store-7", "k.patel@elmstreetrx.example"], ["store-7", "m.diaz@elmstreetrx.example"], ["store-7", "s.grant@elmstreetrx.example"],
   ["store-2", "s.okoro@birchavenuerx.example"]

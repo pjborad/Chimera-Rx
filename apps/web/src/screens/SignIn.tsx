@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { get, msg, post } from "../lib/api";
 import { C, ErrorBox, Icon } from "../components/kit";
@@ -27,11 +27,10 @@ export function SignIn() {
   const [mfa, setMfa] = useState<{ challenge: string } | null>(null);
   const [code, setCode] = useState("");
   const [hint, setHint] = useState<string | null>(null);
-  const demo = cfg.data?.demo;
+  const sandboxCode = !!cfg.data?.mfa; // MFA codes only ever go to the sandbox outbox
   const [storeId, setStoreId] = useState("");
   const stores: { id: string; name: string }[] = cfg.data?.stores ?? [];
   const store = stores.find((x) => x.id === storeId) ?? stores[0];
-  useEffect(() => { if (demo && !email) { setEmail(demo.email); setPassword(demo.password); } }, [demo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const done = () => qc.invalidateQueries({ queryKey: ["me"] });
   async function submit(e: React.FormEvent) {
@@ -48,10 +47,6 @@ export function SignIn() {
   }
   async function showCode() {
     try { const r = await get<{ code: string | null }>(`/api/auth/demo-code/${mfa!.challenge}`); setHint(r.code ?? "No code is waiting. Sign in again."); } catch (x) { setHint(msg(x)); }
-  }
-  async function sso() {
-    setBusy(true); setErr("");
-    try { await post("/api/auth/sso"); await done(); } catch (x) { setErr(msg(x)); } finally { setBusy(false); }
   }
   return (
     <>
@@ -96,9 +91,9 @@ export function SignIn() {
             </div>
             <ErrorBox e={err} />
             <button disabled={busy || code.length !== 6} style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 50, borderRadius: 10, border: 0, background: C.violet, color: C.onAccent, fontWeight: 600, fontSize: 15 }}>{busy ? "Checking…" : "Verify and sign in"}</button>
-            {demo && (
+            {sandboxCode && (
               <div style={{ fontSize: 13, color: C.dim, display: "flex", flexDirection: "column", gap: 6 }}>
-                <span>Demo: no real message is sent. <a href="#" onClick={(e) => { e.preventDefault(); void showCode(); }}>Show the code from the sandbox outbox</a>.</span>
+                <span>Sandbox: no real message is sent. <a href="#" onClick={(e) => { e.preventDefault(); void showCode(); }}>Show the code from the sandbox outbox</a>.</span>
                 {hint && <strong role="status" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 20, color: C.ink }}>{hint}</strong>}
               </div>
             )}
@@ -113,7 +108,7 @@ export function SignIn() {
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <label htmlFor="store" style={lbl}>Pharmacy</label>
             <div style={{ position: "relative" }}>
-              <select id="store" value={store?.id ?? ""} onChange={(e) => { setStoreId(e.target.value); const sd = cfg.data?.storeDemos?.[e.target.value]; if (demo) { setEmail(sd?.email ?? demo.email); setPassword(demo.password); } }} disabled={stores.length < 2} style={{ ...field, padding: "0 40px 0 14px", appearance: "none" }}>
+              <select id="store" value={store?.id ?? ""} onChange={(e) => setStoreId(e.target.value)} disabled={stores.length < 2} style={{ ...field, padding: "0 40px 0 14px", appearance: "none" }}>
                 {stores.length ? stores.map((x) => <option key={x.id} value={x.id}>{x.name}</option>) : <option>Elm Street Pharmacy · Store 7</option>}
               </select>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--muted)" strokeWidth="1.6" aria-hidden="true" style={{ position: "absolute", right: 14, top: 16 }}><path d="M4 6l4 4 4-4" /></svg>
@@ -139,13 +134,8 @@ export function SignIn() {
           {note && <p role="status" style={{ margin: 0, fontSize: 13, color: C.dim }}>{note}</p>}
           <ErrorBox e={err} />
           <button disabled={busy} style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 50, borderRadius: 10, border: 0, background: C.violet, color: C.onAccent, fontWeight: 600, fontSize: 15 }}>{busy ? "Signing in…" : "Sign in"}</button>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, color: C.dimmer, fontSize: 12 }}><span style={{ flex: 1, height: 1, background: C.track }} />or<span style={{ flex: 1, height: 1, background: C.track }} /></div>
-          <button type="button" onClick={sso} disabled={busy || !demo || !!cfg.data?.mfa} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, height: 50, borderRadius: 10, border: `1px solid ${C.line2}`, background: C.card, color: C.ink, fontWeight: 500, fontSize: 15 }}>
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="var(--accent-text)" strokeWidth="1.6" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="2" /><path d="M7 9V6a3 3 0 016 0v3" /></svg>Continue with badge tap or SSO
-          </button>
           <p style={{ margin: 0, fontSize: 12, lineHeight: 1.6, color: C.dimmer }}>
-            Access is logged to the audit trail. {cfg.data?.mfa ? "A 6-digit code follows your password (sandbox outbox only)." : "Demo: badge/SSO signs in the pharmacist and no second factor is set up. Start the server with MFA=1 to turn the second factor on."}
-            {demo && <> Other demo staff: <a href="#" onClick={(e) => { e.preventDefault(); setEmail("k.patel@elmstreetrx.example"); setPassword(demo.password); }}>technician</a> · <a href="#" onClick={(e) => { e.preventDefault(); setEmail("m.diaz@elmstreetrx.example"); setPassword(demo.password); }}>cashier</a> · <a href="#" onClick={(e) => { e.preventDefault(); setEmail("s.grant@elmstreetrx.example"); setPassword(demo.password); }}>admin</a>.</>}
+            Access is logged to the audit trail. {cfg.data?.mfa ? "A 6-digit code follows your password (sandbox outbox only)." : "No second factor is set up. Start the server with MFA=1 to turn it on."}
           </p>
         </form>
         )}

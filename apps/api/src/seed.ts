@@ -81,7 +81,7 @@ export const SEED_VERSION = "2";
 export function seedDatabase(db: Db, cfg: Config, now = Date.now()) {
   if (db.get("SELECT 1 FROM meta WHERE key = 'seeded'")) {
     const v = db.get<{ value: string }>("SELECT value FROM meta WHERE key = 'seed_version'")?.value ?? "1";
-    if (v === SEED_VERSION || !cfg.demo) return false;
+    if (v === SEED_VERSION || !cfg.seedSynthetic) return false;
     console.log(`Demo database is seed v${v}; re-seeding synthetic data as v${SEED_VERSION}.`);
     db.clearAll();
   }
@@ -320,7 +320,7 @@ export function seedDatabase(db: Db, cfg: Config, now = Date.now()) {
     db.run("INSERT INTO meta (key, value) VALUES ('seed_version', ?)", SEED_VERSION);
     db.run("INSERT INTO meta (key, value) VALUES ('last_sync', ?)", String(now - 2 * 60_000));
     // Background agents: with the demo on, the Rx Guardian starts switched on so a judge sees it work without setup. A pharmacist can switch it off.
-    if (cfg.demo) db.run("INSERT OR REPLACE INTO agent_settings (agent, enabled, enabled_by, enabled_at, next_run_at, runs_today) VALUES ('rx-guardian', 1, 'demo seed', ?, ?, 0)", now, now);
+    if (cfg.seedSynthetic) db.run("INSERT OR REPLACE INTO agent_settings (agent, enabled, enabled_by, enabled_at, next_run_at, runs_today) VALUES ('rx-guardian', 1, 'demo seed', ?, ?, 0)", now, now);
   });
   if (cfg.dataset === "large") generateHistory(db);
   return true;

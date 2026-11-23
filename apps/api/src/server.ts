@@ -38,7 +38,7 @@ startWebhookDispatcher(ctx);
 
 const app = await buildApp(ctx);
 await app.listen({ port: cfg.port, host: "0.0.0.0" });
-console.log(`Chimera Rx API on http://localhost:${cfg.port}  (notifier=${ctx.notify.name}, llm=${agents.provider}:${agents.model || "-"}, voice=${ctx.voice!.name}:${ctx.voice!.voice}, demo=${cfg.demo})`);
+console.log(`Chimera Rx API on http://localhost:${cfg.port}  (notifier=${ctx.notify.name}, llm=${agents.provider}:${agents.model || "-"}, voice=${ctx.voice!.name}:${ctx.voice!.voice}, seed=${cfg.seedSynthetic})`);
 
 // Rx Watcher: review every new order at start-up, then every minute.
 void everyStore(() => reviewPending(ctx).then((n) => { if (n) console.log(`Rx Watcher reviewed ${n} new order(s)`); }));

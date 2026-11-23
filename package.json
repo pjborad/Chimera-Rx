@@ -17,7 +17,7 @@
     "test": "vitest run",
     "typecheck": "pnpm -r --no-bail run typecheck",
     "build:web": "pnpm --filter @chimera-rx/web run build",
-    "e2e": "node scripts/e2e/demo-e2e.mjs",
+    "e2e": "node scripts/e2e/run.mjs",
     "evidence": "pnpm --filter @chimera-rx/api run evidence:accuracy && pnpm --filter @chimera-rx/api run evidence:timing",
     "fixtures:refresh": "bash scripts/refresh-fixtures.sh",
     "hooks:install": "bash scripts/install-hooks.sh"

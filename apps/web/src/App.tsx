@@ -10,9 +10,7 @@ import { Receiving } from "./screens/Receiving";
 import { Inventory } from "./screens/Inventory";
 import { Fill } from "./screens/Fill";
 import { Recalls } from "./screens/Recalls";
-import { Labels } from "./screens/Labels";
 import { Outbox } from "./screens/Outbox";
-import { DemoGuide } from "./screens/DemoGuide";
 import { Patients } from "./screens/Patients";
 import { Integrations } from "./screens/Integrations";
 import { Register } from "./screens/Register";
@@ -30,7 +28,7 @@ const NOT_CASHIER: Role[] = ["pharmacist", "technician", "admin"];
 const STAFF: Role[] = ["pharmacist", "technician"];
 /** Same rules as the sidebar, so a typed or bookmarked address does not show a screen the API will refuse. */
 const ACCESS: Record<string, Role[]> = {
-  "/receiving": CLINICAL, "/inventory": CLINICAL, "/fill": CLINICAL, "/recalls": STAFF, "/labels": CLINICAL, "/outbox": STAFF, "/demo": STAFF,
+  "/receiving": CLINICAL, "/inventory": CLINICAL, "/fill": CLINICAL, "/recalls": STAFF, "/outbox": STAFF,
   "/register": ["cashier", "pharmacist"], "/stock": STAFF, "/transfers": ["pharmacist"], "/refills": STAFF, "/dscsa": STAFF,
   "/patients": NOT_CASHIER, "/agents": NOT_CASHIER, "/integrations": ["admin", "pharmacist"]
 };
@@ -79,8 +77,6 @@ export function App() {
         <Route path="/agents" element={<G user={user} path="/agents"><AIAgents user={user} /></G>} />
         <Route path="/dscsa" element={<G user={user} path="/dscsa"><Dscsa user={user} /></G>} />
         <Route path="/refills" element={<G user={user} path="/refills"><Refills user={user} /></G>} />
-        <Route path="/labels" element={<G user={user} path="/labels"><Labels /></G>} />
-        <Route path="/demo" element={<G user={user} path="/demo"><DemoGuide user={user} /></G>} />
         <Route path="/outbox" element={<G user={user} path="/outbox"><Outbox /></G>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

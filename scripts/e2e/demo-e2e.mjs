@@ -1,15 +1,18 @@
 /**
  * Chimera Rx rehearsal: drives the real UI in Chromium with a fake webcam that "holds up" printed DataMatrix labels
  * and a text label, and checks scan -> checks -> put away, fill, OCR of a label, and the fax OCR -> recall flow.
- * Needs the API (4000) and web app (5173) running. Usage: node scripts/chimera-rx-e2e.mjs
- * Resets the demo data first.
+ * Run it with `pnpm e2e` (scripts/e2e/run.mjs), which starts the e2e harness on ports 4650/4651 with a fresh synthetic
+ * database. The harness control port (CONTROL) reseeds, loads scenario fixtures and lists printable labels; the product
+ * itself has no demo routes.
  */
 import { chromium } from "playwright";
 import { createRequire } from "node:module";
 import fs from "node:fs";
 import path from "node:path";
 
-const BASE = process.env.BASE ?? "http://localhost:5173";
+const BASE = process.env.BASE ?? "http://localhost:4650";
+const CONTROL = process.env.CONTROL ?? "http://127.0.0.1:4651";
+const control = async (method, p) => { const r = await fetch(`${CONTROL}${p}`, { method }); if (!r.ok) throw new Error(`harness ${p} -> ${r.status}`); return r.json(); };
 const SHOTS = process.env.SHOTS ?? "/tmp/lg-shots";
 fs.mkdirSync(SHOTS, { recursive: true });
 const require = createRequire(path.resolve(import.meta.dirname, "../../apps/api/package.json"));
@@ -74,9 +77,9 @@ async function session(who) {
 try {
   // reset
   const pharm = await session("j.rivera");
-  await pharm.ctx.request.post(`${BASE}/api/demo/reset`, { data: {} });
+  await control("POST", "/reset");
   await apiLogin(pharm.ctx, "j.rivera"); // reset clears sessions
-  const labels = (await (await pharm.ctx.request.get(`${BASE}/api/demo/labels`)).json()).labels;
+  const labels = (await control("GET", "/labels")).labels;
   const find = (lot, serial) => labels.find((l) => l.lot === lot && (!serial || l.serial === serial));
 
   // 1. RECEIVING with the camera -------------------------------------------------------------
@@ -241,7 +244,7 @@ try {
   check("Test connection answers without an error page", !(await p.locator("main").innerText()).includes("Something went wrong"));
 
   // 10. REFILLS: recall-blocked row after the recall ----------------------------------------------
-  await pharm.ctx.request.post(`${BASE}/api/demo/scenarios/recall-aware-refill`, { data: {} });
+  await control("POST", "/scenario/recall-aware-refill");
   await apiLogin(pharm.ctx, "j.rivera"); // a scenario resets the demo and clears sessions
   const lk = await pharm.ctx.request.post(`${BASE}/api/recalls/lookup`, { data: { number: "D-0611-2026" } }); // insulin lot GX4471C, auto-confirmed
   if (!lk.ok()) throw new Error("recall lookup failed " + lk.status());
@@ -307,8 +310,8 @@ try {
     check("sidebar shows how many agents are on", /Agents on: [1-9]/.test(await q.locator("nav[aria-label='Main']").innerText()));
     await q.screenshot({ path: path.join(SHOTS, "agents-background.png"), fullPage: true });
 
-    const started = await ph.ctx.request.post(`${BASE}/api/demo/scenarios/agent-catches-it`, { data: {} });
-    check("scenario 'Agent catches it' starts", started.ok(), String(started.status()));
+    const started = await control("POST", "/scenario/agent-catches-it").then(() => true, () => false);
+    check("scenario 'Agent catches it' loads (harness fixture)", started);
     await apiLogin(ph.ctx, "j.rivera"); // the reset signs everyone out
     await q.goto(`${BASE}/#/`);
     const card = q.getByRole("region", { name: "Rx Guardian suggestions" }).or(q.locator("section[aria-labelledby=sugg]"));

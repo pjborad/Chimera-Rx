@@ -60,7 +60,6 @@ export function Shell({ user, children }: { user: User; children: ReactNode }) {
     <NavLink to={to} end={to === "/"}>{icon}{label}{badge}</NavLink>
   );
   const clinical = user.role !== "admin";
-  const demoMode = !!useQuery({ queryKey: ["auth-config"], queryFn: () => get<{ demo: unknown }>("/api/auth/config"), staleTime: 300_000 }).data?.demo;
   return (
     <div className="app">
       <aside className="side">
@@ -83,6 +82,7 @@ export function Shell({ user, children }: { user: User; children: ReactNode }) {
             {user.role !== "cashier" && item("/recalls", "Recalls", Icon.shield(), badges.recalls ? <span className="count red">{badges.recalls}</span> : null)}
             {(user.role === "technician" || user.role === "pharmacist") && item("/refills", "Refills", Icon.rx())}
             {(user.role === "technician" || user.role === "pharmacist") && item("/dscsa", "DSCSA & trace", Icon.shield())}
+            {(user.role === "technician" || user.role === "pharmacist") && item("/outbox", "Sandbox outbox", Icon.tag())}
           </>}
           {user.role !== "cashier" && <>
             <span className="nav-label">AI</span>
@@ -92,10 +92,6 @@ export function Shell({ user, children }: { user: User; children: ReactNode }) {
           {(user.role === "admin" || user.role === "pharmacist") && <>
             <span className="nav-label">Admin</span>
             {item("/integrations", "Integrations", NavIcon.plug)}
-          </>}
-          {demoMode && (user.role === "pharmacist" || user.role === "technician") && <>
-            <span className="nav-label">Demo</span>
-            {item("/demo", "Demo guide", Icon.tag())}
           </>}
         </nav>
         <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 10, position: "relative" }}>
