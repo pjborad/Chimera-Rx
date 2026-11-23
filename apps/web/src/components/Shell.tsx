@@ -54,7 +54,7 @@ export function Shell({ user, children }: { user: User; children: ReactNode }) {
   const me = useQuery({ queryKey: ["me"], queryFn: () => get<{ store?: { name: string } }>("/api/me"), staleTime: 60_000 });
   const storeName = (me.data?.store?.name ?? "Elm Street Pharmacy · Store 7").replace(" Pharmacy", "");
   const [menu, setMenu] = useState(false);
-  const logout = async () => { await post("/api/auth/logout"); qc.clear(); await qc.invalidateQueries({ queryKey: ["me"] }); };
+  const logout = async () => { try { await post("/api/auth/logout"); } finally { qc.clear(); window.location.hash = "#/"; window.location.reload(); } };
   const [bg, fg] = AVATAR[user.role] ?? AVATAR.pharmacist!;
   const item = (to: string, label: string, icon: ReactNode, badge?: ReactNode) => (
     <NavLink to={to} end={to === "/"}>{icon}{label}{badge}</NavLink>
