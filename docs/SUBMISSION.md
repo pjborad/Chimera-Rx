@@ -81,20 +81,17 @@ TypeScript, Node 22+, Fastify, node:sqlite, React, Vite, zod, tesseract.js, bwip
 
 ## 3-minute demo video shot list
 
-Follow the 3-minute table in [DEMO.md](DEMO.md) (the recording script, kept outside the app). Confirm the length limit and upload site on the live rules page first. Record at 1080p, browser at 100% zoom, system sounds off. Keep the demo notice visible in every shot.
+The submission video is `demo-video/chimera-rx-submission.mp4` (gitignored; 1920x1080, H.264 and AAC, 2:50, one male Kokoro voice, no music) with `chimera-rx-submission.srt`. Rebuild with `pnpm demo:record:submission`. The spoken script is [DEMO_VIDEO_SCRIPT.md](DEMO_VIDEO_SCRIPT.md). Confirm the length limit and upload site on the live rules page before uploading.
 
 | Time | Shot | Voice-over |
 | --- | --- | --- |
-| 0:00 | Sign-in page | The pharmacy runs on yesterday's software. It knows who got the drug, not which lot. |
-| 0:15 | Today with the recall banner | 197 units on the shelf, 17 patients. |
-| 0:30 | Recalls: read the fax with OCR | The browser reads the fax. openFDA confirms. The Coroner keeps only lots printed on the notice. |
-| 0:55 | Recalls: impact, then Use AI draft | Units quarantined, patients listed by consent. The AI draft is labelled advisory. |
-| 1:15 | Attest, send, then the sandbox outbox | Nothing leaves the laptop. Text carries the pharmacy phone and STOP. |
-| 1:40 | AI agents: the background row and the Rx Guardian suggestions, the provider switch | Agents work while you work: rules decide, the model explains, a gate checks the model, a pharmacist decides. Bedrock by default; any provider can be swapped in. |
-| 2:05 | DSCSA & trace: download EPCIS, sandbox verifier | Package-level events in a standard format. Sandbox, not a filing. |
-| 2:25 | Refills, then Transfers | Recalled-lot patients are held out of refills. Two stores keep lot and serial. |
-| 2:45 | `.kiro/` folder and `docs/SAFETY.md` table | Steering, specs, hooks, and eleven rules each mapped to a test. |
-| 2:58 | End card | "A modern pharmacy system. The recall is the proof." Repo URL, "synthetic data only". |
+| 0:00 | Sign-in, typed login, six-digit code, Today | A recall hits; nobody knows who got the lot. Chimera Rx captures it at receiving and at fill. |
+| 0:21 | Technician: scan, lot gate, put-away. Pharmacist: Rx Watcher and Rx Guardian, accept one. Cashier: register, short menu. Admin: Integrations | Each role sees a different pharmacy. |
+| 1:12 | Recalls D-0611-2026: fax OCR, lots, confirm, quarantine, patients, messages, sandbox outbox | Verbatim gate, pharmacist attests, voicemail rendered never dialed, refills blocked. |
+| 1:52 | AI agents, provider selector, Rx Guardian Run now | Rules decide, the model explains, a gate checks the model, a pharmacist decides. |
+| 2:13 | Integrations and the placeholder caption | REST, MCP, FHIR, webhooks, DSCSA/EPCIS, two stores. Designed seams, sandboxed. |
+| 2:35 | Audit chain | Encrypted PHI, server-side roles, hash-chained audit, eight review findings fixed. |
+| 2:48 | Kiro card, end card | Specs, steering, hooks, custom agent, Kiro Crew. Repo URL, synthetic data only. |
 
 ## Rules check (2026 submission requirements)
 
@@ -105,9 +102,9 @@ From the requirements the owner pasted on 2026-11-23. Status as of that day.
 | Project built with Kiro | Yes. `.kiro/` (specs, steering, hooks, agents) and `docs/KIRO_USAGE.md` |
 | URL to a functional application, login details in the form | **Missing.** Nothing is hosted. Judges can run it locally (`docker compose up`), but the form asks for a URL. Logins: the seeded staff accounts, shared password `moonlight-rx-2026` (synthetic) |
 | Text description of features | Devpost write-up above |
-| Video under 3 minutes, on YouTube, public, link in the form | **Not ready.** The current cut is 3:02.8, over the limit. Not uploaded |
-| Video shows the project running on its device | The cut is a browser screen recording of the running app |
-| No third-party trademarks or copyrighted music | No music. Check the video for logos before upload |
+| Video under 3 minutes, on YouTube, public, link in the form | **Video ready, not uploaded.** `chimera-rx-submission.mp4` is 2:50. Only the owner can upload it to YouTube as public |
+| Video shows the project running on its device | The video is a browser screen recording of the running app |
+| No third-party trademarks or copyrighted music | No music; the voice is a locally generated open model. Frames checked, no logos |
 | Public GitHub repo with source, assets and instructions | Public: `pjborad/Chimera-Rx`. README has setup |
 | Open source licence visible in the About section | `LICENSE` is MIT and GitHub detects it |
 | `/.kiro` at the root, not in `.gitignore` | `.kiro/` is committed. `.gitignore` still lists two generated `.kiro` files (`steering/aidlc-active-memory.md`, `agents/aidlc-scoped-review-*.md`), added by AI-DLC. Remove those lines if you want zero risk |
