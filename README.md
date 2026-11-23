@@ -8,11 +8,11 @@
 
 **Try it now, no install and no login:** open the live app at https://pjborad.github.io/Chimera-Rx/app/ (the real app and API running inside your browser tab, synthetic data, resets on reload; sign-in logins are listed below). The full server version runs in the Codespace above (free with a GitHub account). It installs, seeds synthetic data and opens the app on port 5173. Project page: https://pjborad.github.io/Chimera-Rx/
 
-## Demo video (2:50)
+## Demo video (2:55)
 
 [![Watch the Chimera Rx demo](docs/media/chimera-rx-demo-poster.jpg)](https://pjborad.github.io/Chimera-Rx/#demo-video)
 
-Click the picture to play it on the project page, or [download the MP4](docs/media/chimera-rx-demo.mp4) ([captions](docs/media/chimera-rx-demo.srt)). It covers receiving, fill, the cashier and admin roles, a recall end to end, the AI agents and the integration placeholders.
+Click the picture to play it on the project page, or [download the MP4](docs/media/chimera-rx-demo.mp4) ([captions](docs/media/chimera-rx-demo.srt)). Two narrators: the first covers why pharmacy systems need modernizing and the front of the workflow (Today, receiving, inventory, register, stock, transfers, fill); the second covers patients, recalls, refills, DSCSA, the outbox, the AI agents and integrations. Everything is shown in the pharmacist's view, with the cashier and admin limits explained.
 
 ![Sign-in page with the demo notice](docs/img/sign-in.jpg)
 
