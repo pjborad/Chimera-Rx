@@ -137,7 +137,7 @@ A pilot threat model, not a compliance claim. Full text: [docs/SECURITY.md](docs
 
 - **Synthetic data only.** A hook and a CI step block PHI-shaped content. No real patient data, ever.
 - **Encrypted at rest.** Patient names, dates of birth, phones, emails, allergies, conditions, directions, message bodies, agent runs and suggestions are sealed with AES-256-GCM; the list is in `apps/api/src/protect.ts`.
-- **Roles on the server.** Pharmacist, technician, cashier and admin are checked on every route. Partners get scoped tokens.
+- **Roles on the server.** Every state-changing route and every route in the read authorization matrix is role-checked on the server (pharmacist, technician, cashier, admin); see [docs/SECURITY.md](docs/SECURITY.md). Partners get scoped tokens.
 - **Audit.** A hash-chained log of every decision, with a verify route.
 - **Sandbox messaging.** SMS, email and voice go to an outbox; nothing is dialled or sent. The prescriber loop and the DSCSA verifier are stand-ins.
 - **No compliance claims.** No HIPAA, DSCSA, certification or clinical-validity claim. This is not a medical device.
@@ -229,10 +229,10 @@ Examples: Ollama is `OPENAI_BASE_URL=http://localhost:11434/v1`, `OPENAI_MODEL=<
 A pilot threat model, not a compliance claim. Full text: [docs/SECURITY.md](docs/SECURITY.md).
 
 - **Encryption at rest.** Patient names, dates of birth, phones, emails, allergies, conditions, prescription directions, message bodies, agent runs and audit reasons are sealed with AES-256-GCM, a fresh 12-byte IV per value, in a versioned envelope with a key id. The list is in `apps/api/src/protect.ts`; a test reads the raw SQLite and WAL bytes and finds no synthetic patient string.
-- **Key ring and rotation.** Keys come from `env`, a `file` (mode 0600) or a `kms` placeholder. `pnpm --filter @chimera-rx/api keys:rotate` re-encrypts every protected value under a new key in one transaction per store. A wrong or missing key stops start-up instead of writing under another key.
+- **Key ring and rotation.** Keys come from `env`, a `file` (owner-only: 0600/0700 on macOS and Linux, an `icacls` step or `DATA_KEY` on Windows; see docs/SECURITY.md) or a `kms` placeholder. `pnpm --filter @chimera-rx/api keys:rotate` re-encrypts every protected value under a new key in one transaction per store. A wrong or missing key stops start-up instead of writing under another key.
 - **Headers and API.** CSP, nosniff, no-referrer, frame denial, `no-store` on API responses, HSTS when `COOKIE_SECURE=1`; zod validation on every body; errors that never echo input; request logs with no body, URL query or names.
 - **Rate limits.** Five wrong passwords lock an account for 15 minutes; failures are also counted per IP and per account name. Counters are per process.
-- **Roles.** Checked on the server for every route (pharmacist, technician, cashier, admin). Partners get scoped OAuth tokens; patient data also needs an admin-approved flag.
+- **Roles.** Every state-changing route and every route in the read authorization matrix is role-checked on the server (pharmacist, technician, cashier, admin); see docs/SECURITY.md. Partners get scoped OAuth tokens; patient data also needs an admin-approved flag.
 - **Audit and MFA.** Hash-chained audit, patient views logged with a reason, optional second factor with `MFA=1`.
 
 Not covered: no TLS in the app (put a proxy in front), no KMS or HSM (the default key sits next to the data), columns outside the list are plaintext (message subjects, ids, lot and Rx numbers), no SQLCipher, per-process rate limits, no retention or deletion workflow, no breach process, no independent review or penetration test.

@@ -26,7 +26,9 @@ The eleven rules below are the project's steering file ([`.kiro/steering/pharmac
 - **Prompts carry no patient identifiers.** Prompts hold patient ids, drug, directions, quantities and lots. A prompt that matches a name, phone, email or date of birth in the patient table is not sent. (`apps/api/src/agents/`; test "no agent prompt contains a name, phone, email or date of birth" in `agents.test.ts`.)
 - **Tamper-evident audit.** Each row carries the previous row's hash; `GET /api/audit/verify` recomputes the chain.
 - **Outbound calls from the server** are limited to openFDA, a shortages feed, the model provider you configure, voice providers when their keys are set, and webhook URLs an admin registers.
-- **Secrets** live in environment variables or in `DATA_DIR/.keys` (gitignored), never in the repo.
+- **Secrets** live in environment variables or in `DATA_DIR/.keys` (gitignored), never in the repo. The key file is owner-only by file mode on macOS and Linux; on Windows the file provider needs the `icacls` step to verify or you supply `DATA_KEY`. Neither replaces disk encryption or a KMS (docs/SECURITY.md).
+- **Roles.** Every state-changing route and every route in the read authorization matrix is role-checked on the server; the route-by-role test is `apps/api/test/review-matrix.test.ts`.
+- **Independent review.** One independent review of commit 30408a6 found eight issues; status and what it did not cover are in docs/SECURITY.md ("Independent review") and docs/reviews/2026-11-22/README.md.
 - **Accessibility.** Focus rings, ARIA labels, reduced-motion handling. No formal contrast audit or screen-reader pass.
 - **Data sources.** openFDA's terms apply; it should not be relied on to make decisions about medical care.
 

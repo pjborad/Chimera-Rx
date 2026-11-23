@@ -53,10 +53,16 @@ Provider chosen by `KEY_PROVIDER` (`env`, `file`, `kms`). Default: `env` when `D
 | Provider | Key source | Notes |
 |---|---|---|
 | `env` | `DATA_KEY` (base64, 32 bytes), older keys in `DATA_KEY_PREVIOUS` | `openssl rand -base64 32` makes one |
-| `file` | `<DATA_DIR>/.keys/data.key`, mode 0600, created on first start | older keys stay in `retired.keys` (0600). `data/` is gitignored |
+| `file` | `<DATA_DIR>/.keys/data.key`, created on first start; owner-only as described below | older keys stay in `retired.keys`. `data/` is gitignored |
 | `kms` | placeholder | throws "AWS KMS key provider is not configured" |
 
 Both stores in one data directory share one key. Keys are never logged and never printed by any script. The key sits on the same disk as the database in the `file` provider, so it protects against a copied `.sqlite` file or backup, not against someone with shell access to the host.
+
+### What the key file protects, per platform
+
+- **macOS and Linux (POSIX).** The `.keys` directory is 0700 and `data.key` and `retired.keys` are 0600. A new file is created with `wx` and mode 0600 as a temp file, filled, then renamed. After every write and on every load the mode is read back; a mode wider than 0600 is tightened, and if it still is wider the provider throws instead of running.
+- **Windows.** `chmod` does nothing on Windows, so the mode bits are not a protection there. The provider runs `icacls <path> /inheritance:r /grant:r "<current user>:F"` on the directory and each key file (fixed arguments, no shell), reads the ACL back with `icacls`, and accepts it only if the current user, SYSTEM and Administrators are the only principals left. If setting or verifying fails, the file provider refuses to start and says to supply `DATA_KEY` through the environment (`KEY_PROVIDER=env`). The unit tests drive this with an injected platform and a fake `icacls`; it has not been run against a real Windows host here.
+- **Neither is a substitute** for full-disk encryption, a KMS or HSM, or access control on the host. Anyone who is the same user, root or Administrator on the machine can read the key. The `file` provider protects a copied `.sqlite` file or backup, nothing more.
 
 ### Wiring AWS KMS (not done in this pilot)
 
@@ -97,7 +103,7 @@ Implemented in `apps/api/src/security.ts` and wired in `app.ts`.
 - **Validation**: every route that takes a body parses it with zod; routes that take no body refuse one.
 - **Logging**: one JSON line per request with method, route pattern, status, timing, actor id, store id and IP. It never contains the URL, query string, body, names or phone numbers.
 - **Errors**: responses are built from a fixed vocabulary. Validation errors name the field and the rule, never the value sent (zod's own enum message quotes the input, so it is replaced). Unknown errors become `{"error":"Something went wrong."}`.
-- **Roles** are checked on the server in each route.
+- **Roles.** Every state-changing route and every route listed in the read authorization matrix below is role-checked on the server, with default deny for a route that has no row. Partner surfaces check scoped bearer tokens instead.
 - **Audit log** (hash chained, `GET /api/audit/verify`) holds patient ids, Rx numbers and counts, never names, phones or dates of birth. It records profile views with the reason (`patient.view`), order views (`phi.view`), and key rotation (`keys.rotate`). The free-text reason is encrypted at rest.
 
 ## Read authorization matrix
@@ -121,6 +127,23 @@ A cashier or admin gets 403 on every clinical read. Where a role needs a number,
 
 Not changed on purpose: `POST /api/calls/inbound` (the front desk takes a callback) and `POST /api/sms/inbound` (a simulated STOP reply) stay open to the roles listed in the table because the pickup desk and the sandbox use them; they return an id, a name and a recall id, not clinical history.
 
+### Independent review
+
+An independent reviewer (handle `ict-intelligence`, 2026-11-22, commit 30408a6) reported eight findings in issue #5 and PR #4 and supplied 21 acceptance tests; on the unfixed code 7 passed and 14 failed. Our summary is in [docs/reviews/2026-11-22/README.md](reviews/2026-11-22/README.md).
+
+| Id | Priority | Finding | Status | Commit |
+|---|---|---|---|---|
+| F01 | P1 | Automatic review overwrites a pharmacist hold | fixed in branch fix/review-2026-11-22 | |
+| F02 | P1 | Pending destination recall blocks confirmation propagation | fixed in branch fix/review-2026-11-22 | |
+| F03 | P1 | Clinical reads bypass cashier and admin role restrictions | fixed in branch fix/review-2026-11-22 | |
+| F04 | P1 | Current locally sold medicines omitted from some safety rules | fixed in branch fix/review-2026-11-22 | |
+| F05 | P1 | Interrupted cross-store transfer duplicates stock | fixed in branch fix/review-2026-11-22 | |
+| F06 | P2 | Store 2 outputs retain Store 7 identity and contact details | fixed in branch fix/review-2026-11-22 | |
+| F07 | P2 | Provider destination policy accepts mapped link-local addresses | fixed in branch fix/review-2026-11-22 | |
+| F08 | P2 | Windows file-key permissions do not meet the owner-only claim | fixed in branch fix/review-2026-11-22 (Windows path tested with a fake `icacls` only) | |
+
+"Fixed in branch" means the change is in the review branch with tests; it is not a statement about any deployed system. The review did not cover: Docker, a physical scanner, live providers other than the one live Bedrock check, a full backup restore, keyboard and screen reader review, or an exhaustive penetration test.
+
 ### Provider destination policy
 
 The OpenAI-compatible provider calls a URL an operator typed. `apps/api/src/agents/destination.ts` refuses credentials in the URL, any scheme but http(s), link-local addresses (169.254.0.0/16 and fe80::/10) in every spelling the URL parser can produce (IPv4-mapped IPv6 in dotted and hex form, decimal, octal and hex IPv4, trailing dot, upper case, bracketed hosts, NAT64 and IPv4-compatible forms), and the metadata addresses and names (169.254.169.254, fd00:ec2::/32, `metadata.*`). It runs in the settings route and again before every request; for a host name it resolves with `dns.lookup` and refuses if any answer is blocked. Redirects are not followed (`redirect: "error"`). Localhost and 127.0.0.0/8 stay allowed for Ollama and LM Studio.
@@ -135,7 +158,7 @@ Residual risk: DNS rebinding. The name is resolved for the check and resolved ag
 - **Memory and process.** Decrypted values exist in server memory and in browser memory while a screen is open. Swap files, core dumps and the sandbox outbox endpoint (`/api/outbox`) show plaintext to a signed-in user by design.
 - **Backups and logs of other tools** (reverse proxy, container runtime) are outside the code.
 - **Rate limits are per process.** Several API instances would each count separately.
-- **No per-user field-level access control** beyond roles, no data retention or deletion workflow, no breach notification process, no independent security review or penetration test.
+- **No per-user field-level access control** beyond roles, no data retention or deletion workflow, no breach notification process, no penetration test. One independent review (above) covered a bounded set of behaviors and is not a security certification.
 - **Staff passwords** use the existing salted hash; there is no password rotation policy.
 - The sandbox SMS, email and voice providers never contact a real person.
 
