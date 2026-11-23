@@ -1,0 +1,2364 @@
+{
+  "numTotalTestSuites": 55,
+  "numPassedTestSuites": 49,
+  "numFailedTestSuites": 6,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 203,
+  "numPassedTests": 189,
+  "numFailedTests": 14,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1795393353299,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "the six agents are registered with guardrails"
+          ],
+          "fullName": "the six agents are registered with guardrails lists every agent, read-only, with guardrails and a sample",
+          "status": "passed",
+          "title": "lists every agent, read-only, with guardrails and a sample",
+          "duration": 26.78990000000067,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock coroner: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "coroner: advisory record, labelled, stored",
+          "duration": 5.437599999999293,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock rx-explainer: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "rx-explainer: advisory record, labelled, stored",
+          "duration": 29.989399999999478,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock outreach-drafter: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "outreach-drafter: advisory record, labelled, stored",
+          "duration": 69.92849999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock night-watch: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "night-watch: advisory record, labelled, stored",
+          "duration": 12.354199999999764,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock stock-advisor: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "stock-advisor: advisory record, labelled, stored",
+          "duration": 41.79240000000027,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock copilot: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "copilot: advisory record, labelled, stored",
+          "duration": 17.170799999999872,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock refill-outreach: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "refill-outreach: advisory record, labelled, stored",
+          "duration": 33.649899999999434,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock rx-guardian: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "rx-guardian: advisory record, labelled, stored",
+          "duration": 77.55580000000009,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock coroner: reads the sample notice's lots",
+          "status": "passed",
+          "title": "coroner: reads the sample notice's lots",
+          "duration": 2.6403000000000247,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock rx-explainer: every rule hit survives and carries source rule",
+          "status": "passed",
+          "title": "rx-explainer: every rule hit survives and carries source rule",
+          "duration": 10.002700000000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock outreach-drafter: drafts only, one recipient each, consent respected, nothing sent",
+          "status": "passed",
+          "title": "outreach-drafter: drafts only, one recipient each, consent respected, nothing sent",
+          "duration": 171.7587999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock night-watch: a digest that confirms nothing",
+          "status": "passed",
+          "title": "night-watch: a digest that confirms nothing",
+          "duration": 12.849200000000565,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock stock-advisor: the numbers equal the rule numbers",
+          "status": "passed",
+          "title": "stock-advisor: the numbers equal the rule numbers",
+          "duration": 27.565099999999802,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider mock"
+          ],
+          "fullName": "every agent runs end to end on provider mock copilot: answers from a read-only tool",
+          "status": "passed",
+          "title": "copilot: answers from a read-only tool",
+          "duration": 12.870899999999892,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none coroner: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "coroner: advisory record, labelled, stored",
+          "duration": 1.0344999999997526,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none rx-explainer: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "rx-explainer: advisory record, labelled, stored",
+          "duration": 1.3627000000005864,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none outreach-drafter: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "outreach-drafter: advisory record, labelled, stored",
+          "duration": 57.36959999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none night-watch: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "night-watch: advisory record, labelled, stored",
+          "duration": 5.972399999999652,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none stock-advisor: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "stock-advisor: advisory record, labelled, stored",
+          "duration": 8.217499999999745,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none copilot: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "copilot: advisory record, labelled, stored",
+          "duration": 1.2274999999999636,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none refill-outreach: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "refill-outreach: advisory record, labelled, stored",
+          "duration": 6.850400000000263,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none rx-guardian: advisory record, labelled, stored",
+          "status": "passed",
+          "title": "rx-guardian: advisory record, labelled, stored",
+          "duration": 11.471700000000055,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none coroner: reads the sample notice's lots",
+          "status": "passed",
+          "title": "coroner: reads the sample notice's lots",
+          "duration": 1.016099999999824,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none rx-explainer: every rule hit survives and carries source rule",
+          "status": "passed",
+          "title": "rx-explainer: every rule hit survives and carries source rule",
+          "duration": 1.684599999999591,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none outreach-drafter: drafts only, one recipient each, consent respected, nothing sent",
+          "status": "passed",
+          "title": "outreach-drafter: drafts only, one recipient each, consent respected, nothing sent",
+          "duration": 128.76959999999963,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none night-watch: a digest that confirms nothing",
+          "status": "passed",
+          "title": "night-watch: a digest that confirms nothing",
+          "duration": 5.439199999999801,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none stock-advisor: the numbers equal the rule numbers",
+          "status": "passed",
+          "title": "stock-advisor: the numbers equal the rule numbers",
+          "duration": 6.213299999999435,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "every agent runs end to end on provider none"
+          ],
+          "fullName": "every agent runs end to end on provider none copilot: answers from a read-only tool",
+          "status": "passed",
+          "title": "copilot: answers from a read-only tool",
+          "duration": 1.4396999999999025,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a LYING provider cannot get past the gates"
+          ],
+          "fullName": "a LYING provider cannot get past the gates coroner: an invented lot is dropped and listed, real lots stay",
+          "status": "passed",
+          "title": "coroner: an invented lot is dropped and listed, real lots stay",
+          "duration": 2.676300000000083,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a LYING provider cannot get past the gates"
+          ],
+          "fullName": "a LYING provider cannot get past the gates coroner: garbage from the model falls back to the regex result",
+          "status": "passed",
+          "title": "coroner: garbage from the model falls back to the regex result",
+          "duration": 1.2795999999998457,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a LYING provider cannot get past the gates"
+          ],
+          "fullName": "a LYING provider cannot get past the gates rx-explainer: cannot remove, soften or relabel a rule hit; false 'all clear' is dropped",
+          "status": "passed",
+          "title": "rx-explainer: cannot remove, soften or relabel a rule hit; false 'all clear' is dropped",
+          "duration": 3695.1579999999994,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a LYING provider cannot get past the gates"
+          ],
+          "fullName": "a LYING provider cannot get past the gates rx-explainer: the persisted Rx Watcher review is never touched by an agent run",
+          "status": "passed",
+          "title": "rx-explainer: the persisted Rx Watcher review is never touched by an agent run",
+          "duration": 7.905899999999747,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a LYING provider cannot get past the gates"
+          ],
+          "fullName": "a LYING provider cannot get past the gates outreach-drafter: a liar cannot put a name, phone, patient id, medicine or reason into a draft",
+          "status": "passed",
+          "title": "outreach-drafter: a liar cannot put a name, phone, patient id, medicine or reason into a draft",
+          "duration": 33.804900000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a LYING provider cannot get past the gates"
+          ],
+          "fullName": "a LYING provider cannot get past the gates outreach-drafter: a model text without the pharmacy phone is dropped; a missing STOP is added",
+          "status": "passed",
+          "title": "outreach-drafter: a model text without the pharmacy phone is dropped; a missing STOP is added",
+          "duration": 78.81210000000101,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a LYING provider cannot get past the gates"
+          ],
+          "fullName": "a LYING provider cannot get past the gates night-watch: a summary with an invented number, or one that claims actions, is dropped",
+          "status": "passed",
+          "title": "night-watch: a summary with an invented number, or one that claims actions, is dropped",
+          "duration": 18.37330000000111,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a LYING provider cannot get past the gates"
+          ],
+          "fullName": "a LYING provider cannot get past the gates stock-advisor: an explanation that changes or adds a number is dropped; the rule numbers do not move",
+          "status": "passed",
+          "title": "stock-advisor: an explanation that changes or adds a number is dropped; the rule numbers do not move",
+          "duration": 11.295200000000477,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a LYING provider cannot get past the gates"
+          ],
+          "fullName": "a LYING provider cannot get past the gates copilot: write tools do not exist, so a liar cannot run them; an invented lot, patient id or name never reaches the answer",
+          "status": "passed",
+          "title": "copilot: write tools do not exist, so a liar cannot run them; an invented lot, patient id or name never reaches the answer",
+          "duration": 9.717100000001665,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a LYING provider cannot get past the gates"
+          ],
+          "fullName": "a LYING provider cannot get past the gates copilot: a technician cannot read patient ids, even if the model asks",
+          "status": "passed",
+          "title": "copilot: a technician cannot read patient ids, even if the model asks",
+          "duration": 8.615599999999176,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a LYING provider cannot get past the gates"
+          ],
+          "fullName": "a LYING provider cannot get past the gates a provider that throws leaves rules-only output and a clear note",
+          "status": "passed",
+          "title": "a provider that throws leaves rules-only output and a clear note",
+          "duration": 86.1262999999999,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "PHI minimisation: prompts carry patient ids only"
+          ],
+          "fullName": "PHI minimisation: prompts carry patient ids only no agent prompt contains a name, phone, email or date of birth, even when the question does",
+          "status": "passed",
+          "title": "no agent prompt contains a name, phone, email or date of birth, even when the question does",
+          "duration": 1859.571,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "PHI minimisation: prompts carry patient ids only"
+          ],
+          "fullName": "PHI minimisation: prompts carry patient ids only a prompt that would leak is refused, not sent",
+          "status": "passed",
+          "title": "a prompt that would leak is refused, not sent",
+          "duration": 1.5666000000001077,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "provider runtime: keys stay in memory, are role-checked, audited, never echoed"
+          ],
+          "fullName": "provider runtime: keys stay in memory, are role-checked, audited, never echoed a pharmacist can switch provider and paste a key; the key is shown as its last four characters only",
+          "status": "passed",
+          "title": "a pharmacist can switch provider and paste a key; the key is shown as its last four characters only",
+          "duration": 35.95939999999973,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "provider runtime: keys stay in memory, are role-checked, audited, never echoed"
+          ],
+          "fullName": "provider runtime: keys stay in memory, are role-checked, audited, never echoed the key is not written to disk or persisted: a new runtime does not have it",
+          "status": "passed",
+          "title": "the key is not written to disk or persisted: a new runtime does not have it",
+          "duration": 0.20049999999901047,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "provider runtime: keys stay in memory, are role-checked, audited, never echoed"
+          ],
+          "fullName": "provider runtime: keys stay in memory, are role-checked, audited, never echoed only a pharmacist or admin can change or test the provider; everyone signed in can read it",
+          "status": "passed",
+          "title": "only a pharmacist or admin can change or test the provider; everyone signed in can read it",
+          "duration": 3.651799999999639,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "provider runtime: keys stay in memory, are role-checked, audited, never echoed"
+          ],
+          "fullName": "provider runtime: keys stay in memory, are role-checked, audited, never echoed rejects an unsafe base URL and unknown fields",
+          "status": "passed",
+          "title": "rejects an unsafe base URL and unknown fields",
+          "duration": 3.399699999999939,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "provider runtime: keys stay in memory, are role-checked, audited, never echoed"
+          ],
+          "fullName": "provider runtime: keys stay in memory, are role-checked, audited, never echoed Test connection works on mock and none, and is audited",
+          "status": "passed",
+          "title": "Test connection works on mock and none, and is audited",
+          "duration": 1.3656000000009954,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "provider runtime: keys stay in memory, are role-checked, audited, never echoed"
+          ],
+          "fullName": "provider runtime: keys stay in memory, are role-checked, audited, never echoed Bedrock is the default when nothing is configured",
+          "status": "passed",
+          "title": "Bedrock is the default when nothing is configured",
+          "duration": 0.1856999999999971,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "provider adapters against stubs"
+          ],
+          "fullName": "provider adapters against stubs Bedrock: Converse request shape, region, model, text extraction (stubbed SDK client)",
+          "status": "passed",
+          "title": "Bedrock: Converse request shape, region, model, text extraction (stubbed SDK client)",
+          "duration": 0.46899999999914144,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "provider adapters against stubs"
+          ],
+          "fullName": "provider adapters against stubs Bedrock through the runtime: errors are scrubbed, and a failed provider is not hammered",
+          "status": "passed",
+          "title": "Bedrock through the runtime: errors are scrubbed, and a failed provider is not hammered",
+          "duration": 1.665500000000975,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "provider adapters against stubs"
+          ],
+          "fullName": "provider adapters against stubs Anthropic: request shape (stubbed fetch)",
+          "status": "passed",
+          "title": "Anthropic: request shape (stubbed fetch)",
+          "duration": 0.3017999999992753,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "provider adapters against stubs"
+          ],
+          "fullName": "provider adapters against stubs OpenAI-compatible: base URL, optional key, chat completions shape (stubbed fetch)",
+          "status": "passed",
+          "title": "OpenAI-compatible: base URL, optional key, chat completions shape (stubbed fetch)",
+          "duration": 0.3503999999993539,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "provider adapters against stubs"
+          ],
+          "fullName": "provider adapters against stubs an HTTP error never includes the response body or the key",
+          "status": "passed",
+          "title": "an HTTP error never includes the response body or the key",
+          "duration": 0.19000000000050932,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "agent routes"
+          ],
+          "fullName": "agent routes GET /api/agents lists the six agents with what the caller may run",
+          "status": "passed",
+          "title": "GET /api/agents lists the six agents with what the caller may run",
+          "duration": 1.9342999999989843,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "agent routes"
+          ],
+          "fullName": "agent routes POST /api/agents/:id/run: sample input works in one call, role-checked, audited",
+          "status": "passed",
+          "title": "POST /api/agents/:id/run: sample input works in one call, role-checked, audited",
+          "duration": 2.9886999999998807,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "agent routes"
+          ],
+          "fullName": "agent routes GET /api/agents/runs and /api/agents/:id; run records are bounded",
+          "status": "passed",
+          "title": "GET /api/agents/runs and /api/agents/:id; run records are bounded",
+          "duration": 12.50630000000092,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "agent routes"
+          ],
+          "fullName": "agent routes GET /api/agents/drafts is for pharmacists and says nothing was sent",
+          "status": "passed",
+          "title": "GET /api/agents/drafts is for pharmacists and says nothing was sent",
+          "duration": 31.667699999999968,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "MCP surface: the read-only agents are tools behind a scope"
+          ],
+          "fullName": "MCP surface: the read-only agents are tools behind a scope only a partner with agents.read sees and can call them",
+          "status": "passed",
+          "title": "only a partner with agents.read sees and can call them",
+          "duration": 16.213599999999133,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795393358897,
+      "endTime": 1795393365617.2136,
+      "status": "passed",
+      "message": "",
+      "name": "<checkout>/apps/api/test/agents.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "EPCIS export"
+          ],
+          "fullName": "EPCIS export a technician downloads a valid EPCIS 2.0 JSON-LD document that the validator accepts",
+          "status": "passed",
+          "title": "a technician downloads a valid EPCIS 2.0 JSON-LD document that the validator accepts",
+          "duration": 50.16070000000036,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "EPCIS export"
+          ],
+          "fullName": "EPCIS export covers receiving, storing, dispensing and holding, and carries no patient ids by default",
+          "status": "passed",
+          "title": "covers receiving, storing, dispensing and holding, and carries no patient ids by default",
+          "duration": 18.07840000000033,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "EPCIS export"
+          ],
+          "fullName": "EPCIS export filters by lot, gtin and date",
+          "status": "passed",
+          "title": "filters by lot, gtin and date",
+          "duration": 46.77090000000044,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "EPCIS export"
+          ],
+          "fullName": "EPCIS export refuses bad filters",
+          "status": "passed",
+          "title": "refuses bad filters",
+          "duration": 6.975699999999961,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "EPCIS export"
+          ],
+          "fullName": "EPCIS export a cashier and an admin are refused, and a technician cannot ask for patient ids",
+          "status": "passed",
+          "title": "a cashier and an admin are refused, and a technician cannot ask for patient ids",
+          "duration": 31.777799999999843,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "EPCIS export"
+          ],
+          "fullName": "EPCIS export marks a serial without a real read as inferred and never writes it as an EPC",
+          "status": "passed",
+          "title": "marks a serial without a real read as inferred and never writes it as an EPC",
+          "duration": 2.853399999999965,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "EPCIS export"
+          ],
+          "fullName": "EPCIS export every export is audited",
+          "status": "passed",
+          "title": "every export is audited",
+          "duration": 0.22159999999985303,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "EPCIS import is advisory"
+          ],
+          "fullName": "EPCIS import is advisory a dry run reports what would be added and changes nothing",
+          "status": "passed",
+          "title": "a dry run reports what would be added and changes nothing",
+          "duration": 17.41900000000078,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "EPCIS import is advisory"
+          ],
+          "fullName": "EPCIS import is advisory an invalid document is explained, and cannot be committed",
+          "status": "passed",
+          "title": "an invalid document is explained, and cannot be committed",
+          "duration": 5.013299999999617,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "EPCIS import is advisory"
+          ],
+          "fullName": "EPCIS import is advisory only a pharmacist confirms, and confirmed events never move stock",
+          "status": "passed",
+          "title": "only a pharmacist confirms, and confirmed events never move stock",
+          "duration": 19.938000000000102,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "EPCIS import is advisory"
+          ],
+          "fullName": "EPCIS import is advisory an exported document imports back as all duplicates or new advisory rows, and parses to the same events",
+          "status": "passed",
+          "title": "an exported document imports back as all duplicates or new advisory rows, and parses to the same events",
+          "duration": 7.871299999999792,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "sandbox verifier"
+          ],
+          "fullName": "sandbox verifier answers verified, not verified and lot recalled, logs each, and labels itself a sandbox",
+          "status": "passed",
+          "title": "answers verified, not verified and lot recalled, logs each, and labels itself a sandbox",
+          "duration": 18.034200000000055,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "sandbox verifier"
+          ],
+          "fullName": "sandbox verifier a lot in a confirmed recall answers lot_recalled",
+          "status": "passed",
+          "title": "a lot in a confirmed recall answers lot_recalled",
+          "duration": 6.414799999999559,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "sandbox verifier"
+          ],
+          "fullName": "sandbox verifier validates the body and refuses a cashier and an admin",
+          "status": "passed",
+          "title": "validates the body and refuses a cashier and an admin",
+          "duration": 9.759100000000217,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "sandbox verifier"
+          ],
+          "fullName": "sandbox verifier a failed verification at receiving changes nothing: the package is still reported and quarantined as before",
+          "status": "passed",
+          "title": "a failed verification at receiving changes nothing: the package is still reported and quarantined as before",
+          "duration": 13.892900000000736,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "suspect product cases"
+          ],
+          "fullName": "suspect product cases a pharmacist opens a case from a failed verification; a verified package or a technician cannot",
+          "status": "passed",
+          "title": "a pharmacist opens a case from a failed verification; a verified package or a technician cannot",
+          "duration": 11.113800000000083,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "suspect product cases"
+          ],
+          "fullName": "suspect product cases the draft says it is a draft, not a filing, and sends nothing",
+          "status": "passed",
+          "title": "the draft says it is a draft, not a filing, and sends nothing",
+          "duration": 1.7075999999997293,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "suspect product cases"
+          ],
+          "fullName": "suspect product cases quarantine uses the existing path (Q-1 and a Quarantined lot event)",
+          "status": "passed",
+          "title": "quarantine uses the existing path (Q-1 and a Quarantined lot event)",
+          "duration": 15.208799999999428,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "suspect product cases"
+          ],
+          "fullName": "suspect product cases a recalled lot stays blocked: its case cannot be cleared, and receiving still refuses it",
+          "status": "passed",
+          "title": "a recalled lot stays blocked: its case cannot be cleared, and receiving still refuses it",
+          "duration": 6.994999999999891,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "recall trace export"
+          ],
+          "fullName": "recall trace export exports the events of the confirmed recalled lots, patient ids only, never names",
+          "status": "passed",
+          "title": "exports the events of the confirmed recalled lots, patient ids only, never names",
+          "duration": 13.280700000000252,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "recall trace export"
+          ],
+          "fullName": "recall trace export is for pharmacists only, needs a known recall, and is audited",
+          "status": "passed",
+          "title": "is for pharmacists only, needs a known recall, and is audited",
+          "duration": 2.866899999999987,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "lot_trace MCP tool"
+          ],
+          "fullName": "lot_trace MCP tool is read-only, needs inventory.read, returns EPCIS events and no patient ids",
+          "status": "passed",
+          "title": "is read-only, needs inventory.read, returns EPCIS events and no patient ids",
+          "duration": 26.197299999999814,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "audit chain"
+          ],
+          "fullName": "audit chain still verifies after all of the above",
+          "status": "passed",
+          "title": "still verifies after all of the above",
+          "duration": 2.8662999999996828,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795393358893,
+      "endTime": 1795393359230.8662,
+      "status": "passed",
+      "message": "",
+      "name": "<checkout>/apps/api/test/dscsa.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "Rx Guardian rules fire on a crafted history and stay quiet on a clean one"
+          ],
+          "fullName": "Rx Guardian rules fire on a crafted history and stay quiet on a clean one a clean order and history raise nothing",
+          "status": "passed",
+          "title": "a clean order and history raise nothing",
+          "duration": 3.9661999999998443,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Rx Guardian rules fire on a crafted history and stay quiet on a clean one"
+          ],
+          "fullName": "Rx Guardian rules fire on a crafted history and stay quiet on a clean one duplicate therapy: the same medicine already active from another prescriber",
+          "status": "passed",
+          "title": "duplicate therapy: the same medicine already active from another prescriber",
+          "duration": 1.6041999999997643,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Rx Guardian rules fire on a crafted history and stay quiet on a clean one"
+          ],
+          "fullName": "Rx Guardian rules fire on a crafted history and stay quiet on a clean one interaction: a Watcher pair and a demo-table pair, each backed by a dated history fact",
+          "status": "passed",
+          "title": "interaction: a Watcher pair and a demo-table pair, each backed by a dated history fact",
+          "duration": 1.1779999999998836,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Rx Guardian rules fire on a crafted history and stay quiet on a clean one"
+          ],
+          "fullName": "Rx Guardian rules fire on a crafted history and stay quiet on a clean one allergy class conflict is a block and the prompt text carries only a class code",
+          "status": "passed",
+          "title": "allergy class conflict is a block and the prompt text carries only a class code",
+          "duration": 0.8847999999998137,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Rx Guardian rules fire on a crafted history and stay quiet on a clean one"
+          ],
+          "fullName": "Rx Guardian rules fire on a crafted history and stay quiet on a clean one dose or days supply that does not match the directions",
+          "status": "passed",
+          "title": "dose or days supply that does not match the directions",
+          "duration": 0.7100000000000364,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Rx Guardian rules fire on a crafted history and stay quiet on a clean one"
+          ],
+          "fullName": "Rx Guardian rules fire on a crafted history and stay quiet on a clean one early refill: a Schedule II fill is needs_review, another medicine is a monitor, a normal refill is silent",
+          "status": "passed",
+          "title": "early refill: a Schedule II fill is needs_review, another medicine is a monitor, a normal refill is silent",
+          "duration": 1.241899999999987,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Rx Guardian rules fire on a crafted history and stay quiet on a clean one"
+          ],
+          "fullName": "Rx Guardian rules fire on a crafted history and stay quiet on a clean one non-adherence reuses the PDC maths; late refill of another active medicine is a monitor",
+          "status": "passed",
+          "title": "non-adherence reuses the PDC maths; late refill of another active medicine is a monitor",
+          "duration": 2.704800000000432,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Rx Guardian rules fire on a crafted history and stay quiet on a clean one"
+          ],
+          "fullName": "Rx Guardian rules fire on a crafted history and stay quiet on a clean one a recalled or quarantined lot in the history",
+          "status": "passed",
+          "title": "a recalled or quarantined lot in the history",
+          "duration": 0.6959999999999127,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Rx Guardian rules fire on a crafted history and stay quiet on a clean one"
+          ],
+          "fullName": "Rx Guardian rules fire on a crafted history and stay quiet on a clean one controlled-substance pattern: several prescribers on Schedule II",
+          "status": "passed",
+          "title": "controlled-substance pattern: several prescribers on Schedule II",
+          "duration": 1.0662999999995009,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Rx Guardian rules fire on a crafted history and stay quiet on a clean one"
+          ],
+          "fullName": "Rx Guardian rules fire on a crafted history and stay quiet on a clean one a dose outside the age band (demo ceiling)",
+          "status": "passed",
+          "title": "a dose outside the age band (demo ceiling)",
+          "duration": 2.332399999999325,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Rx Guardian rules fire on a crafted history and stay quiet on a clean one"
+          ],
+          "fullName": "Rx Guardian rules fire on a crafted history and stay quiet on a clean one never contradicts Rx Watcher: every non-pass rule finding has a Guardian hit with the same severity",
+          "status": "passed",
+          "title": "never contradicts Rx Watcher: every non-pass rule finding has a Guardian hit with the same severity",
+          "duration": 1.0162000000000262,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "the gate keeps every rule hit and drops what the history does not back"
+          ],
+          "fullName": "the gate keeps every rule hit and drops what the history does not back drops an explanation that softens a hit or uses a number the facts do not have, and keeps a faithful one",
+          "status": "passed",
+          "title": "drops an explanation that softens a hit or uses a number the facts do not have, and keeps a faithful one",
+          "duration": 1.589600000000246,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "the gate keeps every rule hit and drops what the history does not back"
+          ],
+          "fullName": "the gate keeps every rule hit and drops what the history does not back a note must cite history facts that exist and use only their numbers",
+          "status": "passed",
+          "title": "a note must cite history facts that exist and use only their numbers",
+          "duration": 0.645900000000438,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "the agent on the seeded store"
+          ],
+          "fullName": "the agent on the seeded store raises suggestions for the seeded insulin order from its history, advisory and labelled",
+          "status": "passed",
+          "title": "raises suggestions for the seeded insulin order from its history, advisory and labelled",
+          "duration": 181.32409999999982,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "the agent on the seeded store"
+          ],
+          "fullName": "the agent on the seeded store a lying provider cannot remove a rule hit or invent a history fact",
+          "status": "passed",
+          "title": "a lying provider cannot remove a rule hit or invent a history fact",
+          "duration": 60.008600000000115,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "the agent on the seeded store"
+          ],
+          "fullName": "the agent on the seeded store a truthful note that cites real history becomes a lower-confidence suggestion, never a rule hit",
+          "status": "passed",
+          "title": "a truthful note that cites real history becomes a lower-confidence suggestion, never a rule hit",
+          "duration": 64.05309999999918,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "the agent on the seeded store"
+          ],
+          "fullName": "the agent on the seeded store prompts carry the patient id, drug names, dates and class codes only",
+          "status": "passed",
+          "title": "prompts carry the patient id, drug names, dates and class codes only",
+          "duration": 156.09209999999985,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "the agent on the seeded store"
+          ],
+          "fullName": "the agent on the seeded store a provider that throws leaves rules-only output and every rule hit",
+          "status": "passed",
+          "title": "a provider that throws leaves rules-only output and every rule hit",
+          "duration": 61.816500000000815,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "the agent on the seeded store"
+          ],
+          "fullName": "the agent on the seeded store suggestions are stored encrypted: title, evidence, explanation and the decision reason",
+          "status": "passed",
+          "title": "suggestions are stored encrypted: title, evidence, explanation and the decision reason",
+          "duration": 8.973299999999654,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "background mode"
+          ],
+          "fullName": "background mode runs an enabled agent, skips a disabled one, and runs the Guardian again when an order changes",
+          "status": "passed",
+          "title": "runs an enabled agent, skips a disabled one, and runs the Guardian again when an order changes",
+          "duration": 17.479099999999562,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "background mode"
+          ],
+          "fullName": "background mode survives an agent that throws and a provider that fails, and records the error",
+          "status": "passed",
+          "title": "survives an agent that throws and a provider that fails, and records the error",
+          "duration": 18.03110000000015,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "background mode"
+          ],
+          "fullName": "background mode AGENTS_BACKGROUND=0 stops the loop; Run now still works",
+          "status": "passed",
+          "title": "AGENTS_BACKGROUND=0 stops the loop; Run now still works",
+          "duration": 48.54150000000027,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "routes and roles"
+          ],
+          "fullName": "routes and roles suggestion data: pharmacist and technician read, cashier and admin get 403, anonymous 401",
+          "status": "passed",
+          "title": "suggestion data: pharmacist and technician read, cashier and admin get 403, anonymous 401",
+          "duration": 56.97820000000047,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "routes and roles"
+          ],
+          "fullName": "routes and roles decide, enable, disable and run-now role matrix",
+          "status": "passed",
+          "title": "decide, enable, disable and run-now role matrix",
+          "duration": 30.719900000000052,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "routes and roles"
+          ],
+          "fullName": "routes and roles accept puts the order on hold with the reason; the fill is refused; dismiss needs a reason; a change request uses the existing path",
+          "status": "passed",
+          "title": "accept puts the order on hold with the reason; the fill is refused; dismiss needs a reason; a change request uses the existing path",
+          "duration": 80.58799999999974,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "scenario: Agent catches it"
+          ],
+          "fullName": "scenario: Agent catches it the new insulin order gets a recalled-lot, an interaction and a non-adherence suggestion; Run now makes the Today card update",
+          "status": "passed",
+          "title": "the new insulin order gets a recalled-lot, an interaction and a non-adherence suggestion; Run now makes the Today card update",
+          "duration": 922.1891999999998,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795393358889,
+      "endTime": 1795393360617.1892,
+      "status": "passed",
+      "message": "",
+      "name": "<checkout>/apps/api/test/guardian.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "Independent acceptance: clinical agent reads"
+          ],
+          "fullName": "Independent acceptance: clinical agent reads m.diaz must not read clinical runs through /api/agents/runs",
+          "status": "failed",
+          "title": "m.diaz must not read clinical runs through /api/agents/runs",
+          "duration": 1412.6865000000003,
+          "failureMessages": [
+            "AssertionError: clinical run records require a reader role check: expected 200 to be 403 // Object.is equality\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:46:80\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: clinical agent reads"
+          ],
+          "fullName": "Independent acceptance: clinical agent reads m.diaz must not read clinical runs through /api/agents/rx-guardian",
+          "status": "failed",
+          "title": "m.diaz must not read clinical runs through /api/agents/rx-guardian",
+          "duration": 414.72569999999996,
+          "failureMessages": [
+            "AssertionError: clinical run records require a reader role check: expected 200 to be 403 // Object.is equality\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:46:80\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: clinical agent reads"
+          ],
+          "fullName": "Independent acceptance: clinical agent reads s.grant must not read clinical runs through /api/agents/runs",
+          "status": "failed",
+          "title": "s.grant must not read clinical runs through /api/agents/runs",
+          "duration": 395.8058000000001,
+          "failureMessages": [
+            "AssertionError: clinical run records require a reader role check: expected 200 to be 403 // Object.is equality\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:46:80\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: clinical agent reads"
+          ],
+          "fullName": "Independent acceptance: clinical agent reads s.grant must not read clinical runs through /api/agents/rx-guardian",
+          "status": "failed",
+          "title": "s.grant must not read clinical runs through /api/agents/rx-guardian",
+          "duration": 363.6265000000003,
+          "failureMessages": [
+            "AssertionError: clinical run records require a reader role check: expected 200 to be 403 // Object.is equality\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:46:80\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: history continuity"
+          ],
+          "fullName": "Independent acceptance: history continuity interaction rule includes current Active medicines",
+          "status": "passed",
+          "title": "interaction rule includes current Active medicines",
+          "duration": 0.79950000000008,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: history continuity"
+          ],
+          "fullName": "Independent acceptance: history continuity interaction rule includes current Sold here medicines",
+          "status": "failed",
+          "title": "interaction rule includes current Sold here medicines",
+          "duration": 1.3667999999997846,
+          "failureMessages": [
+            "AssertionError: expected [] to include 'interaction'\n    at Proxy.<anonymous> (file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+expect@3.2.7/node_modules/@vitest/expect/dist/index.js:1191:15)\n    at Proxy.<anonymous> (file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+expect@3.2.7/node_modules/@vitest/expect/dist/index.js:1029:14)\n    at Proxy.methodWrapper (file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:54:48\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10)\n    at runTest (file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12)"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: recall reads and store boundaries"
+          ],
+          "fullName": "Independent acceptance: recall reads and store boundaries m.diaz cannot read patient-linked recall data through /api/recalls",
+          "status": "failed",
+          "title": "m.diaz cannot read patient-linked recall data through /api/recalls",
+          "duration": 403.9814000000006,
+          "failureMessages": [
+            "AssertionError: patient-linked recall reads require explicit authorization: expected 200 to be 403 // Object.is equality\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:66:89\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: recall reads and store boundaries"
+          ],
+          "fullName": "Independent acceptance: recall reads and store boundaries m.diaz cannot read patient-linked recall data through /api/recalls/D-0611-2026",
+          "status": "failed",
+          "title": "m.diaz cannot read patient-linked recall data through /api/recalls/D-0611-2026",
+          "duration": 373.51800000000003,
+          "failureMessages": [
+            "AssertionError: patient-linked recall reads require explicit authorization: expected 200 to be 403 // Object.is equality\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:66:89\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: recall reads and store boundaries"
+          ],
+          "fullName": "Independent acceptance: recall reads and store boundaries m.diaz cannot read patient-linked recall data through /api/recalls/D-0611-2026/results",
+          "status": "failed",
+          "title": "m.diaz cannot read patient-linked recall data through /api/recalls/D-0611-2026/results",
+          "duration": 450.0700999999999,
+          "failureMessages": [
+            "AssertionError: patient-linked recall reads require explicit authorization: expected 200 to be 403 // Object.is equality\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:66:89\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: recall reads and store boundaries"
+          ],
+          "fullName": "Independent acceptance: recall reads and store boundaries s.grant cannot read patient-linked recall data through /api/recalls",
+          "status": "failed",
+          "title": "s.grant cannot read patient-linked recall data through /api/recalls",
+          "duration": 355.0101999999997,
+          "failureMessages": [
+            "AssertionError: patient-linked recall reads require explicit authorization: expected 200 to be 403 // Object.is equality\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:66:89\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: recall reads and store boundaries"
+          ],
+          "fullName": "Independent acceptance: recall reads and store boundaries s.grant cannot read patient-linked recall data through /api/recalls/D-0611-2026",
+          "status": "failed",
+          "title": "s.grant cannot read patient-linked recall data through /api/recalls/D-0611-2026",
+          "duration": 320.48599999999897,
+          "failureMessages": [
+            "AssertionError: patient-linked recall reads require explicit authorization: expected 200 to be 403 // Object.is equality\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:66:89\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: recall reads and store boundaries"
+          ],
+          "fullName": "Independent acceptance: recall reads and store boundaries s.grant cannot read patient-linked recall data through /api/recalls/D-0611-2026/results",
+          "status": "failed",
+          "title": "s.grant cannot read patient-linked recall data through /api/recalls/D-0611-2026/results",
+          "duration": 324.48339999999916,
+          "failureMessages": [
+            "AssertionError: patient-linked recall reads require explicit authorization: expected 200 to be 403 // Object.is equality\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:66:89\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: recall reads and store boundaries"
+          ],
+          "fullName": "Independent acceptance: recall reads and store boundaries changing the store prefix cannot reuse a Store 7 session in Store 2",
+          "status": "passed",
+          "title": "changing the store prefix cannot reuse a Store 7 session in Store 2",
+          "duration": 445.2397999999994,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: recall reads and store boundaries"
+          ],
+          "fullName": "Independent acceptance: recall reads and store boundaries Store 2 agent records never include Store 7 runs",
+          "status": "passed",
+          "title": "Store 2 agent records never include Store 7 runs",
+          "duration": 389.1719000000012,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: recall propagation"
+          ],
+          "fullName": "Independent acceptance: recall propagation mirrors a confirmed recall when destination pending row exists=false",
+          "status": "passed",
+          "title": "mirrors a confirmed recall when destination pending row exists=false",
+          "duration": 345.1841999999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: recall propagation"
+          ],
+          "fullName": "Independent acceptance: recall propagation mirrors a confirmed recall when destination pending row exists=true",
+          "status": "failed",
+          "title": "mirrors a confirmed recall when destination pending row exists=true",
+          "duration": 347.8052000000007,
+          "failureMessages": [
+            "AssertionError: destination must upgrade its existing pending lot to confirmed: expected null to be truthy\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:94:90\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: recall propagation"
+          ],
+          "fullName": "Independent acceptance: recall propagation a repeat quarantine is idempotent",
+          "status": "passed",
+          "title": "a repeat quarantine is idempotent",
+          "duration": 232.73170000000027,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: recall propagation"
+          ],
+          "fullName": "Independent acceptance: recall propagation a recalled fill waiting for pickup cannot be sold",
+          "status": "passed",
+          "title": "a recalled fill waiting for pickup cannot be sold",
+          "duration": 283.4280999999992,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: recall propagation"
+          ],
+          "fullName": "Independent acceptance: recall propagation send-back never returns a recalled package to the shelf",
+          "status": "passed",
+          "title": "send-back never returns a recalled package to the shelf",
+          "duration": 249.59419999999955,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: interruption and human decisions"
+          ],
+          "fullName": "Independent acceptance: interruption and human decisions transfer failure cannot leave one serial on both stores shelves",
+          "status": "failed",
+          "title": "transfer failure cannot leave one serial on both stores shelves",
+          "duration": 288.09439999999995,
+          "failureMessages": [
+            "AssertionError: [\"on_shelf\",\"on_shelf\"]: expected 2 to be 1 // Object.is equality\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:129:76\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Independent acceptance: interruption and human decisions"
+          ],
+          "fullName": "Independent acceptance: interruption and human decisions a slow automatic review cannot overwrite a pharmacist hold",
+          "status": "failed",
+          "title": "a slow automatic review cannot overwrite a pharmacist hold",
+          "duration": 162.60309999999845,
+          "failureMessages": [
+            "AssertionError: filled: expected 'clear' to be 'on_hold' // Object.is equality\n    at <checkout>\\apps\\api\\test\\independent-review-2026-11-22.test.ts:144:96\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/ajfri/OneDrive/Documents/ChatGPT/Fantastic4%202/Chimera-Rx/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+          ],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795393357370,
+      "endTime": 1795393364931.603,
+      "status": "failed",
+      "message": "",
+      "name": "<checkout>/apps/api/test/independent-review-2026-11-22.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "FR7 second sign-in factor"
+          ],
+          "fullName": "FR7 second sign-in factor FR7.1 a correct password alone gives no session; the code goes to the sandbox outbox only",
+          "status": "passed",
+          "title": "FR7.1 a correct password alone gives no session; the code goes to the sandbox outbox only",
+          "duration": 151.03899999999976,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR7 second sign-in factor"
+          ],
+          "fullName": "FR7 second sign-in factor FR7.1 the right code signs in, and the sign-in is in the audit chain",
+          "status": "passed",
+          "title": "FR7.1 the right code signs in, and the sign-in is in the audit chain",
+          "duration": 90.10910000000058,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR7 second sign-in factor"
+          ],
+          "fullName": "FR7 second sign-in factor FR7.2 a code works once",
+          "status": "passed",
+          "title": "FR7.2 a code works once",
+          "duration": 48.506500000000415,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR7 second sign-in factor"
+          ],
+          "fullName": "FR7 second sign-in factor FR7.2 a code expires after 5 minutes",
+          "status": "passed",
+          "title": "FR7.2 a code expires after 5 minutes",
+          "duration": 51.351700000000164,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR7 second sign-in factor"
+          ],
+          "fullName": "FR7 second sign-in factor FR7.2 five wrong codes lock the account for 15 minutes",
+          "status": "passed",
+          "title": "FR7.2 five wrong codes lock the account for 15 minutes",
+          "duration": 58.52109999999993,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR7 second sign-in factor"
+          ],
+          "fullName": "FR7 second sign-in factor FR7.3 the demo can read the code without a session; the badge stand-in is off while MFA is on",
+          "status": "passed",
+          "title": "FR7.3 the demo can read the code without a session; the badge stand-in is off while MFA is on",
+          "duration": 51.04770000000008,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR7 second sign-in factor"
+          ],
+          "fullName": "FR7 second sign-in factor without MFA, sign-in is unchanged",
+          "status": "passed",
+          "title": "without MFA, sign-in is unchanged",
+          "duration": 428.5220999999992,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR3 front-store register"
+          ],
+          "fullName": "FR3 front-store register US4.1 finds an item by its retail barcode and by name",
+          "status": "passed",
+          "title": "US4.1 finds an item by its retail barcode and by name",
+          "duration": 4.602100000000064,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR3 front-store register"
+          ],
+          "fullName": "FR3 front-store register US4.2 a technician cannot use the register (Q5)",
+          "status": "passed",
+          "title": "US4.2 a technician cannot use the register (Q5)",
+          "duration": 3.996100000000297,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR3 front-store register"
+          ],
+          "fullName": "FR3 front-store register US4.1 and Q3: an over-the-counter sale is recorded and does not touch prescription stock",
+          "status": "passed",
+          "title": "US4.1 and Q3: an over-the-counter sale is recorded and does not touch prescription stock",
+          "duration": 3.0846999999994296,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR3 front-store register"
+          ],
+          "fullName": "FR3 front-store register US4.2 the patient view carries no allergies or date of birth",
+          "status": "passed",
+          "title": "US4.2 the patient view carries no allergies or date of birth",
+          "duration": 1.4155000000000655,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR3 front-store register"
+          ],
+          "fullName": "FR3 front-store register US4.2 prescriptions need photo ID, counseling and signature",
+          "status": "passed",
+          "title": "US4.2 prescriptions need photo ID, counseling and signature",
+          "duration": 2.356499999999869,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR3 front-store register"
+          ],
+          "fullName": "FR3 front-store register US4.3 a mixed sale completes: lot and serial on the receipt, the fill marked sold, the audit chain intact",
+          "status": "passed",
+          "title": "US4.3 a mixed sale completes: lot and serial on the receipt, the fill marked sold, the audit chain intact",
+          "duration": 5.7249000000001615,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR3 front-store register"
+          ],
+          "fullName": "FR3 front-store register FR3.5 a prescription that is not verified is blocked, by name, and nothing is sold",
+          "status": "passed",
+          "title": "FR3.5 a prescription that is not verified is blocked, by name, and nothing is sold",
+          "duration": 2.3257000000003245,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR3 front-store register"
+          ],
+          "fullName": "FR3 front-store register FR3.5 a package from a recalled lot is blocked at the register",
+          "status": "passed",
+          "title": "FR3.5 a package from a recalled lot is blocked at the register",
+          "duration": 2.2236999999995533,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR3 front-store register"
+          ],
+          "fullName": "FR3 front-store register an empty sale and an unknown item are refused",
+          "status": "passed",
+          "title": "an empty sale and an unknown item are refused",
+          "duration": 3.0862000000006446,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR8 AI stock help"
+          ],
+          "fullName": "FR8 AI stock help only a technician or pharmacist sees suggestions; only a pharmacist can act (Q5)",
+          "status": "passed",
+          "title": "only a technician or pharmacist sees suggestions; only a pharmacist can act (Q5)",
+          "duration": 19.198499999999513,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR8 AI stock help"
+          ],
+          "fullName": "FR8 AI stock help FR8.1 a reorder suggestion shows the numbers it used",
+          "status": "passed",
+          "title": "FR8.1 a reorder suggestion shows the numbers it used",
+          "duration": 8.024599999999737,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR8 AI stock help"
+          ],
+          "fullName": "FR8 AI stock help FR8.2 flags a lot that will not be used before it expires",
+          "status": "passed",
+          "title": "FR8.2 flags a lot that will not be used before it expires",
+          "duration": 7.75380000000041,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR8 AI stock help"
+          ],
+          "fullName": "FR8 AI stock help FR8.3 flags products on the shortage list, from the cached copy offline, and says so",
+          "status": "passed",
+          "title": "FR8.3 flags products on the shortage list, from the cached copy offline, and says so",
+          "duration": 8.63000000000011,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR8 AI stock help"
+          ],
+          "fullName": "FR8 AI stock help FR8 accepting is recorded in the audit log and changes nothing in the ledger",
+          "status": "passed",
+          "title": "FR8 accepting is recorded in the audit log and changes nothing in the ledger",
+          "duration": 14.964700000000448,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR8 AI stock help"
+          ],
+          "fullName": "FR8 AI stock help FR8.4 an LLM only explains: the numbers are unchanged, and a failing LLM falls back to the rule's reason",
+          "status": "passed",
+          "title": "FR8.4 an LLM only explains: the numbers are unchanged, and a failing LLM falls back to the rule's reason",
+          "duration": 19.135700000000725,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795393358618,
+      "endTime": 1795393360491.1357,
+      "status": "passed",
+      "message": "",
+      "name": "<checkout>/apps/api/test/pilot-platform.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "PDC (proportion of days covered)"
+          ],
+          "fullName": "PDC (proportion of days covered) is exact on a worked example",
+          "status": "passed",
+          "title": "is exact on a worked example",
+          "duration": 6.3685999999997875,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "PDC (proportion of days covered)"
+          ],
+          "fullName": "PDC (proportion of days covered) carries an early pickup forward instead of counting the same day twice",
+          "status": "passed",
+          "title": "carries an early pickup forward instead of counting the same day twice",
+          "duration": 0.5794000000000779,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "PDC (proportion of days covered)"
+          ],
+          "fullName": "PDC (proportion of days covered) a gap lowers it, and below 0.80 is the flag line",
+          "status": "passed",
+          "title": "a gap lowers it, and below 0.80 is the flag line",
+          "duration": 0.6288000000004104,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "PDC (proportion of days covered)"
+          ],
+          "fullName": "PDC (proportion of days covered) property: always between 0 and 1, and covered days never exceed the window",
+          "status": "passed",
+          "title": "property: always between 0 and 1, and covered days never exceed the window",
+          "duration": 28.061299999999846,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "PDC (proportion of days covered)"
+          ],
+          "fullName": "PDC (proportion of days covered) property: more days of supply never lowers it",
+          "status": "passed",
+          "title": "property: more days of supply never lowers it",
+          "duration": 36.01119999999992,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "PDC (proportion of days covered)"
+          ],
+          "fullName": "PDC (proportion of days covered) property: adding a fill on or after the first fill never lowers it",
+          "status": "passed",
+          "title": "property: adding a fill on or after the first fill never lowers it",
+          "duration": 27.473900000000413,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "PDC (proportion of days covered)"
+          ],
+          "fullName": "PDC (proportion of days covered) ignores fills dated in the future",
+          "status": "passed",
+          "title": "ignores fills dated in the future",
+          "duration": 1.287600000000566,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "worklist, adherence and sync (scenario data, today is 2026-11-18)"
+          ],
+          "fullName": "worklist, adherence and sync (scenario data, today is 2026-11-18) computes due dates from the last fill, days supply and the grace window",
+          "status": "passed",
+          "title": "computes due dates from the last fill, days supply and the grace window",
+          "duration": 16.805200000000696,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "worklist, adherence and sync (scenario data, today is 2026-11-18)"
+          ],
+          "fullName": "worklist, adherence and sync (scenario data, today is 2026-11-18) flags low adherence below 80 percent and says when there is too little history",
+          "status": "passed",
+          "title": "flags low adherence below 80 percent and says when there is too little history",
+          "duration": 3.613199999999779,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "worklist, adherence and sync (scenario data, today is 2026-11-18)"
+          ],
+          "fullName": "worklist, adherence and sync (scenario data, today is 2026-11-18) suggests one pickup day with short fills for the drugs that run out later",
+          "status": "passed",
+          "title": "suggests one pickup day with short fills for the drugs that run out later",
+          "duration": 4.699999999999818,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "worklist, adherence and sync (scenario data, today is 2026-11-18)"
+          ],
+          "fullName": "worklist, adherence and sync (scenario data, today is 2026-11-18) sync maths on a plain example",
+          "status": "passed",
+          "title": "sync maths on a plain example",
+          "duration": 1.4457000000002154,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "worklist, adherence and sync (scenario data, today is 2026-11-18)"
+          ],
+          "fullName": "worklist, adherence and sync (scenario data, today is 2026-11-18) Schedule II is never offered: it shows as needing a new prescription",
+          "status": "passed",
+          "title": "Schedule II is never offered: it shows as needing a new prescription",
+          "duration": 6.79070000000047,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a recalled lot blocks the refill and stays blocked"
+          ],
+          "fullName": "a recalled lot blocks the refill and stays blocked offers the refill before any recall",
+          "status": "passed",
+          "title": "offers the refill before any recall",
+          "duration": 7.220399999999245,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a recalled lot blocks the refill and stays blocked"
+          ],
+          "fullName": "a recalled lot blocks the refill and stays blocked blocks it, with a link to the recall, once the lot is confirmed recalled",
+          "status": "passed",
+          "title": "blocks it, with a link to the recall, once the lot is confirmed recalled",
+          "duration": 25.425000000000182,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a recalled lot blocks the refill and stays blocked"
+          ],
+          "fullName": "a recalled lot blocks the refill and stays blocked stays blocked after the recall is closed (rule 8)",
+          "status": "passed",
+          "title": "stays blocked after the recall is closed (rule 8)",
+          "duration": 4.3270000000002256,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "a recalled lot blocks the refill and stays blocked"
+          ],
+          "fullName": "a recalled lot blocks the refill and stays blocked gets no reminder drafted, and a draft made earlier is refused at send time",
+          "status": "passed",
+          "title": "gets no reminder drafted, and a draft made earlier is refused at send time",
+          "duration": 922.4633999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "routes and roles"
+          ],
+          "fullName": "routes and roles a cashier gets 403 everywhere; a technician sees and drafts but cannot send",
+          "status": "passed",
+          "title": "a cashier gets 403 everywhere; a technician sees and drafts but cannot send",
+          "duration": 47.54410000000098,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "routes and roles"
+          ],
+          "fullName": "routes and roles GET /api/refills returns the worklist, adherence and sync",
+          "status": "passed",
+          "title": "GET /api/refills returns the worklist, adherence and sync",
+          "duration": 7.301900000000387,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "routes and roles"
+          ],
+          "fullName": "routes and roles audits every draft and every send a person starts",
+          "status": "passed",
+          "title": "audits every draft and every send a person starts",
+          "duration": 47.02880000000005,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Refill Outreach agent"
+          ],
+          "fullName": "Refill Outreach agent works under mock: AI wording passes the gate, drafts are queued and nothing is sent",
+          "status": "passed",
+          "title": "works under mock: AI wording passes the gate, drafts are queued and nothing is sent",
+          "duration": 19.5640999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Refill Outreach agent"
+          ],
+          "fullName": "Refill Outreach agent works under none: the approved templates are used and the run says rules only",
+          "status": "passed",
+          "title": "works under none: the approved templates are used and the run says rules only",
+          "duration": 13.513499999999112,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Refill Outreach agent"
+          ],
+          "fullName": "Refill Outreach agent the prompt carries patient ids and counts only",
+          "status": "passed",
+          "title": "the prompt carries patient ids and counts only",
+          "duration": 13.416900000000169,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Refill Outreach agent"
+          ],
+          "fullName": "Refill Outreach agent a lying provider cannot make a draft name another patient, a voicemail name the medicine, or a text drop the phone and STOP",
+          "status": "passed",
+          "title": "a lying provider cannot make a draft name another patient, a voicemail name the medicine, or a text drop the phone and STOP",
+          "duration": 43.112700000001496,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Refill Outreach agent"
+          ],
+          "fullName": "Refill Outreach agent the final per-draft gate drops each kind of bad draft",
+          "status": "passed",
+          "title": "the final per-draft gate drops each kind of bad draft",
+          "duration": 5.75170000000071,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Refill Outreach agent"
+          ],
+          "fullName": "Refill Outreach agent sends only after attestation, and checks consent at send time",
+          "status": "passed",
+          "title": "sends only after attestation, and checks consent at send time",
+          "duration": 51.83300000000054,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "AI draft in the recall send flow"
+          ],
+          "fullName": "AI draft in the recall send flow the Recall Outreach Drafter's templates can be loaded, and the send flow still requires attestation",
+          "status": "passed",
+          "title": "the Recall Outreach Drafter's templates can be loaded, and the send flow still requires attestation",
+          "duration": 608.8608999999997,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795393357373,
+      "endTime": 1795393363194.8608,
+      "status": "passed",
+      "message": "",
+      "name": "<checkout>/apps/api/test/refills.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "REV-API double submit"
+          ],
+          "fullName": "REV-API double submit two concurrent fill scans of one prescription dispense one package, not two",
+          "status": "passed",
+          "title": "two concurrent fill scans of one prescription dispense one package, not two",
+          "duration": 1638.6532999999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "REV-API double submit"
+          ],
+          "fullName": "REV-API double submit two concurrent sells of one dispense write one sale",
+          "status": "passed",
+          "title": "two concurrent sells of one dispense write one sale",
+          "duration": 545.6901000000007,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "REV-API edge inputs"
+          ],
+          "fullName": "REV-API edge inputs negative, zero, huge and SQL-looking values are refused or harmless",
+          "status": "passed",
+          "title": "negative, zero, huge and SQL-looking values are refused or harmless",
+          "duration": 578.1211000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "REV-API edge inputs"
+          ],
+          "fullName": "REV-API edge inputs error bodies never carry a stack, SQL or what the caller sent",
+          "status": "passed",
+          "title": "error bodies never carry a stack, SQL or what the caller sent",
+          "duration": 447.97999999999956,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "REV-API proxy headers, origin and cookies"
+          ],
+          "fullName": "REV-API proxy headers, origin and cookies X-Forwarded-For does not reset the sign-in limiter (trust proxy is off by default)",
+          "status": "passed",
+          "title": "X-Forwarded-For does not reset the sign-in limiter (trust proxy is off by default)",
+          "duration": 611.6076999999996,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "REV-API proxy headers, origin and cookies"
+          ],
+          "fullName": "REV-API proxy headers, origin and cookies a foreign Origin, a lookalike Origin and a null Origin cannot change state",
+          "status": "passed",
+          "title": "a foreign Origin, a lookalike Origin and a null Origin cannot change state",
+          "duration": 421.746000000001,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "REV-API proxy headers, origin and cookies"
+          ],
+          "fullName": "REV-API proxy headers, origin and cookies CORS never reflects a foreign origin with credentials",
+          "status": "passed",
+          "title": "CORS never reflects a foreign origin with credentials",
+          "duration": 475.1803,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "REV-API proxy headers, origin and cookies"
+          ],
+          "fullName": "REV-API proxy headers, origin and cookies a session token set before sign-in is not adopted (no fixation)",
+          "status": "passed",
+          "title": "a session token set before sign-in is not adopted (no fixation)",
+          "duration": 421.6233000000011,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "REV-API MFA: the first factor alone opens nothing"
+          ],
+          "fullName": "REV-API MFA: the first factor alone opens nothing password-only gives no session cookie, every API route stays 401, and the badge stand-in is off",
+          "status": "passed",
+          "title": "password-only gives no session cookie, every API route stays 401, and the badge stand-in is off",
+          "duration": 273.64769999999953,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "REV-API least privilege on reads that name patients"
+          ],
+          "fullName": "REV-API least privilege on reads that name patients admin cannot read the fill queue, a prescription, the outbox or a recall message preview; search gives admin no prescriptions",
+          "status": "passed",
+          "title": "admin cannot read the fill queue, a prescription, the outbox or a recall message preview; search gives admin no prescriptions",
+          "duration": 329.28930000000037,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "REV-API least privilege on reads that name patients"
+          ],
+          "fullName": "REV-API least privilege on reads that name patients a cashier cannot read the outbox or recall message previews; the fill queue stays available to hand over medicine",
+          "status": "passed",
+          "title": "a cashier cannot read the outbox or recall message previews; the fill queue stays available to hand over medicine",
+          "duration": 354.7582000000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "REV-API inferred serials at fill"
+          ],
+          "fullName": "REV-API inferred serials at fill a scan with no serial is marked inferred and the response never claims it was scanned",
+          "status": "passed",
+          "title": "a scan with no serial is marked inferred and the response never claims it was scanned",
+          "duration": 358.77260000000024,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "REV-API agent API key handling"
+          ],
+          "fullName": "REV-API agent API key handling a pasted key never appears in a response, a table (ai_runs, audit) or a request log line",
+          "status": "passed",
+          "title": "a pasted key never appears in a response, a table (ai_runs, audit) or a request log line",
+          "duration": 522.663700000001,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795393357387,
+      "endTime": 1795393364369.6638,
+      "status": "passed",
+      "message": "",
+      "name": "<checkout>/apps/api/test/review-probes.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "FR4.1 / FR4.2 each store has its own data"
+          ],
+          "fullName": "FR4.1 / FR4.2 each store has its own data lists both stores on the sign-in config",
+          "status": "passed",
+          "title": "lists both stores on the sign-in config",
+          "duration": 3.2922000000007756,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR4.1 / FR4.2 each store has its own data"
+          ],
+          "fullName": "FR4.1 / FR4.2 each store has its own data a signed-in user sees their own store's name and stock",
+          "status": "passed",
+          "title": "a signed-in user sees their own store's name and stock",
+          "duration": 9.983500000000276,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR4.1 / FR4.2 each store has its own data"
+          ],
+          "fullName": "FR4.1 / FR4.2 each store has its own data NFR3 Store 2 cannot read or change Store 7 patients, prescriptions, deliveries or sales through any staff route",
+          "status": "passed",
+          "title": "NFR3 Store 2 cannot read or change Store 7 patients, prescriptions, deliveries or sales through any staff route",
+          "duration": 19.209899999999834,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR4.1 / FR4.2 each store has its own data"
+          ],
+          "fullName": "FR4.1 / FR4.2 each store has its own data NFR3 a session cookie from one store does not work as the other store's",
+          "status": "passed",
+          "title": "NFR3 a session cookie from one store does not work as the other store's",
+          "duration": 1.0877000000000407,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR4.1 / FR4.2 each store has its own data"
+          ],
+          "fullName": "FR4.1 / FR4.2 each store has its own data each store keeps its own audit chain",
+          "status": "passed",
+          "title": "each store keeps its own audit chain",
+          "duration": 3.1464999999998327,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR4.1 / FR4.2 each store has its own data"
+          ],
+          "fullName": "FR4.1 / FR4.2 each store has its own data each store's ledger invariant holds",
+          "status": "passed",
+          "title": "each store's ledger invariant holds",
+          "duration": 11.630199999999604,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR4.3 moving stock between stores"
+          ],
+          "fullName": "FR4.3 moving stock between stores a technician cannot move stock (Q5)",
+          "status": "passed",
+          "title": "a technician cannot move stock (Q5)",
+          "duration": 3.3766999999998006,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR4.3 moving stock between stores"
+          ],
+          "fullName": "FR4.3 moving stock between stores a pharmacist moves packages: lot and serial kept, events and audit rows on both sides",
+          "status": "passed",
+          "title": "a pharmacist moves packages: lot and serial kept, events and audit rows on both sides",
+          "duration": 23.013500000000022,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR4.3 moving stock between stores"
+          ],
+          "fullName": "FR4.3 moving stock between stores a package can be moved back",
+          "status": "passed",
+          "title": "a package can be moved back",
+          "duration": 3.765900000000329,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "FR4.3 moving stock between stores"
+          ],
+          "fullName": "FR4.3 moving stock between stores refuses more than the shelf holds, and moving to your own store",
+          "status": "passed",
+          "title": "refuses more than the shelf holds, and moving to your own store",
+          "duration": 7.948900000000322,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Q4 / FR4.4 a recall confirmed in one store blocks the lot in both, with each store seeing only its own"
+          ],
+          "fullName": "Q4 / FR4.4 a recall confirmed in one store blocks the lot in both, with each store seeing only its own looking up and confirming the recall in Store 7 mirrors it to Store 2",
+          "status": "passed",
+          "title": "looking up and confirming the recall in Store 7 mirrors it to Store 2",
+          "duration": 36.83320000000003,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Q4 / FR4.4 a recall confirmed in one store blocks the lot in both, with each store seeing only its own"
+          ],
+          "fullName": "Q4 / FR4.4 a recall confirmed in one store blocks the lot in both, with each store seeing only its own the recalled lot cannot be moved from either store",
+          "status": "passed",
+          "title": "the recalled lot cannot be moved from either store",
+          "duration": 8.476799999999457,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "Q4 / FR4.4 a recall confirmed in one store blocks the lot in both, with each store seeing only its own"
+          ],
+          "fullName": "Q4 / FR4.4 a recall confirmed in one store blocks the lot in both, with each store seeing only its own a prescription from the recalled lot is blocked at Store 2's register",
+          "status": "passed",
+          "title": "a prescription from the recalled lot is blocked at Store 2's register",
+          "duration": 1.6884999999992942,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": [
+            "demo reset"
+          ],
+          "fullName": "demo reset rebuilds both stores",
+          "status": "passed",
+          "title": "rebuilds both stores",
+          "duration": 731.3717000000006,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795393359040,
+      "endTime": 1795393359906.3716,
+      "status": "passed",
+      "message": "",
+      "name": "<checkout>/apps/api/test/two-stores.test.ts"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>F05 evidence</title><style>*{box-sizing:border-box}body{margin:0;padding:42px;background:#f2f4f8;color:#182235;font:20px/1.5 system-ui,sans-serif}header{border-bottom:2px solid #c9d0de;margin-bottom:26px;padding-bottom:22px}.label{font-size:17px;letter-spacing:.08em;color:#4b5266;text-transform:uppercase}h1{font-size:34px;line-height:1.25;margin:12px 0}.badge{color:#a62030}main{display:grid;grid-template-columns:1fr 1fr;gap:24px}section{background:white;border:1px solid #d3d9e2;padding:25px;border-radius:12px;min-width:0}h2{font-size:23px;margin:0 0 15px}pre{font:16px/1.55 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;margin:0;color:#192333}small{font-size:16px;color:#586477}.why{background:#e9edf9;padding:20px;margin-top:25px;border-left:5px solid #4558a5}footer{margin-top:23px;font-size:16px;color:#586477}</style><header><div class="label">Chimera Rx · F05 · upstream 30408a6 · synthetic data</div><h1><span class="badge">P1</span> Interrupted cross-store transfer duplicates available stock</h1><small>Evidence capture: test/API/permissions output with source annotation. This is not an application screen.</small></header><main><section><h2>1 Observed evidence</h2><pre>Recorded acceptance test: FAILED
+Independent acceptance: interruption and human decisions transfer failure cannot leave one serial on both stores shelves
+
+AssertionError: [&quot;on_shelf&quot;,&quot;on_shelf&quot;]: expected 2 to be 1 // Object.is equality</pre></section><section><h2>2 Relevant implementation</h2><small>apps/api/src/crossstore.ts · lines 40–58 · pinned commit</small><pre style="margin-top:18px">40    reg.run(input.toStore, () =&gt; ctx.db.tx(() =&gt; {
+41      const lotId = ensureLot(ctx, lot.ndc11, lot.lot, lot.expiry);
+42      const loc = suggestLocation({ ndc11: lot.ndc11, name: lot.name, storage: lot.storage });
+43      const who = { ...actor, storeId: input.toStore };
+44      for (const k of pkgs) {
+45        const have = ctx.db.get&lt;{ id: number }&gt;(&quot;SELECT id FROM packages WHERE gtin = ? AND serial = ?&quot;, k.gtin, k.serial);
+46        let id: number;
+47        if (have) { id = have.id; ctx.db.run(&quot;UPDATE packages SET status = &#39;on_shelf&#39;, lot_id = ?, location = ?, zone = ?, note = NULL WHERE id = ?&quot;, lotId, loc.location, loc.zone, id); }
+48        else id = Number(ctx.db.run(&quot;INSERT INTO packages (serial, lot_id, gtin, expiry, location, zone, status, delivery_id, received_at, received_by, note) VALUES (?,?,?,?,?,?,?,?,?,?,?)&quot;,
+49          k.serial, lotId, k.gtin, k.expiry, loc.location, loc.zone, &quot;on_shelf&quot;, null, ctx.now(), actor.name, `Transferred from ${from}`).lastInsertRowid);
+50        lotEvent(ctx, &quot;Transfer in&quot;, lotId, actor.name, `From ${from}`, id);
+51      }
+52      audit(ctx, who, &quot;stock.transfer_in&quot;, &quot;lot&quot;, lotId, undefined, { lot: lot.lot, units: pkgs.length, from });
+53    }));
+54    ctx.db.tx(() =&gt; {
+55      for (const k of pkgs) {
+56        ctx.db.run(&quot;UPDATE packages SET status = &#39;adjusted&#39;, note = ? WHERE id = ?&quot;, `Transferred to ${dest?.name}`, k.id);
+57        lotEvent(ctx, &quot;Transfer out&quot;, lot.id, actor.name, `To ${dest?.name}`, k.id);
+58      }</pre><p class="why">Destination and source commit separately. The injected source write failure leaves both copies on_shelf.</p></section></main><footer>Interpret alongside the reproduction and acceptance checks in review.html. Findings remain open. Screenshots show observations, not fixes.</footer></html>
