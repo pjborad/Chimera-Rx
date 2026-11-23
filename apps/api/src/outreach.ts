@@ -1,7 +1,8 @@
 import crypto from "node:crypto";
 import { audit, emit, HttpError, type Actor, type Ctx } from "./core";
 import { findPatientByPhone } from "./patients";
-import { merge, PHARMACY_PHONE, recallImpact } from "./recall";
+import { foreignIdentity, merge, recallImpact } from "./recall";
+import { pharmacyProfile } from "./stores";
 
 /**
  * Outreach agent (plan 6.4 and section 9): pharmacist voicemail by default.
@@ -15,7 +16,7 @@ import { merge, PHARMACY_PHONE, recallImpact } from "./recall";
  *   even  voicemail left
  */
 
-export const DEFAULT_VOICEMAIL = `Hello {first_name}. This is {pharmacist}, the pharmacist at Elm Street Pharmacy. I'm calling about a medicine you picked up from us on {sold_date}. It's important, but it is not an emergency. Please call us back at {pharmacy_phone} so we can talk it over and take care of it for you at no cost. Again, that number is {pharmacy_phone}. If you'd like to talk with a pharmacist now, press 1. Thank you.`;
+export const DEFAULT_VOICEMAIL = `Hello {first_name}. This is {pharmacist}, the pharmacist at {pharmacy_name}. I'm calling about a medicine you picked up from us on {sold_date}. It's important, but it is not an emergency. Please call us back at {pharmacy_phone} so we can talk it over and take care of it for you at no cost. Again, that number is {pharmacy_phone}. If you'd like to talk with a pharmacist now, press 1. Thank you.`;
 
 export const CALL_WINDOW = { start: 9, end: 20 };
 
@@ -38,14 +39,16 @@ export function checkScript(ctx: Ctx, script: string): string[] {
   const hit = names.find((n) => script.toLowerCase().includes(n));
   if (hit) problems.push(`The message names a medicine ("${hit}"). Leave it out; the patient will hear the details on the call back.`);
   if (/\bS-\d{4}\b/.test(script)) problems.push("Remove the patient ID from the message.");
+  if (foreignIdentity(ctx, script)) problems.push("The message names another store. Use {pharmacy_name} and {pharmacy_phone} so this store's own details are filled in.");
   if (/recall|sterile|contaminat|diabet|insulin|cancer|hiv|pregnan/i.test(script)) problems.push("Do not mention the recall reason or a condition in a voicemail.");
   return problems;
 }
 
 const firstName = (n: string) => n.split(" ")[0]!;
 
-function fieldsFor(ctx: Ctx, p: { name: string; sold: string }, pharmacist: string) {
-  return { first_name: firstName(p.name), sold_date: p.sold, pharmacy_phone: spokenPhone(PHARMACY_PHONE), pharmacist: pharmacist.replace(/, PharmD$/, "").replace(/^J\. /, "Jordan ") };
+function fieldsFor(ctx: Ctx, p: { name: string; sold: string }, actor: Actor) {
+  const me = pharmacyProfile(ctx, actor);
+  return { first_name: firstName(p.name), sold_date: p.sold, pharmacy_name: me.name, pharmacy_phone: spokenPhone(me.phone), pharmacist: me.pharmacistSpoken };
 }
 
 async function speak(ctx: Ctx, text: string): Promise<{ audioId: string | null; voice: string; provider: string }> {
@@ -68,7 +71,7 @@ export async function previewVoicemail(ctx: Ctx, actor: Actor, recallId: string,
   if (actor.role !== "pharmacist") throw new HttpError(403, `A ${actor.role} cannot do that.`, "forbidden");
   const imp = recallImpact(ctx, recallId);
   const sample = imp.patients[0] ?? { name: "Maria Alvarez", sold: "Oct 9" };
-  const text = merge(script, fieldsFor(ctx, sample, actor.name));
+  const text = merge(script, fieldsFor(ctx, sample, actor));
   const sp = await speak(ctx, text);
   return { text, problems: checkScript(ctx, script), sample: sample.name, ...sp };
 }
@@ -85,7 +88,7 @@ export function voicemailDraft(ctx: Ctx, recallId: string, actor: Actor) {
   const sample = imp.patients[0];
   return {
     script: DEFAULT_VOICEMAIL, callCount: reachable.size, noPhone, dnc, window: `${CALL_WINDOW.start} AM – ${CALL_WINDOW.end - 12} PM patient's local time`,
-    sampleText: sample ? merge(DEFAULT_VOICEMAIL, fieldsFor(ctx, sample, actor.name)) : "", voice: ctx.voice ? { provider: ctx.voice.name, voice: ctx.voice.voice } : { provider: "browser", voice: "device voice" }
+    sampleText: sample ? merge(DEFAULT_VOICEMAIL, fieldsFor(ctx, sample, actor)) : "", voice: ctx.voice ? { provider: ctx.voice.name, voice: ctx.voice.voice } : { provider: "browser", voice: "device voice" }
   };
 }
 
@@ -108,7 +111,7 @@ export async function startVoicemail(ctx: Ctx, actor: Actor, recallId: string, s
       if (seen.has(p.id)) continue;
       seen.add(p.id);
       const pt = ctx.db.get<any>("SELECT phone, dnc, voice_consent FROM patients WHERE id = ?", p.id)!;
-      const text = merge(script, fieldsFor(ctx, p, actor.name));
+      const text = merge(script, fieldsFor(ctx, p, actor));
       const outcome = !pt.phone ? "call_list" : pt.dnc || !pt.voice_consent ? "call_list" : "queued";
       const note = !pt.phone ? "No phone number on file" : pt.dnc || !pt.voice_consent ? "Do-not-call or no consent for automated calls" : null;
       ctx.db.run("INSERT INTO outreach_calls (recall_id, patient_id, attempt, outcome, script, placed_at, window_ok, note) VALUES (?,?,?,?,?,?,?,?)", recallId, p.id, 1, outcome, text, null, null, note);

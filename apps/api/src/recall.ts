@@ -7,6 +7,7 @@ import { OpenFdaClient, recordFromText, type RecallRecord } from "@chimera-rx/su
 import path from "node:path";
 import { audit, emit, HttpError, lotEvent, type Actor, type Ctx } from "./core";
 import { ndcFromAny, ndc11Pretty } from "./domain";
+import { pharmacyProfile } from "./stores";
 
 const CONFIRM_AT = 0.95;
 const RECALL_NO = /\b([A-Z])-(\d{3,4})-(\d{4})\b/;
@@ -213,16 +214,36 @@ export function recallImpact(ctx: Ctx, recallId: string, opts: { includeUnconfir
 
 // ------------------------------------------------------------------ messages
 
-export const PHARMACY_PHONE = "(555) 010-2200";
-export const DEFAULT_SMS = `Elm Street Pharmacy: Hi {first_name}, a medicine you picked up on {sold_date} is part of a safety recall. Please don't use it. Call ${PHARMACY_PHONE} for a free replacement.`;
+/** Templates carry placeholders; {pharmacy_name}, {pharmacy_phone} and {pharmacist} are filled from the CURRENT store (REV-F06). */
+export const DEFAULT_SMS = `{pharmacy_name}: Hi {first_name}, a medicine you picked up on {sold_date} is part of a safety recall. Please don't use it. Call {pharmacy_phone} for a free replacement.`;
 export const DEFAULT_EMAIL_SUBJECT = "Important: a medicine you received has been recalled";
 export const DEFAULT_EMAIL_BODY = `Dear {first_name},
 
-On {sold_date} you picked up {drug_name} (Rx {rx_number}) from Elm Street Pharmacy. The maker has recalled this batch because it may not be sterile.
+On {sold_date} you picked up {drug_name} (Rx {rx_number}) from {pharmacy_name}. The maker has recalled this batch because it may not be sterile.
 
-Please do not use any remaining doses. Bring them to the pharmacy, or call us at ${PHARMACY_PHONE}. We will replace your medicine at no cost and answer any questions.
+Please do not use any remaining doses. Bring them to the pharmacy, or call us at {pharmacy_phone}. We will replace your medicine at no cost and answer any questions.
 
-J. Rivera, PharmD`;
+{pharmacist}`;
+
+/** The signed-in store's name, phone and signing pharmacist as merge fields. Spoken form is applied by the voicemail code. */
+export function storeFields(ctx: Ctx, actor?: Actor | null) {
+  const p = pharmacyProfile(ctx, actor);
+  return { pharmacy_name: p.name, pharmacy_phone: p.phone, pharmacist: p.pharmacist };
+}
+
+/** Another store's name or phone typed into this store's text (a stale draft, a pasted template) is refused. */
+export function foreignIdentity(ctx: Ctx, text: string): string | null {
+  const reg = ctx.stores;
+  if (!reg) return null;
+  const digits = (x: string) => x.replace(/\D/g, "");
+  const flat = digits(text);
+  for (const id of reg.others(reg.current)) {
+    const o = reg.run(id, () => pharmacyProfile(ctx));
+    if (o.name && text.toLowerCase().includes(o.name.toLowerCase())) return o.name;
+    if (digits(o.phone).length === 10 && flat.includes(digits(o.phone))) return o.phone;
+  }
+  return null;
+}
 
 /** GSM-7 messages hold 160 characters in one segment (153 each when joined); anything else falls back to UCS-2 (70 / 67). */
 export function smsSegments(text: string): { segments: number; chars: number; unicode: boolean } {
@@ -236,10 +257,11 @@ export function merge(tpl: string, f: Record<string, string>): string {
   return tpl.replace(/\{(\w+)\}/g, (m, k: string) => (k in f ? f[k]! : m));
 }
 
-export function messageDraft(ctx: Ctx, recallId: string) {
+export function messageDraft(ctx: Ctx, recallId: string, actor?: Actor | null) {
   const imp = recallImpact(ctx, recallId);
   const sample = imp.patients.find((p) => p.channels.includes("Text")) ?? imp.patients[0];
-  const fields = sample ? { first_name: sample.name.split(" ")[0]!, sold_date: sample.sold, drug_name: sample.drug, rx_number: sample.rx, pharmacy_phone: PHARMACY_PHONE } : { first_name: "Maria", sold_date: "Oct 9", drug_name: "your medicine", rx_number: "0000000", pharmacy_phone: PHARMACY_PHONE };
+  const who = storeFields(ctx, actor);
+  const fields = sample ? { first_name: sample.name.split(" ")[0]!, sold_date: sample.sold, drug_name: sample.drug, rx_number: sample.rx, ...who } : { first_name: "Maria", sold_date: "Oct 9", drug_name: "your medicine", rx_number: "0000000", ...who };
   return { sms: DEFAULT_SMS, emailSubject: DEFAULT_EMAIL_SUBJECT, emailBody: DEFAULT_EMAIL_BODY, previewName: sample?.name ?? "Maria Alvarez", fields, smsCount: imp.textCount, emailCount: imp.emailCount, callCount: imp.callCount };
 }
 
@@ -254,7 +276,10 @@ export function sendNotifications(ctx: Ctx, actor: Actor, recallId: string, tpl:
   const imp = recallImpact(ctx, recallId);
   if (imp.unconfirmed > 0) throw new HttpError(409, `${imp.unconfirmed} lot(s) still need a pharmacist's confirmation before messages can go out.`, "unconfirmed_lots");
   if (!imp.patients.length) throw new HttpError(409, "No patients are linked to these lots.", "no_patients");
-  if (!/\(\d{3}\) \d{3}-\d{4}/.test(tpl.sms)) throw new HttpError(422, "The text must include the pharmacy phone number.", "template");
+  const me = storeFields(ctx, actor);
+  if (!(/\{pharmacy_phone\}/.test(tpl.sms) || (me.pharmacy_phone && tpl.sms.includes(me.pharmacy_phone)))) throw new HttpError(422, "The text must include this pharmacy's phone number.", "template");
+  const foreign = foreignIdentity(ctx, `${tpl.sms}\n${tpl.emailSubject}\n${tpl.emailBody}`);
+  if (foreign) throw new HttpError(422, `The message names another store (${foreign}). Use the placeholders so each store's own name and phone are filled in.`, "template");
   const sms = /\bSTOP\b/i.test(tpl.sms) ? tpl.sms : `${tpl.sms.trim()} Reply STOP to opt out.`;
   const version = (ctx.db.get<{ v: number | null }>("SELECT max(template_version) AS v FROM notifications WHERE recall_id = ?", recallId)?.v ?? 0) + 1;
 
@@ -266,7 +291,7 @@ export function sendNotifications(ctx: Ctx, actor: Actor, recallId: string, tpl:
     // Consent is checked now, at send time, not when the recall was opened.
     const pat = ctx.db.get<any>("SELECT * FROM patients WHERE id = ?", p.id)!;
     const ch = channelsFor(pat);
-    const f = { first_name: p.name.split(" ")[0]!, sold_date: p.sold, drug_name: p.drug, rx_number: p.rx, pharmacy_phone: PHARMACY_PHONE };
+    const f = { first_name: p.name.split(" ")[0]!, sold_date: p.sold, drug_name: p.drug, rx_number: p.rx, ...me };
     if (ch.includes("Call only")) { calls.push(p); continue; }
     const mk = (channel: "sms" | "email", body: string, subject: string | null) =>
       Number(ctx.db.run("INSERT INTO notifications (recall_id, patient_id, rx, channel, template_version, merged_text, subject, status, queued_at) VALUES (?,?,?,?,?,?,?,?,?)", recallId, p.id, p.rx, channel, version, body, subject, "queued", ctx.now()).lastInsertRowid);
@@ -361,7 +386,7 @@ export function auditReport(ctx: Ctx, recallId: string): Promise<Buffer> {
   const done = new Promise<Buffer>((resolve) => doc.on("end", () => resolve(Buffer.concat(chunks))));
 
   doc.font("Helvetica-Bold").fontSize(18).text(`Recall audit report · ${recallId}`);
-  doc.font("Helvetica").fontSize(9).fillColor("#666").text("Elm Street Pharmacy · Store 7 · synthetic data, not for clinical use");
+  doc.font("Helvetica").fontSize(9).fillColor("#666").text(`${pharmacyProfile(ctx).fullName} · ${pharmacyProfile(ctx).phone} · synthetic data, not for clinical use`);
   doc.moveDown(0.8).fillColor("#000").fontSize(11);
   doc.text(`${view.classification} · ${view.level || "level not stated"} · initiated ${view.initiated}`);
   doc.text(`Product: ${view.product}`).text(`Firm: ${view.firm}`).text(`Reason: ${view.reason}`);

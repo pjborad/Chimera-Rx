@@ -31,7 +31,7 @@ import { seedDatabase, expectedPackages, FILL_PACKAGES, PRODUCTS } from "./seed"
 import { gtinOf, ndc11Digits } from "./domain";
 import { ingestFaxInbox, pollOpenFda, todayView } from "./today";
 import { splitStore, withStore } from "./stores";
-import { otherStores, transferPackages } from "./crossstore";
+import { listTransfers, otherStores, reconcileTransfers, transferPackages } from "./crossstore";
 import { corsOriginsFrom, publicError, registerSecurity } from "./security";
 import { listScenarios, resetDemo, scenarioLabels, startScenario } from "./scenarios";
 
@@ -373,7 +373,9 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
   });
   // ---- two stores (FR4): see the other store, move stock to it
   app.get("/api/stores", async (req) => ({ me: A(req).storeId, others: otherStores(ctx, A(req)) }));
-  app.post("/api/transfers", async (req) => transferPackages(ctx, A(req), z.object({ toStore: z.string().max(40), lotId: z.number().int(), qty: z.number().int() }).parse(req.body)));
+  app.get("/api/transfers", async (req) => { only(req, "pharmacist"); return { transfers: listTransfers(ctx) }; });
+  app.post("/api/transfers/recover", async (req) => { only(req, "pharmacist"); return reconcileTransfers(ctx, A(req)); });
+  app.post("/api/transfers", async (req) => transferPackages(ctx, A(req), z.object({ toStore: z.string().max(40), lotId: z.number().int(), qty: z.number().int(), transferId: z.string().uuid().optional() }).parse(req.body)));
 
   // ---- front-store register (FR3)
   app.get("/api/register/items", async (req) => findItems(ctx, A(req), String((req.query as { q?: string }).q ?? "")));

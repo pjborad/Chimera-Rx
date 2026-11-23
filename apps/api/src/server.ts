@@ -13,6 +13,8 @@ import { ingestFaxInbox, pollOpenFda } from "./today";
 import { createVoice } from "./voice";
 import { startWebhookDispatcher } from "./webhooks";
 import { runOutreachAgent } from "./outreach";
+import { reconcileTransfers, retryPropagations } from "./crossstore";
+import { quarantineRecalled } from "./recall";
 
 const cfg = loadConfig();
 // Two stores (FR4): one database each, one routed `ctx.db`. TWO_STORES=0 runs the original single store.
@@ -29,6 +31,9 @@ if (multi) {
 } else if (seedDatabase(db, cfg)) console.log("Seeded Elm Street Pharmacy · Store 7 (synthetic data)");
 const everyStore = async (fn: () => Promise<unknown>) => { if (ctx.stores) await ctx.stores.each(fn); else await fn(); };
 await everyStore(() => ingestFaxInbox(ctx));
+// Cross-store work that a crash can leave half done (REV-F02, REV-F05): finish it now, then every minute.
+const crossStoreRecovery = () => everyStore(async () => { reconcileTransfers(ctx); retryPropagations(ctx, quarantineRecalled); });
+await crossStoreRecovery();
 startWebhookDispatcher(ctx);
 
 const app = await buildApp(ctx);
@@ -38,6 +43,7 @@ console.log(`Chimera Rx API on http://localhost:${cfg.port}  (notifier=${ctx.not
 // Rx Watcher: review every new order at start-up, then every minute.
 void everyStore(() => reviewPending(ctx).then((n) => { if (n) console.log(`Rx Watcher reviewed ${n} new order(s)`); }));
 cron.schedule("* * * * *", () => { void everyStore(() => reviewPending(ctx)).catch(() => undefined); });
+cron.schedule("* * * * *", () => { void crossStoreRecovery().catch(() => undefined); });
 // Background agents (agents/background.ts): every enabled agent runs on its trigger. The tick is never awaited by a request and never throws.
 // AGENTS_BACKGROUND=0 turns it off. The Rx Guardian looks at new or changed orders on every tick.
 const backgroundRound = () => everyStore(() => backgroundTick(ctx)).catch(() => undefined);

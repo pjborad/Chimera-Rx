@@ -57,7 +57,7 @@ export const ACCESS: Record<string, Rule> = {
   "POST /api/deliveries/:id/scan": ST, "POST /api/packages/:id/putaway": ST, "POST /api/packages/:id/problem": ST,
   "GET /api/lots": FLOOR, "GET /api/lots/:id": FLOOR, "POST /api/lots/:id/move": ST, "POST /api/lots/:id/adjust": ST,
   "GET /api/demo/labels": FLOOR, "POST /api/ocr/parse": FLOOR,
-  "GET /api/stores": PH, "POST /api/transfers": PH,
+  "GET /api/stores": PH, "POST /api/transfers": PH, "GET /api/transfers": PH, "POST /api/transfers/recover": PH,
 
   // ---- fill and pickup
   "GET /api/rx": FLOOR,                       // the cashier gets the pickup columns only (fill.ts)

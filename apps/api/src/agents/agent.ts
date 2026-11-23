@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { audit, HttpError, type Actor, type Ctx } from "../core";
 import type { Role } from "../domain";
+import { pharmacyProfile } from "../stores";
 import { runtimeOf, type ProviderClient } from "./providers";
 
 /**
@@ -60,7 +61,8 @@ export interface AgentDef {
 // ------------------------------------------------------------------ PHI handling
 
 interface PatientRow { id: string; name: string; dob: string; phone: string; email: string }
-const PHARMACY_PHONE_DIGITS = "5550102200";
+/** the signed-in store's own phone (digits): the one number a draft may carry (REV-F06) */
+const storeDigits = (ctx: Ctx) => { try { return pharmacyProfile(ctx).phone.replace(/\D/g, ""); } catch { return ""; } };
 
 function patients(ctx: Ctx): PatientRow[] {
   try { return ctx.db.all<PatientRow>("SELECT id, name, dob, phone, email FROM patients"); } catch { return []; }
@@ -76,7 +78,8 @@ const phoneRe = (d: string) => new RegExp(`(?<!\\d)${d.split("").join("\\D?")}(?
 export function findPhi(ctx: Ctx, text: string): string | null {
   const low = text.toLowerCase();
   if (/[\w.+-]+@[\w-]+\.[\w.-]+/.test(text)) return "an email address";
-  for (const m of text.matchAll(PHONE)) if (digits(m[0]) !== PHARMACY_PHONE_DIGITS) return "a phone number";
+  const own = storeDigits(ctx);
+  for (const m of text.matchAll(PHONE)) if (digits(m[0]) !== own) return "a phone number";
   const all = patients(ctx);
   for (const p of all) {
     const name = (p.name ?? "").trim();
@@ -84,7 +87,7 @@ export function findPhi(ctx: Ctx, text: string): string | null {
     for (const part of name.split(/\s+/)) if (part.length >= 4 && new RegExp(`\\b${part.toLowerCase().replace(/[^a-z]/g, "")}\\b`).test(low)) return "a patient name";
     if (p.dob && text.includes(p.dob)) return "a date of birth";
     const pd = digits(p.phone ?? "");
-    if (pd.length === 10 && pd !== PHARMACY_PHONE_DIGITS && phoneRe(pd).test(text)) return "a phone number";
+    if (pd.length === 10 && pd !== own && phoneRe(pd).test(text)) return "a phone number";
   }
   return null;
 }
@@ -93,7 +96,7 @@ export function findPhi(ctx: Ctx, text: string): string | null {
 export function deidentify(ctx: Ctx, text: string): string {
   let t = text
     .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "[email]")
-    .replace(PHONE, (m) => (digits(m) === PHARMACY_PHONE_DIGITS ? m : "[phone]"));
+    .replace(PHONE, (m) => (digits(m) === storeDigits(ctx) ? m : "[phone]"));
   for (const p of patients(ctx)) {
     const name = (p.name ?? "").trim();
     if (name.length > 3) t = t.replace(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), p.id);
@@ -104,7 +107,7 @@ export function deidentify(ctx: Ctx, text: string): string {
 }
 
 /** Scrub phone numbers and emails out of text before it is stored in a run record. */
-export const scrubContact = (s: string) => s.replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "[email]").replace(PHONE, (m) => (digits(m) === PHARMACY_PHONE_DIGITS ? m : "[phone]"));
+export const scrubContact = (s: string, ownDigits = "") => s.replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "[email]").replace(PHONE, (m) => (ownDigits && digits(m) === ownDigits ? m : "[phone]"));
 
 // ------------------------------------------------------------------ the LLM handle an agent gets
 
@@ -207,7 +210,7 @@ export async function runAgent(ctx: Ctx, actor: Actor | null, agentId: string, r
   const rec = {
     provider: client?.id ?? "none", model: client?.model ?? "", mode: (answered ? "ai" : "rules only") as "ai" | "rules only",
     input: llm.prompts.join("\n---\n").slice(0, 6000),
-    raw: answered ? scrubContact(rt.scrubSecrets(llm.raws.join("\n---\n"))).slice(0, 6000) : null,
+    raw: answered ? scrubContact(rt.scrubSecrets(llm.raws.join("\n---\n")), storeDigits(ctx)).slice(0, 6000) : null,
     error: llm.error ? rt.scrubSecrets(llm.error) : null
   };
   const id = Number(ctx.db.run(

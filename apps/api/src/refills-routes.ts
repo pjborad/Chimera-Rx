@@ -4,7 +4,8 @@ import { audit, HttpError, type Actor, type Ctx } from "./core";
 import { ADVISORY_LABEL, draftQueue, refillDraftProblem, REFILL_DRAFT_KEY, runAgent } from "./agents";
 import { refillFields, refillReport } from "./refills";
 import { spokenPhone } from "./outreach";
-import { channelsFor, merge, PHARMACY_PHONE } from "./recall";
+import { channelsFor, merge } from "./recall";
+import { pharmacyProfile } from "./stores";
 
 /**
  * Refills routes. Pharmacist and technician see the worklist and may start drafts; a cashier gets 403. Only a pharmacist sends,
@@ -36,11 +37,12 @@ export function sendRefillDrafts(ctx: Ctx, actor: Actor, ids: number[] | undefin
     if (!pat) { skip(r, "Unknown patient."); continue; }
     const ch = channelsFor(pat);
     const f = refillFields(ctx, r.patient_id, actor.name.replace(/, PharmD$/, ""), rep);
-    const base = { first_name: f.first_name, drug_name: f.drug_name, pharmacist: f.pharmacist };
+    const me = pharmacyProfile(ctx, actor);
+    const base = { first_name: f.first_name, drug_name: f.drug_name, pharmacist: f.pharmacist, pharmacy_name: me.name };
     const draft = {
       patientId: r.patient_id, channel: r.channel as "sms" | "email" | "voicemail",
       subject: r.subject ? merge(r.subject, base) : null,
-      text: merge(r.body, { ...base, pharmacy_phone: r.channel === "voicemail" ? spokenPhone(PHARMACY_PHONE) : PHARMACY_PHONE })
+      text: merge(r.body, { ...base, pharmacy_phone: r.channel === "voicemail" ? spokenPhone(me.phone) : me.phone })
     };
     const bad = refillDraftProblem(ctx, draft, offer.map((o) => o.drug));
     if (bad) { skip(r, bad); continue; }
