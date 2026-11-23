@@ -27,7 +27,7 @@ const fieldLabel = { fontSize: 12, color: C.dimmer, display: "flex", flexDirecti
 export function AIAgents({ user }: { user: User }) {
   const qc = useQueryClient();
   const ov = useQuery({ queryKey: ["agents"], queryFn: () => get<Overview>("/api/agents") });
-  const runs = useQuery({ queryKey: ["agent-runs"], queryFn: () => get<{ runs: Run[] }>("/api/agents/runs?limit=8") });
+  const runs = useQuery({ queryKey: ["agent-runs"], queryFn: () => get<{ runs: Run[] }>("/api/agents/runs?limit=8"), enabled: user.role !== "admin" }); // run history holds patient ids: pharmacist and technician only
   const [err, setErr] = useState("");
   const [result, setResult] = useState<Run | null>(null);
   const [busy, setBusy] = useState("");
@@ -125,7 +125,7 @@ export function AIAgents({ user }: { user: User }) {
 
         {result && <RunView run={result} name={o?.agents.find((a) => a.id === result.agentId)?.name ?? result.agentId} />}
 
-        <section aria-label="Recent runs" style={card}>
+        {user.role !== "admin" && <section aria-label="Recent runs" style={card}>
           <h2 style={{ margin: 0, fontSize: 16 }}>Recent runs <span style={{ color: C.dimmer, fontWeight: 400 }}>(newest first, the last 300 are kept)</span></h2>
           {!(runs.data?.runs.length) && <p style={{ margin: 0, color: C.dim, fontSize: 14 }}>No runs yet. Press "Run with sample input" on any agent.</p>}
           {runs.data?.runs.map((r) => (
@@ -134,7 +134,7 @@ export function AIAgents({ user }: { user: User }) {
               <span style={{ display: "flex", gap: 6 }}><Pill tone={r.mode === "ai" ? "violet" : "gray"}>{r.mode === "ai" ? `${r.provider}` : "rules only"}</Pill><Pill tone="gray">{r.latencyMs} ms</Pill>{r.dropped.length > 0 && <Pill tone="amber">{r.dropped.length} dropped</Pill>}</span>
             </button>
           ))}
-        </section>
+        </section>}
         </>}
         <Footer />
       </main>

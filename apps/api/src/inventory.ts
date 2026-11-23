@@ -76,7 +76,7 @@ export function lotDetail(ctx: Ctx, id: number) {
   hist.sort((a, b) => a.at - b.at);
   return {
     id: l.id, name: l.name, ndc10: l.ndc10, lot: l.lot, expiry: l.expiry, status: l.status, storage: l.storage,
-    received, dispensed: c("dispensed"), onHand, returned: c("returned"), adjusted: c("adjusted") + c("destroyed"), history: hist
+    received, dispensed: c("dispensed"), onHand, returned: c("returned"), adjusted: c("adjusted") + c("destroyed") + c("in_transit"), history: hist
   };
 }
 
@@ -133,7 +133,7 @@ export function adjustLot(ctx: Ctx, actor: Actor, lotId: number, newCount: numbe
 
 /**
  * The ledger's invariants (spec property tests):
- *  - on hand = received - dispensed - returned - adjusted, never negative
+ *  - on hand = received - dispensed - returned - adjusted - in transit, never negative (a transfer in flight is not on hand anywhere)
  *  - every dispensed package has a receiving record and exactly one live dispense
  */
 export function ledgerViolations(ctx: Ctx): string[] {
@@ -142,7 +142,7 @@ export function ledgerViolations(ctx: Ctx): string[] {
     const c = (s: string) => ctx.db.get<{ n: number }>("SELECT count(*) AS n FROM packages WHERE lot_id = ? AND status = ?", l.id, s)!.n;
     const received = ctx.db.get<{ n: number }>("SELECT count(*) AS n FROM packages WHERE lot_id = ? AND status <> 'pending_putaway'", l.id)!.n;
     const onHand = c("on_shelf") + c("quarantined");
-    if (onHand !== received - c("dispensed") - c("returned") - c("adjusted") - c("destroyed")) bad.push(`lot ${l.lot}: on hand does not reconcile`);
+    if (onHand !== received - c("dispensed") - c("returned") - c("adjusted") - c("destroyed") - c("in_transit")) bad.push(`lot ${l.lot}: on hand does not reconcile`);
     if (onHand < 0) bad.push(`lot ${l.lot}: negative on hand`);
   }
   for (const r of ctx.db.all<any>(

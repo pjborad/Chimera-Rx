@@ -12,6 +12,7 @@ import "./guardian";
 import { ADVISORY_LABEL, allAgents, canRun, getAgent, listRuns, runAgent, sampleFor } from "./agent";
 import { draftQueue } from "./outreach";
 import { PROVIDER_IDS, runtimeOf } from "./providers";
+import { checkDestinationLiteral, DestinationError } from "./destination";
 import { agentsOn, backgroundAllowed, backgroundStatus, runNow, setEnabled } from "./background";
 import { acceptSuggestion, dismissSuggestion, listSuggestions, requestChange, suggestionSummary } from "./guardian";
 
@@ -26,13 +27,9 @@ const providerBody = z.object({
   apiKey: z.string().max(600).optional()
 }).strict();
 
-/** The OpenAI-compatible base URL is called from the server, so keep it to plain http(s) with no embedded credentials and no link-local range. */
+/** The OpenAI-compatible base URL is called from the server: the shared destination policy (destination.ts) applies here and again before every request. */
 function checkBaseUrl(raw: string) {
-  let u: URL;
-  try { u = new URL(raw); } catch { throw new HttpError(422, "The base URL is not a valid URL.", "base_url"); }
-  if (!/^https?:$/.test(u.protocol)) throw new HttpError(422, "The base URL must start with http:// or https://.", "base_url");
-  if (u.username || u.password) throw new HttpError(422, "Put the key in the key field, not in the URL.", "base_url");
-  if (/^169\.254\./.test(u.hostname) || /metadata/i.test(u.hostname)) throw new HttpError(422, "That address is not allowed.", "base_url");
+  try { checkDestinationLiteral(raw); } catch (e) { if (e instanceof DestinationError) throw new HttpError(422, e.message, "base_url"); throw e; }
 }
 
 export function registerAgentRoutes(app: FastifyInstance, ctx: Ctx) {

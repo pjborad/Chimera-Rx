@@ -19,7 +19,7 @@ const WHO: Record<string, string> = { cashier: "m.diaz", technician: "k.patel", 
 
 /** POST routes and the roles that may call them. Anything not listed is pharmacist-only. */
 const ALLOW: Record<string, R[]> = {
-  "/api/auth/login": ROLES.slice(), "/api/auth/verify": ROLES.slice(), "/api/auth/sso": ROLES.slice(), "/api/auth/logout": ROLES.slice(),
+  "/api/auth/login": ROLES.slice(), "/api/auth/verify": ROLES.slice(), "/api/auth/logout": ROLES.slice(),
   "/api/deliveries/:id/scan": ["technician", "pharmacist"], "/api/packages/:id/putaway": ["technician", "pharmacist"], "/api/packages/:id/problem": ["technician", "pharmacist"],
   "/api/lots/:id/move": ["technician", "pharmacist"], "/api/lots/:id/adjust": ["technician", "pharmacist"],
   "/api/rx/:rx/review": ["technician", "pharmacist"],
@@ -66,7 +66,7 @@ const BODY: Record<string, unknown> = {
   "/api/lots/:id/move": { location: "A1" }, "/api/lots/:id/adjust": { count: 1, reason: "x" }, "/api/packages/:id/problem": { kind: "damaged" }, "/api/deliveries/:id/scan": { raw: "x" }
 };
 /** Routes that wipe or reload state (and sign everyone out) run last. */
-const LAST = ["/api/demo/reset", "/api/demo/scenarios/:id"];
+const LAST: string[] = [];
 const concrete = (u: string) => u.replace(":id", u.includes("/agents/") ? "coroner" : "1").replace(":rx", "RX-NONE").replace(":challenge", "x").replace(":file", "x");
 
 let app: FastifyInstance; let db: Db;
@@ -96,7 +96,7 @@ describe("REV-API role-by-route matrix", () => {
   it("finds the routes in source", () => { expect(sourceRoutes().length).toBeGreaterThan(100); });
 
   it("every unauthenticated /api call (except the public list) is 401", async () => {
-    const PUB = new Set(["/api/health", "/api/auth/login", "/api/auth/sso", "/api/auth/config", "/api/auth/logout", "/api/auth/verify"]);
+    const PUB = new Set(["/api/health", "/api/auth/login", "/api/auth/config", "/api/auth/logout", "/api/auth/verify"]);
     const bad: string[] = [];
     for (const r of sourceRoutes()) {
       if (PUB.has(r.url) || r.url.startsWith("/api/auth/demo-code")) continue;

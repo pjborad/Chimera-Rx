@@ -4,7 +4,7 @@
  *
  *   pnpm evidence:timing
  *
- * Each run resets the demo with the large dataset, then times, through the real HTTP routes (Fastify inject, no browser):
+ * Each run reseeds the synthetic data with the large dataset, then times, through the real HTTP routes (Fastify inject, no browser):
  * submit recall D-0650-2026 -> confirm every lot that waits for the pharmacist -> load the affected-patient list.
  * Writes docs/evidence/timing.json and docs/evidence/timing.md.
  */
@@ -20,6 +20,7 @@ import { Db } from "../src/db";
 import { SandboxNotifier } from "../src/notify";
 import { seedDatabase } from "../src/seed";
 import { createVoice } from "../src/voice";
+import { resetDemo } from "../test/scenario-fixtures";
 
 const RUNS = 5;
 const root = path.resolve(import.meta.dirname, "../../..");
@@ -47,7 +48,7 @@ const call = async (method: "GET" | "POST", url: string, payload?: unknown) => {
 
 const runs: { ms: number; patients: number; units: number; confirmClicks: number }[] = [];
 for (let i = 0; i < RUNS; i++) {
-  await call("POST", "/api/demo/reset");
+  await resetDemo(ctx, null);
   await signIn(); // a reset clears sessions, as it does for a person
   const t0 = performance.now();
   let v = await call("POST", "/api/recalls/lookup", { number: TIMING_RECALL.number });

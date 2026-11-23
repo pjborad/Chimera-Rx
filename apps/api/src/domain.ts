@@ -6,7 +6,7 @@ export const DAY = 86_400_000;
 export type Role = "technician" | "pharmacist" | "cashier" | "admin";
 export type Zone = "shelf" | "cold" | "controlled" | "quarantine" | "rtv";
 export type Storage = "room" | "cold" | "c2";
-export type PackageStatus = "pending_putaway" | "on_shelf" | "dispensed" | "quarantined" | "returned" | "destroyed" | "adjusted";
+export type PackageStatus = "pending_putaway" | "on_shelf" | "dispensed" | "quarantined" | "returned" | "destroyed" | "adjusted" | "in_transit";
 
 /** Stored NDC: 11 digits, no hyphens. */
 export const ndc11Digits = (ndc10: string) => ndc10ToNdc11(ndc10).replace(/-/g, "");

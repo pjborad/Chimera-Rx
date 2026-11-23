@@ -1,4 +1,5 @@
 import { loadBedrockSdk, type LlmClient } from "@chimera-rx/coroner";
+import { assertDestination, type LookupFn } from "./destination";
 
 /**
  * Provider registry for the AI agents. One interface (`ProviderClient`), five providers:
@@ -97,14 +98,18 @@ export class AnthropicProvider implements ProviderClient {
 export class OpenAiCompatibleProvider implements ProviderClient {
   readonly id = "openai-compatible" as const;
   readonly name = "openai-compatible";
-  constructor(private baseUrl: string, private apiKey: string, readonly model: string, private fetchFn: typeof fetch = fetch) {}
+  constructor(private baseUrl: string, private apiKey: string, readonly model: string, private fetchFn: typeof fetch = fetch, private lookup?: LookupFn) {}
   async complete(system: string, user: string): Promise<string> {
     const url = `${this.baseUrl.replace(/\/+$/, "")}/chat/completions`;
+    // Destination policy again, right before the request (the saved URL may predate the policy or come from OPENAI_BASE_URL).
+    // A refused destination gets no request and never sees the key.
+    try { await assertDestination(url, this.lookup); } catch (e) { throw new Error(`openai-compatible base URL refused: ${(e as Error).message}`); }
     const headers: Record<string, string> = { "content-type": "application/json" };
     if (this.apiKey) { headers.authorization = `Bearer ${this.apiKey}`; headers["api-key"] = this.apiKey; } // "api-key" is what Azure OpenAI reads
     const res = await this.fetchFn(url, {
       method: "POST", headers,
       body: JSON.stringify({ model: this.model, temperature: 0, max_tokens: 1024, messages: [{ role: "system", content: system }, { role: "user", content: user }] }),
+      redirect: "error", // a redirect could point at a blocked address after the check; never follow one
       signal: AbortSignal.timeout(TIMEOUT_MS)
     });
     if (!res.ok) throw new Error(`openai-compatible server returned HTTP ${res.status}`);
@@ -181,19 +186,19 @@ function mockRx(d: any): string {
 
 function mockOutreach(): string {
   return JSON.stringify({
-    sms: "Elm Street Pharmacy: Hi {first_name}, a medicine you picked up on {sold_date} is part of a safety recall. Please don't use it. Call {pharmacy_phone} for a free replacement. Reply STOP to opt out.",
+    sms: "{pharmacy_name}: Hi {first_name}, a medicine you picked up on {sold_date} is part of a safety recall. Please don't use it. Call {pharmacy_phone} for a free replacement. Reply STOP to opt out.",
     emailSubject: "Important: please call us about your recent pickup",
-    emailBody: "Dear {first_name},\n\nOn {sold_date} you picked up a medicine from Elm Street Pharmacy that the maker has recalled. Please do not use any remaining doses. Call us at {pharmacy_phone} or visit the pharmacy and we will replace it at no cost.\n\nYour pharmacist",
-    voicemail: "Hello {first_name}. This is your pharmacist at Elm Street Pharmacy. I'm calling about something you picked up from us on {sold_date}. It's important, but it is not an emergency. Please call us back at {pharmacy_phone} so we can talk it over and take care of it for you at no cost. Again, that number is {pharmacy_phone}. Thank you."
+    emailBody: "Dear {first_name},\n\nOn {sold_date} you picked up a medicine from {pharmacy_name} that the maker has recalled. Please do not use any remaining doses. Call us at {pharmacy_phone} or visit the pharmacy and we will replace it at no cost.\n\nYour pharmacist",
+    voicemail: "Hello {first_name}. This is your pharmacist at {pharmacy_name}. I'm calling about something you picked up from us on {sold_date}. It's important, but it is not an emergency. Please call us back at {pharmacy_phone} so we can talk it over and take care of it for you at no cost. Again, that number is {pharmacy_phone}. Thank you."
   });
 }
 
 function mockRefill(): string {
   return JSON.stringify({
-    sms: "Elm Street Pharmacy: Hi {first_name}, it is almost time for your next refill. Call {pharmacy_phone} and we will get it ready for you. Reply STOP to opt out.",
+    sms: "{pharmacy_name}: Hi {first_name}, it is almost time for your next refill. Call {pharmacy_phone} and we will get it ready for you. Reply STOP to opt out.",
     emailSubject: "A friendly reminder about your refill",
-    emailBody: "Dear {first_name},\n\nYour {drug_name} is ready to be refilled. Call us at {pharmacy_phone} or stop by and we will have it waiting for you.\n\nYour pharmacy team at Elm Street Pharmacy",
-    voicemail: "Hello {first_name}. This is {pharmacist} at Elm Street Pharmacy. We have a refill waiting to be arranged for you. It is not an emergency. Please call us back at {pharmacy_phone} when you can. Again, that number is {pharmacy_phone}. Thank you."
+    emailBody: "Dear {first_name},\n\nYour {drug_name} is ready to be refilled. Call us at {pharmacy_phone} or stop by and we will have it waiting for you.\n\nYour pharmacy team at {pharmacy_name}",
+    voicemail: "Hello {first_name}. This is {pharmacist} at {pharmacy_name}. We have a refill waiting to be arranged for you. It is not an emergency. Please call us back at {pharmacy_phone} when you can. Again, that number is {pharmacy_phone}. Thank you."
   });
 }
 
@@ -237,7 +242,7 @@ function mockCopilot(d: any): string {
 
 // ------------------------------------------------------------------ the runtime
 
-export interface RuntimeDeps { fetch?: typeof fetch; bedrockSdk?: () => Promise<BedrockSdk>; now?: () => number }
+export interface RuntimeDeps { fetch?: typeof fetch; bedrockSdk?: () => Promise<BedrockSdk>; now?: () => number; lookup?: LookupFn }
 
 export interface PublicSettings {
   provider: ProviderId;
@@ -350,7 +355,7 @@ export class AgentRuntime {
         if (!k) return new MissingKey("anthropic", model);
         return new AnthropicProvider(k, model, this.deps.fetch);
       }
-      case "openai-compatible": return new OpenAiCompatibleProvider(baseUrl, this.keys.get("openai-compatible")?.key ?? "", model, this.deps.fetch);
+      case "openai-compatible": return new OpenAiCompatibleProvider(baseUrl, this.keys.get("openai-compatible")?.key ?? "", model, this.deps.fetch, this.deps.lookup);
     }
   }
 

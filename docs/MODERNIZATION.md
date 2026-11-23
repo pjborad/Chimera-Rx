@@ -95,4 +95,4 @@ Before any real patient data: a security review, the key provider moved off the 
 | Records are edited | Hash-chained audit with a verify route | No external anchor for the chain |
 | Data at rest | AES-256-GCM on listed columns, key rotation | Default key sits next to the data; no KMS; plaintext columns outside the list |
 | Regulation changes | The DSCSA sandbox follows the FDA's published dates: the stabilization period ended [November 27, 2024](https://www.fda.gov/media/179256/download), and small dispensers have an [exemption to November 27, 2027](https://www.fda.gov/drugs/drug-supply-chain-security-act-dscsa/exemptions-under-drug-supply-chain-security-act) | Confirm your own status with the FDA; this repo is not advice and files nothing |
-| Over-reach in claims | No HIPAA, DSCSA, certification or clinical-validity claim anywhere | None |
+| Over-reach in claims | Built with HIPAA-style safeguards, not certified; no HIPAA, DSCSA, certification or clinical-validity claim anywhere | None |

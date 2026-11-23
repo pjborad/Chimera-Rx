@@ -10,8 +10,8 @@ export interface Speech { mime: string; bytes: Buffer; voice: string }
 
 /**
  * Text-to-speech for the pharmacist voicemail (plan section 9): clear synthetic speech, never a clone of a real
- * person. Providers are tried in order: ElevenLabs, OpenAI, the best neural voice installed on this Mac, and
- * finally "browser", where the web app reads the script with the device's own voice.
+ * person. Providers are tried in order: ElevenLabs, OpenAI, a local Kokoro server (when KOKORO_URL is set or
+ * VOICE_PROVIDER=kokoro), the best neural voice installed on this Mac, and finally "browser", where the web app reads the script with the device's own voice.
  */
 export interface VoiceProvider {
   readonly name: string;
@@ -49,6 +49,37 @@ class OpenAiVoice implements VoiceProvider {
     });
     if (!res.ok) throw new Error(`openai tts ${res.status}`);
     return { mime: "audio/mpeg", bytes: Buffer.from(await res.arrayBuffer()), voice: `openai:${this.voice}` };
+  }
+}
+
+/** Hosts a Kokoro server may run on. Anything else is refused, so voicemail text never leaves this machine. */
+const LOOPBACK = new Set(["127.0.0.1", "localhost", "[::1]", "::1"]);
+
+/**
+ * Kokoro-82M (open weights, Apache-2.0), served locally by an OpenAI-compatible speech endpoint such as Kokoro-FastAPI
+ * (`POST {KOKORO_URL}/v1/audio/speech`). Renders voicemail audio only: nothing here dials. The script reaching this class
+ * has already passed `checkScript` (no medicine, recall reason or patient id). The URL must be loopback.
+ */
+export class KokoroVoice implements VoiceProvider {
+  readonly name = "kokoro";
+  private base: string;
+  constructor(baseUrl: string, readonly voice: string, private speed = 1, private fetcher: typeof fetch = (...a) => fetch(...a)) {
+    let u: URL;
+    try { u = new URL(baseUrl); } catch { throw new Error(`KOKORO_URL is not a URL: ${baseUrl}`); }
+    if (u.protocol !== "http:" || !LOOPBACK.has(u.hostname)) throw new Error("KOKORO_URL must be http://127.0.0.1 (or localhost): voicemail text never leaves this machine.");
+    this.base = u.origin + u.pathname.replace(/\/+$/, "").replace(/\/v1$/, "");
+  }
+  async synthesize(text: string): Promise<Speech | null> {
+    const res = await this.fetcher(`${this.base}/v1/audio/speech`, {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "audio/mpeg" },
+      body: JSON.stringify({ model: "kokoro", voice: this.voice, input: text, response_format: "mp3", speed: this.speed }),
+      signal: AbortSignal.timeout(60_000)
+    });
+    if (!res.ok) throw new Error(`kokoro ${res.status}`);
+    const bytes = Buffer.from(await res.arrayBuffer());
+    if (!bytes.length) throw new Error("kokoro returned no audio");
+    return { mime: res.headers.get("content-type")?.startsWith("audio/") ? res.headers.get("content-type")! : "audio/mpeg", bytes, voice: `kokoro:${this.voice}` };
   }
 }
 
@@ -98,6 +129,9 @@ export async function createVoice(env: Record<string, string | undefined> = proc
   const want = (env.VOICE_PROVIDER ?? "auto").toLowerCase();
   if ((want === "auto" || want === "elevenlabs") && env.ELEVENLABS_API_KEY) return new ElevenLabs(env.ELEVENLABS_API_KEY, env.ELEVENLABS_VOICE_ID ?? "EXAVITQu4vr4xnSDxMaL", env.ELEVENLABS_MODEL ?? "eleven_turbo_v2_5");
   if ((want === "auto" || want === "openai") && env.OPENAI_API_KEY) return new OpenAiVoice(env.OPENAI_API_KEY, env.OPENAI_TTS_VOICE ?? "coral", env.OPENAI_TTS_MODEL ?? "gpt-4o-mini-tts");
+  if (want === "kokoro" || (want === "auto" && env.KOKORO_URL)) {
+    return new KokoroVoice(env.KOKORO_URL || "http://127.0.0.1:8880", env.KOKORO_VOICE || "am_michael", Number(env.KOKORO_SPEED ?? 1) || 1);
+  }
   if (want === "auto" || want === "mac" || want === "say") {
     const v = env.MAC_VOICE ?? (await bestMacVoice());
     if (v) return new MacSay(v);

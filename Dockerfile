@@ -22,7 +22,7 @@ ENV LG_API_PORT=4000 \
     NODE_ENV=production \
     DATA_DIR=/app/data \
     LLM_PROVIDER=none \
-    LG_DEMO=1
+    SEED_SYNTHETIC=1
 EXPOSE 4000
 VOLUME ["/app/data"]
 CMD ["pnpm", "--filter", "@chimera-rx/api", "run", "start"]

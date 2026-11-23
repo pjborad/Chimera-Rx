@@ -2,9 +2,19 @@
 
 **A modern, agent-assisted pharmacy system. One ledger holds the lot, the patient and the prescription history, agents watch it in the background, and a pharmacist decides. A recall is the sharpest proof.**
 
-**Kiroween 2026, Frankenstein category. Built with Kiro.** Demo environment: synthetic data only, not for clinical use, not HIPAA-compliant, no compliance or certification claim of any kind. See [docs/SAFETY.md](docs/SAFETY.md).
+**Kiroween 2026, Frankenstein category. Built with Kiro.** Demo environment: synthetic data only, not for clinical use. Built with HIPAA-style safeguards, not certified; no compliance or certification claim of any kind. See [docs/SAFETY.md](docs/SAFETY.md).
 
-![Sign-in page with the demo accounts and the demo notice](docs/img/sign-in.jpg)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/pjborad/Chimera-Rx?quickstart=1)
+
+**Try it in the browser:** open the Codespace above (free with a GitHub account). It installs, seeds synthetic data and opens the app on port 5173. Project page: https://pjborad.github.io/Chimera-Rx/
+
+## Demo video (2:50)
+
+[![Watch the Chimera Rx demo](docs/media/chimera-rx-demo-poster.jpg)](https://pjborad.github.io/Chimera-Rx/#demo-video)
+
+Click the picture to play it on the project page, or [download the MP4](docs/media/chimera-rx-demo.mp4) ([captions](docs/media/chimera-rx-demo.srt)). It covers receiving, fill, the cashier and admin roles, a recall end to end, the AI agents and the integration placeholders.
+
+![Sign-in page with the demo notice](docs/img/sign-in.jpg)
 
 ## The pharmacy runs on yesterday's software
 
@@ -85,9 +95,9 @@ pnpm dev                 # API on :4000, web app on :5173 -> open http://localho
 
 `docker compose up` was **not run on the machine that wrote this repo** (no reachable Docker daemon). `docker-compose config` validated the file, and the same app was installed, built and served from source (`pnpm install --frozen-lockfile`, `pnpm setup`, `pnpm build:web`, API from source).
 
-### Demo accounts
+### Synthetic staff accounts
 
-All accounts share the password `moonlight-rx-2026`. Pick the pharmacy on the sign-in page.
+The sign-in form is empty: type one of these. All accounts share the password `moonlight-rx-2026`. Pick the pharmacy on the sign-in page.
 
 | Store | Email | Role | Sees |
 | --- | --- | --- | --- |
@@ -99,15 +109,17 @@ All accounts share the password `moonlight-rx-2026`. Pick the pharmacy on the si
 | Birch Avenue, Store 2 | `t.lund@birchavenuerx.example` | Technician | Store 2 receiving, inventory, fill |
 | Birch Avenue, Store 2 | `c.reyes@birchavenuerx.example` | Cashier | Store 2 register and pickup |
 
-The "Badge tap / SSO" button is a demo stand-in that signs in the Store 7 pharmacist. `MFA=1` turns on a second sign-in factor (a 6-digit code delivered to the sandbox outbox) and disables that button.
+There is no badge or SSO button. `MFA=1` turns on a second sign-in factor: a 6-digit code goes to the sandbox outbox, and the sign-in page offers a link that shows the code from the outbox (no real message is ever sent).
 
-### Three scenarios to click first
+### Three things to try on the seeded data
 
-Sign in as the pharmacist and open **Demo guide** in the sidebar for the scenarios (each one resets the data and shows a short brief).
+The app ships with no demo pages or scenario launcher: the screens are the product. A fresh database is seeded with synthetic data (`SEED_SYNTHETIC=1`, the default).
 
-1. **Agent catches it.** Start the scenario and stay on Today. A new insulin order arrives for a patient with late fills, an active semaglutide pen and a last fill from a recalled lot. Within about a minute the Rx Guardian raises suggestions with the evidence. Accept one and the order goes on hold.
-2. **Class I recall with patients to reach.** Recalls, look up `D-0611-2026`: the lot is confirmed, every on-shelf pen moves to quarantine, the impact list names the patients. Draft messages (try **Use AI draft**), tick the attestation, send. They land in the sandbox outbox.
-3. **Recall-aware refill.** Open Refills, then look up `D-0611-2026` in Recalls. The patient's refill row turns red and links to the recall.
+1. **Class I recall with patients to reach.** Sign in as the pharmacist, open Recalls and look up `D-0611-2026`. The lot is confirmed, on-shelf units move to quarantine and the impact list names the patients who took one home (on a fresh seed: 17 units held, 5 patients). Draft messages (try **Use AI draft**), tick the attestation, send. They land in the **Sandbox outbox** (sidebar).
+2. **Rx Guardian.** Open AI agents. The seed switches the Rx Guardian on; press **Run now** or wait about a minute, then open Today and Fill & pickup to see suggestions with their evidence. Accept one and the order goes on hold.
+3. **Register.** Sign in as the cashier (`m.diaz`), sell an over-the-counter item and pick up a verified prescription. Patient records, allergies and dates of birth stay hidden from this role.
+
+The scripted scenarios used in development (Agent catches it, Recall-aware refill, misread fax, receiving problems, suspect product) are now test fixtures in `apps/api/test/scenario-fixtures.ts`. `pnpm test` and `pnpm e2e` load them; the product has no route that does.
 
 ![Today screen after a Class I recall: refills tile](docs/img/today.jpg)
 
@@ -137,10 +149,10 @@ A pilot threat model, not a compliance claim. Full text: [docs/SECURITY.md](docs
 
 - **Synthetic data only.** A hook and a CI step block PHI-shaped content. No real patient data, ever.
 - **Encrypted at rest.** Patient names, dates of birth, phones, emails, allergies, conditions, directions, message bodies, agent runs and suggestions are sealed with AES-256-GCM; the list is in `apps/api/src/protect.ts`.
-- **Roles on the server.** Pharmacist, technician, cashier and admin are checked on every route. Partners get scoped tokens.
+- **Roles on the server.** Every state-changing route and every route in the read authorization matrix is role-checked on the server (pharmacist, technician, cashier, admin); see [docs/SECURITY.md](docs/SECURITY.md). Partners get scoped tokens.
 - **Audit.** A hash-chained log of every decision, with a verify route.
 - **Sandbox messaging.** SMS, email and voice go to an outbox; nothing is dialled or sent. The prescriber loop and the DSCSA verifier are stand-ins.
-- **No compliance claims.** No HIPAA, DSCSA, certification or clinical-validity claim. This is not a medical device.
+- **No compliance claims.** Built with HIPAA-style safeguards, not certified. No DSCSA, certification or clinical-validity claim. This is not a medical device.
 
 ## Architecture
 
@@ -193,7 +205,7 @@ flowchart LR
   DSC --> EPC
 ```
 
-Other parts stitched in: openFDA (live, with fixtures as fallback), the Coroner lot extractor (regex plus optional LLM, keeps a lot only if it is printed in the source), recall voicemail with ElevenLabs, OpenAI, macOS or browser voice (nothing is dialled), and a sandbox NCPDP SCRIPT-shaped `RxChangeRequest` to the prescriber. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Other parts stitched in: openFDA (live, with fixtures as fallback), the Coroner lot extractor (regex plus optional LLM, keeps a lot only if it is printed in the source), recall voicemail with ElevenLabs, OpenAI, a local Kokoro-82M model, macOS or browser voice (nothing is dialled), and a sandbox NCPDP SCRIPT-shaped `RxChangeRequest` to the prescriber. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## AI agents
 
@@ -229,10 +241,10 @@ Examples: Ollama is `OPENAI_BASE_URL=http://localhost:11434/v1`, `OPENAI_MODEL=<
 A pilot threat model, not a compliance claim. Full text: [docs/SECURITY.md](docs/SECURITY.md).
 
 - **Encryption at rest.** Patient names, dates of birth, phones, emails, allergies, conditions, prescription directions, message bodies, agent runs and audit reasons are sealed with AES-256-GCM, a fresh 12-byte IV per value, in a versioned envelope with a key id. The list is in `apps/api/src/protect.ts`; a test reads the raw SQLite and WAL bytes and finds no synthetic patient string.
-- **Key ring and rotation.** Keys come from `env`, a `file` (mode 0600) or a `kms` placeholder. `pnpm --filter @chimera-rx/api keys:rotate` re-encrypts every protected value under a new key in one transaction per store. A wrong or missing key stops start-up instead of writing under another key.
+- **Key ring and rotation.** Keys come from `env`, a `file` (owner-only: 0600/0700 on macOS and Linux, an `icacls` step or `DATA_KEY` on Windows; see docs/SECURITY.md) or a `kms` placeholder. `pnpm --filter @chimera-rx/api keys:rotate` re-encrypts every protected value under a new key in one transaction per store. A wrong or missing key stops start-up instead of writing under another key.
 - **Headers and API.** CSP, nosniff, no-referrer, frame denial, `no-store` on API responses, HSTS when `COOKIE_SECURE=1`; zod validation on every body; errors that never echo input; request logs with no body, URL query or names.
 - **Rate limits.** Five wrong passwords lock an account for 15 minutes; failures are also counted per IP and per account name. Counters are per process.
-- **Roles.** Checked on the server for every route (pharmacist, technician, cashier, admin). Partners get scoped OAuth tokens; patient data also needs an admin-approved flag.
+- **Roles.** Every state-changing route and every route in the read authorization matrix is role-checked on the server (pharmacist, technician, cashier, admin); see docs/SECURITY.md. Partners get scoped OAuth tokens; patient data also needs an admin-approved flag.
 - **Audit and MFA.** Hash-chained audit, patient views logged with a reason, optional second factor with `MFA=1`.
 
 Not covered: no TLS in the app (put a proxy in front), no KMS or HSM (the default key sits next to the data), columns outside the list are plaintext (message subjects, ids, lot and Rx numbers), no SQLCipher, per-process rate limits, no retention or deletion workflow, no breach process, no independent review or penetration test.
@@ -251,26 +263,27 @@ Eleven rules in [`.kiro/steering/pharmacy-safety.md`](.kiro/steering/pharmacy-sa
 
 ## Testing
 
-Measured on 2026-11-20 on the machine that built this repo:
+Measured on 2026-11-23 on the machine that built this repo:
 
 | Command | Result |
 | --- | --- |
-| `pnpm test` | 20 files, 364 tests passed |
+| `pnpm test` | 26 files, 476 tests passed |
 | `pnpm typecheck` | clean in all workspaces |
 | `pnpm build:web` | builds |
-| `pnpm e2e` | 49 passed and 1 skipped against a fresh data directory (the MFA check is skipped unless the API runs with `MFA=1`); run by the Rx Guardian build item, see [docs/evidence/items/bgagents.md](docs/evidence/items/bgagents.md) |
+| `pnpm e2e` | 49 of 49 passed; with `MFA=1`, 51 of 51 (the two MFA checks only run when MFA is on). See [docs/evidence/items/final-round.md](docs/evidence/items/final-round.md) |
 
 Property tests (fast-check, in 9 test files) check that on-hand stock always equals received minus dispensed, returned and adjusted, that no serial is dispensed twice, that the Coroner never emits a lot that is not in the source even when a stub model lies, that GS1 parsing round-trips, and that EPCIS events stay valid. Hostile-provider tests feed lying models to every agent and check the gates.
 
-End-to-end (needs the app running, uses Chromium with a fake webcam and real OCR; `npx playwright install chromium` once if the browser is missing):
+End-to-end (Chromium with a fake webcam and real OCR; `npx playwright install chromium` once if the browser is missing):
 
 ```bash
-pnpm dev                                  # in one terminal
-pnpm e2e                                  # in another; BASE=http://localhost:5173 by default
-BASE=http://localhost:5530 pnpm e2e       # against another web port
+pnpm build:web                            # once, the harness serves the built web app
+pnpm e2e                                  # starts its own stack on :4650 (control port :4651), fresh data dir
+E2E_PORT=4655 E2E_CONTROL_PORT=4656 pnpm e2e
+MFA=1 pnpm e2e                            # also drives the second factor through the sign-in form
 ```
 
-The e2e run resets the data. If the API is not on a dev origin, set `CORS_ORIGINS` (below) or the browser's POSTs are refused. A physical webcam, printed labels and live model providers were not tested.
+`pnpm e2e` (`scripts/e2e/run.mjs`) starts `scripts/e2e/harness.ts`: the real API on a temporary data directory, serving the built web app, plus a loopback-only control port that reseeds, loads scenario fixtures and lists printable test labels. It does not touch a running `pnpm dev` stack. A physical webcam, printed labels and live model providers were not tested.
 
 ## Configuration
 
@@ -284,7 +297,7 @@ Every variable is optional. Copy `.env.example` to `.env` to set them.
 | `DATASET` | `demo` | `large` adds a generated six-month history (about 5,000 fills) |
 | `TWO_STORES` | `1` | `0` runs one store |
 | `MFA` | `0` | `1` requires a 6-digit code after the password |
-| `LG_DEMO` | `1` | Show the demo accounts on sign-in and allow the SSO stand-in |
+| `SEED_SYNTHETIC` | `1` | Seed the synthetic dataset on a fresh database and re-seed it when the seed version changes; `0` never seeds and leaves the database as it is. On, it also switches the Rx Guardian on in the seed |
 | `TODAY` | real date | Pretend today is this date (`YYYY-MM-DD`) |
 | `NIGHT_WATCH` | on | `0` stops the openFDA poll |
 | `MIN_EXPIRY_MONTHS` | `6` | Shortest remaining shelf life accepted at receiving |
@@ -295,7 +308,8 @@ Every variable is optional. Copy `.env.example` to `.env` to set them.
 | `AWS_REGION`, `AWS_PROFILE`, `BEDROCK_MODEL_ID` | `us-east-1`, none, `us.anthropic.claude-sonnet-5` | Bedrock |
 | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` | none, `claude-3-5-haiku-latest` | Anthropic |
 | `OPENAI_BASE_URL`, `OPENAI_API_KEY`, `OPENAI_MODEL` | OpenAI URL, none, `gpt-4o-mini` | OpenAI-compatible; the key also serves OpenAI voice |
-| `VOICE_PROVIDER` | `auto` | Voicemail voice: ElevenLabs, OpenAI, macOS, then the browser |
+| `VOICE_PROVIDER` | `auto` | Voicemail voice: ElevenLabs, OpenAI, Kokoro (when `KOKORO_URL` is set), macOS, then the browser. `kokoro` forces the local Kokoro model |
+| `KOKORO_URL`, `KOKORO_VOICE`, `KOKORO_SPEED` | none, `am_michael`, `1` | Local Kokoro-82M speech server (OpenAI-compatible `/v1/audio/speech`); `http://127.0.0.1` or `localhost` only. Male voices `am_michael`, `am_adam`. Renders audio; nothing is dialled |
 | `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `ELEVENLABS_MODEL` | none | ElevenLabs voice |
 | `OPENAI_TTS_VOICE`, `OPENAI_TTS_MODEL` | `coral`, `gpt-4o-mini-tts` | OpenAI voice |
 | `MAC_VOICE` | none | Force a macOS voice |
@@ -328,7 +342,7 @@ packages/summoner      openFDA client with fixture fallback
 packages/coroner       lot, NDC and expiry extraction (regex plus optional LLM, verbatim gate)
 packages/epcis         EPCIS 2.0 events, validator and parser
 fixtures/recalls       50 real 2025 openFDA records and demo recalls
-scripts/               dev launcher, end-to-end run, PHI guard
+scripts/               dev launcher, end-to-end harness and run, PHI guard
 prototype/             the clickable design prototype the screens were built from
 .kiro/                 steering, specs, hooks, agents, MCP config
 docs/                  architecture, safety, security, agents, demo, DSCSA, refills, submission
@@ -337,13 +351,13 @@ Dockerfile, docker-compose.yml, .devcontainer/
 
 ## Built with Kiro
 
-Steering files hold the safety rules and the stack, specs cover the Coroner and Summoner, a PHI-guard hook blocks risky writes, and a property-test hook runs on save. The honest account, including what Kiro did not do, is in [docs/KIRO_USAGE.md](docs/KIRO_USAGE.md). Criteria mapping: [docs/KIROWEEN.md](docs/KIROWEEN.md). Demo script: [docs/DEMO.md](docs/DEMO.md). Devpost write-up: [docs/SUBMISSION.md](docs/SUBMISSION.md).
+Steering files hold the safety rules and the stack, specs cover the Coroner and Summoner, a PHI-guard hook blocks risky writes, and a property-test hook runs on save. The honest account, including what Kiro did not do, is in [docs/KIRO_USAGE.md](docs/KIRO_USAGE.md). Criteria mapping: [docs/KIROWEEN.md](docs/KIROWEEN.md). Demo recording script (outside the app): [docs/DEMO.md](docs/DEMO.md). Devpost write-up: [docs/SUBMISSION.md](docs/SUBMISSION.md).
 
 ## Limitations and non-goals
 
 - No real patient data, ever. All names, ids, phones and addresses are invented.
 - No real messaging: SMS, email and voice are sandbox stand-ins. Nothing is dialled or sent.
-- The prescriber loop, the DSCSA verifier and the key provider `kms` are sandbox stand-ins. Nothing is filed with any regulator or trading partner.
+- The prescriber loop, the DSCSA verifier and the key provider `kms` are sandbox stand-ins. Nothing is filed with any regulator or trading partner. Every outside connection a real deployment would need (SMS, email, voice calls, wholesaler feed, verification router, e-prescribing, PMS, EHR, payer, secrets manager, KMS, SSO) is listed, unwired, in [docs/INTEGRATION_PLACEHOLDERS.md](docs/INTEGRATION_PLACEHOLDERS.md).
 - The drug rules are a small curated table, not a licensed interaction database. The Rx Guardian's interaction and age-band tables are synthetic demo tables, not clinical content.
 - The cold-chain temperature is simulated.
 - No payment is processed; over-the-counter stock is not tracked.

@@ -1,3 +1,4 @@
+import { resetDemo } from "./scenario-fixtures";
 import { beforeAll, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { buildApp, ingestFaxInbox, loadConfig, SandboxNotifier, seedDatabase, type Ctx } from "../src/index";
@@ -168,9 +169,9 @@ describe("Q4 / FR4.4 a recall confirmed in one store blocks the lot in both, wit
   });
 });
 
-describe("demo reset", () => {
+describe("synthetic reseed", () => {
   it("rebuilds both stores", async () => {
-    expect((await call("j.rivera", "POST", "/api/demo/reset")).statusCode).toBe(200);
+    await resetDemo(ctx, null);
     ctx.stores!.run(STORE_2, () => expect(ctx.db.get<any>("SELECT count(*) AS n FROM recalls")!.n).toBe(0));
     ctx.stores!.run(STORE_2, () => expect(ctx.db.get<any>("SELECT count(*) AS n FROM patients")!.n).toBe(12));
     await signInAll();

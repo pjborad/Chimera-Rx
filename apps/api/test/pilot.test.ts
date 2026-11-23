@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { buildApp, Db, ingestFaxInbox, loadConfig, SandboxNotifier, seedDatabase, type Ctx } from "../src/index";
 import { generateHistory, lotCaptureRate, TIMING_RECALL } from "../src/dataset";
-import { SCENARIOS } from "../src/scenarios";
+import { resetDemo, SCENARIOS } from "./scenario-fixtures";
 
 // Judge-ready pilot: scenario library (FR6, US1.1 to US1.3, US5.1 to US5.3) and the larger dataset (FR5, US2.4).
 
@@ -19,10 +19,8 @@ async function signIn(who: "j.rivera" | "k.patel" | "m.diaz") {
 const call = (who: string, method: "GET" | "POST", url: string, payload?: unknown) => app.inject({ method, url, payload: payload as never, headers: { cookie: cookies[who]! } });
 const json = async (who: string, method: "GET" | "POST", url: string, payload?: unknown) => (await call(who, method, url, payload)).json();
 const startScenario = async (id: string) => {
-  const r = await call("j.rivera", "POST", `/api/demo/scenarios/${id}`);
-  expect(r.statusCode).toBe(200);
+  await resetDemo(ctx, null, id); // in-process fixture: the product has no scenario routes
   for (const w of ["j.rivera", "k.patel", "m.diaz"] as const) await signIn(w); // a reset clears sessions
-  return r.json();
 };
 
 beforeAll(async () => {
@@ -37,16 +35,12 @@ beforeAll(async () => {
 }, 60_000);
 
 describe("FR6 scenario library", () => {
-  it("lists five scenarios, each with a brief", async () => {
-    const r = await json("k.patel", "GET", "/api/demo/scenarios");
-    expect(r.scenarios.map((s: any) => s.id)).toEqual(SCENARIOS.map((s) => s.id));
-    for (const s of r.scenarios) expect(s.brief.length).toBeGreaterThan(80);
-  });
-
-  it("US1.1 only a pharmacist may pick a scenario or reset the demo (Q5)", async () => {
-    expect((await call("k.patel", "POST", "/api/demo/scenarios/class1-recall")).statusCode).toBe(403);
-    expect((await call("m.diaz", "POST", "/api/demo/reset")).statusCode).toBe(403);
-    expect((await call("j.rivera", "POST", "/api/demo/scenarios/nope")).statusCode).toBe(404);
+  it("the fixture library has its scenarios, each with a brief, and the product exposes no demo routes", async () => {
+    expect(SCENARIOS.length).toBeGreaterThanOrEqual(5);
+    for (const s of SCENARIOS) expect(s.brief.length).toBeGreaterThan(80);
+    for (const [m, u] of [["GET", "/api/demo/scenarios"], ["POST", "/api/demo/reset"], ["GET", "/api/demo/labels"]] as const) {
+      expect([403, 404], u).toContain((await call("j.rivera", m, u)).statusCode); // default-deny or not found: never served
+    }
   });
 
   it("US5.1 a Class I recall quarantines shelf units and lists the patients who took one home", async () => {
@@ -81,8 +75,6 @@ describe("FR6 scenario library", () => {
 
   it("US1.2 receiving problems: warm shipment, extra Schedule II package and an expired package all fail checks", async () => {
     await startScenario("receiving-problems");
-    const labels = (await json("k.patel", "GET", "/api/demo/labels")).labels.filter((l: any) => l.group.startsWith("Scenario"));
-    expect(labels).toHaveLength(2);
     const insulin = await json("k.patel", "POST", "/api/deliveries/ASH-1105-07/scan", { fields: { ndc: "70004-623-15", lot: "GX4471C", expiry: "2027-08-31", serial: "0000932" }, source: "typed" });
     expect(insulin.checks.find((c: any) => c.id === "temp")?.state).toBe("fail");
     const oxy1 = await json("k.patel", "POST", "/api/deliveries/ASH-1105-07/scan", { fields: { ndc: "70004-310-10", lot: "OX25L072", expiry: "2028-03-31", serial: "55020417" }, source: "typed" });

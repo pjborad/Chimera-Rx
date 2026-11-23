@@ -37,6 +37,7 @@
   <img src="img/today.jpg" alt="Chimera Rx Today screen with a recall banner and the refills tile" width="1360" height="820">
 
   <h2>Try it</h2>
+  <p><a href="https://codespaces.new/pjborad/Chimera-Rx?quickstart=1">Open in GitHub Codespaces</a>: it installs, seeds synthetic data and opens the app in your browser. Or run it locally:</p>
 <pre>git clone &lt;this repo&gt;
 cd chimera-rx
 docker compose up        # then open http://localhost:4000
@@ -45,7 +46,7 @@ docker compose up        # then open http://localhost:4000
 pnpm install --frozen-lockfile
 pnpm setup
 pnpm dev                 # open http://localhost:5173</pre>
-  <p>Sign in as <code>j.rivera@elmstreetrx.example</code> with <code>moonlight-rx-2026</code> (pharmacist). Then pick a scenario on the Today screen. The Docker image build was not run on the machine that wrote this repo.</p>
+  <p>Sign in as <code>j.rivera@elmstreetrx.example</code> with <code>moonlight-rx-2026</code> (pharmacist). Type them on the sign-in page (synthetic accounts; the form is not pre-filled), then look up recall <code>D-0611-2026</code> on Recalls. The Docker image build was not run on the machine that wrote this repo.</p>
 
   <h2>Gaps we close</h2>
   <table>
@@ -68,7 +69,7 @@ pnpm dev                 # open http://localhost:5173</pre>
 
   <h2>Documents</h2>
   <ul>
-    <li><a href="DEMO.md">Demo guide: 3-minute and 8-minute paths</a></li>
+    <li><a href="DEMO.md">Demo recording script: 3-minute and 8-minute paths</a></li>
     <li><a href="ARCHITECTURE.md">Architecture</a></li>
     <li><a href="MODERNIZATION.md">Modernization: the case by role, roadmap and 90-day pilot plan</a></li>
     <li><a href="AGENTS.md">AI agents and providers</a></li>
@@ -80,8 +81,13 @@ pnpm dev                 # open http://localhost:5173</pre>
     <li><a href="evidence/timing.md">Recall to affected-patient list timing</a></li>
   </ul>
 
-  <h2>Demo video</h2>
-  <p>Not recorded yet. The demo script above has the same steps.</p>
+  <h2 id="demo-video">Demo video</h2>
+  <p>A 2:50 walkthrough of the running app: receiving, fill, cashier, admin, a recall end to end, the AI agents and the integration placeholders. Synthetic data only.</p>
+  <video controls preload="metadata" poster="media/chimera-rx-demo-poster.jpg" style="width:100%;max-width:960px;border-radius:10px">
+    <source src="media/chimera-rx-demo.mp4" type="video/mp4">
+    <track kind="captions" src="media/chimera-rx-demo.vtt" srclang="en" label="English" default>
+    <a href="media/chimera-rx-demo.mp4">Download the video</a>
+  </video>
 
   <p class="notice">Demo environment · synthetic data only · not for clinical use · not HIPAA-compliant · a pharmacist approves every message</p>
 </main>

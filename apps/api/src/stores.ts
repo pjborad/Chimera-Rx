@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import path from "node:path";
 import type { Config } from "./config";
+import type { Ctx } from "./core";
 import { Db } from "./db";
 
 /**
@@ -62,4 +63,37 @@ export function splitStore(value: string | undefined, reg: StoreRegistry): { sto
   const i = value?.indexOf("~") ?? -1;
   if (value && i > 0 && reg.has(value.slice(0, i))) return { store: value.slice(0, i), token: value.slice(i + 1) };
   return { store: reg.defaultId, token: value ?? "" };
+}
+
+/**
+ * The current store's own identity for anything a patient or a regulator reads: drafts, previews, sent messages, voicemail
+ * scripts and exported reports (REV-F06). Resolved from the store's own database at use time, never from a constant.
+ */
+export interface PharmacyProfile {
+  /** "Birch Avenue Pharmacy" (the store row's name without the " · Store 2" suffix) */
+  name: string;
+  /** the full store name as stored */
+  fullName: string;
+  phone: string;
+  /** the signing pharmacist as written on a letter, e.g. "S. Okoro, PharmD" */
+  pharmacist: string;
+  /** how a voicemail says it, e.g. "Sam Okoro" */
+  pharmacistSpoken: string;
+}
+
+export function pharmacyProfile(ctx: Ctx, actor?: { id?: string; name?: string; storeId?: string } | null): PharmacyProfile {
+  const sid = actor?.storeId ?? ctx.stores?.current;
+  const row = (sid ? ctx.db.get<{ id: string; name: string; phone: string }>("SELECT id, name, phone FROM stores WHERE id = ?", sid) : undefined)
+    ?? ctx.db.get<{ id: string; name: string; phone: string }>("SELECT id, name, phone FROM stores ORDER BY id LIMIT 1");
+  const fullName = row?.name ?? "Your pharmacy";
+  let user = actor?.id ? ctx.db.get<{ name: string; first_name: string | null }>("SELECT name, first_name FROM users WHERE id = ?", actor.id) : undefined;
+  if (!user && actor?.name) user = ctx.db.get<{ name: string; first_name: string | null }>("SELECT name, first_name FROM users WHERE name = ?", actor.name);
+  if (!user) user = ctx.db.get<{ name: string; first_name: string | null }>("SELECT name, first_name FROM users WHERE role = 'pharmacist' AND (? IS NULL OR store_id = ?) ORDER BY id LIMIT 1", row?.id ?? null, row?.id ?? null);
+  const signed = user?.name ?? actor?.name ?? "your pharmacist";
+  const bare = signed.replace(/,.*$/, "").trim();
+  const last = bare.split(/\s+/).pop() ?? bare;
+  return {
+    name: fullName.split(" · ")[0]!.trim(), fullName, phone: row?.phone ?? "", pharmacist: signed,
+    pharmacistSpoken: user?.first_name ? `${user.first_name} ${last}` : bare
+  };
 }

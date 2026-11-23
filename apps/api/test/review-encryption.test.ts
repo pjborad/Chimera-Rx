@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { buildApp, Db, ingestFaxInbox, loadConfig, SandboxNotifier, seedDatabase, type Ctx } from "../src/index";
-import { resetDemo } from "../src/scenarios";
+import { resetDemo } from "./scenario-fixtures";
 import { AgentRuntime } from "../src/agents";
 import { resetCipherCache } from "../src/crypto";
 

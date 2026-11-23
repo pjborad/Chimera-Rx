@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { HttpError, type Actor, type Ctx } from "../core";
+import { pharmacyProfile } from "../stores";
 import { checkScript, DEFAULT_VOICEMAIL, spokenPhone } from "../outreach";
-import { DEFAULT_EMAIL_BODY, DEFAULT_EMAIL_SUBJECT, DEFAULT_SMS, merge, PHARMACY_PHONE, recallImpact, type ImpactPatient } from "../recall";
+import { DEFAULT_EMAIL_BODY, DEFAULT_EMAIL_SUBJECT, DEFAULT_SMS, merge, recallImpact, type ImpactPatient } from "../recall";
 import { refillFields, refillReport } from "../refills";
 import { ensureTables, findPhi, parseJsonObject, registerAgent, type AgentResult, type Dropped, type LlmCall } from "./agent";
 
@@ -13,10 +14,10 @@ import { ensureTables, findPhi, parseJsonObject, registerAgent, type AgentResult
 
 type Piece = "sms" | "emailSubject" | "emailBody" | "voicemail";
 const ALLOWED: Record<Piece, string[]> = {
-  sms: ["first_name", "sold_date", "pharmacy_phone"],
+  sms: ["first_name", "sold_date", "pharmacy_phone", "pharmacy_name"],
   emailSubject: [],
-  emailBody: ["first_name", "sold_date", "pharmacy_phone", "drug_name", "rx_number"],
-  voicemail: ["first_name", "sold_date", "pharmacy_phone", "pharmacist"]
+  emailBody: ["first_name", "sold_date", "pharmacy_phone", "pharmacy_name", "pharmacist", "drug_name", "rx_number"],
+  voicemail: ["first_name", "sold_date", "pharmacy_phone", "pharmacy_name", "pharmacist"]
 };
 
 const SYSTEM = `You draft recall notices from a pharmacy to patients. A pharmacist will review every draft before anything is sent.
@@ -49,8 +50,8 @@ export function pieceProblem(ctx: Ctx, piece: Piece, text: unknown): string | nu
   const leak = findPhi(ctx, text.replace(/\{\w+\}/g, ""));
   if (leak) return `Contains ${leak}.`;
   if (/\bS-\d{4}\b/.test(text)) return "Contains a patient ID.";
-  if (piece === "sms" && !(/\{pharmacy_phone\}/.test(text) || text.includes(PHARMACY_PHONE))) return "The text must carry the pharmacy phone number.";
-  if (piece === "emailBody" && !(/\{pharmacy_phone\}/.test(text) || text.includes(PHARMACY_PHONE))) return "The email must carry the pharmacy phone number.";
+  if (piece === "sms" && !(/\{pharmacy_phone\}/.test(text) || text.includes(pharmacyProfile(ctx).phone))) return "The text must carry the pharmacy phone number.";
+  if (piece === "emailBody" && !(/\{pharmacy_phone\}/.test(text) || text.includes(pharmacyProfile(ctx).phone))) return "The email must carry the pharmacy phone number.";
   if (piece === "voicemail") {
     const problems = checkScript(ctx, text);
     if (problems.length) return problems[0]!;
@@ -72,8 +73,9 @@ export function namesOtherPatient(ctx: Ctx, text: string, recipient: string): bo
 
 interface Draft { patientId: string; channel: "sms" | "email" | "voicemail"; subject: string | null; text: string }
 
-function fieldsFor(p: ImpactPatient, pharmacist: string, spoken: boolean) {
-  return { first_name: p.name.split(" ")[0]!, sold_date: p.sold, drug_name: p.drug, rx_number: p.rx, pharmacy_phone: spoken ? spokenPhone(PHARMACY_PHONE) : PHARMACY_PHONE, pharmacist };
+function fieldsFor(ctx: Ctx, p: ImpactPatient, pharmacist: string, spoken: boolean) {
+  const me = pharmacyProfile(ctx);
+  return { first_name: p.name.split(" ")[0]!, sold_date: p.sold, drug_name: p.drug, rx_number: p.rx, pharmacy_name: me.name, pharmacy_phone: spoken ? spokenPhone(me.phone) : me.phone, pharmacist };
 }
 
 /** Build the per-patient drafts from the (already gated) templates. Each draft names only its recipient. */
@@ -91,9 +93,9 @@ export function buildDrafts(ctx: Ctx, recallId: string, tpl: Record<Piece, strin
   for (const p of first.values()) {
     const pt = ctx.db.get<any>("SELECT phone, email, sms_consent, email_consent, sms_opt_out, dnc, voice_consent FROM patients WHERE id = ?", p.id);
     if (!pt) continue;
-    if (p.channels.includes("Text")) keep({ patientId: p.id, channel: "sms", subject: null, text: merge(tpl.sms, fieldsFor(p, pharmacist, false)) });
-    if (p.channels.includes("Email")) keep({ patientId: p.id, channel: "email", subject: merge(tpl.emailSubject, fieldsFor(p, pharmacist, false)), text: merge(tpl.emailBody, fieldsFor(p, pharmacist, false)) });
-    if (pt.phone && !pt.dnc && pt.voice_consent) keep({ patientId: p.id, channel: "voicemail", subject: null, text: merge(tpl.voicemail, fieldsFor(p, pharmacist, true)) });
+    if (p.channels.includes("Text")) keep({ patientId: p.id, channel: "sms", subject: null, text: merge(tpl.sms, fieldsFor(ctx, p, pharmacist, false)) });
+    if (p.channels.includes("Email")) keep({ patientId: p.id, channel: "email", subject: merge(tpl.emailSubject, fieldsFor(ctx, p, pharmacist, false)), text: merge(tpl.emailBody, fieldsFor(ctx, p, pharmacist, false)) });
+    if (pt.phone && !pt.dnc && pt.voice_consent) keep({ patientId: p.id, channel: "voicemail", subject: null, text: merge(tpl.voicemail, fieldsFor(ctx, p, pharmacist, true)) });
   }
   return { drafts, dropped };
 }
@@ -174,12 +176,12 @@ export function draftQueue(ctx: Ctx, recallId?: string) {
       // Refill reminders (agents/refills.ts) share this queue. The recipient's first name and drug are merged on read, never stored.
       refills ??= refillReport(ctx);
       const f = refillFields(ctx, r.patient_id, "your pharmacist", refills);
-      const m = { first_name: f.first_name, drug_name: f.drug_name, pharmacist: f.pharmacist, pharmacy_phone: r.channel === "voicemail" ? spokenPhone(PHARMACY_PHONE) : PHARMACY_PHONE };
+      const m = { first_name: f.first_name, drug_name: f.drug_name, pharmacist: f.pharmacist, pharmacy_name: pharmacyProfile(ctx).name, pharmacy_phone: r.channel === "voicemail" ? spokenPhone(pharmacyProfile(ctx).phone) : pharmacyProfile(ctx).phone };
       return { id: r.id, recallId: r.recall_id, patientId: r.patient_id, channel: r.channel, subject: r.subject ? merge(r.subject, m) : r.subject, text: merge(r.body, m), status: r.status, createdAt: r.created_at, label: "Draft. A pharmacist reviews and sends." };
     }
     if (!impacts.has(r.recall_id)) impacts.set(r.recall_id, new Map(recallImpact(ctx, r.recall_id, { includeUnconfirmed: true }).patients.map((p) => [p.id, p])));
     const p = impacts.get(r.recall_id)!.get(r.patient_id);
-    const f = p ? fieldsFor(p, "your pharmacist", r.channel === "voicemail") : null;
+    const f = p ? fieldsFor(ctx, p, "your pharmacist", r.channel === "voicemail") : null;
     return { id: r.id, recallId: r.recall_id, patientId: r.patient_id, channel: r.channel, subject: r.subject && f ? merge(r.subject, f) : r.subject, text: f ? merge(r.body, f) : r.body, status: r.status, createdAt: r.created_at, label: "Draft. A pharmacist reviews and sends." };
   });
 }

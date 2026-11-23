@@ -10,7 +10,7 @@ services:
       MFA: ${MFA:-0}
       TWO_STORES: ${TWO_STORES:-1}
       LLM_PROVIDER: none
-      LG_DEMO: "1"
+      SEED_SYNTHETIC: "1"
     volumes:
       - chimera-data:/app/data
     healthcheck:

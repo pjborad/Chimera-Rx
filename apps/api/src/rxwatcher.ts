@@ -3,6 +3,7 @@ import { z } from "zod";
 import { audit, emit, HttpError, todayIso, type Actor, type Ctx } from "./core";
 import { ageBand, DUPLICATE_CLASSES, expectedDaysSupply, findDrug, INTERACTIONS, parseSig, type Drug } from "./drugs";
 import { daysBetween } from "./domain";
+import { currentMedicines, dedupeFills, loadPatientHistory } from "./refills";
 
 /**
  * Rx Watcher (plan 6.1). Deterministic rules run first and decide every finding. The optional LLM may only
@@ -44,7 +45,9 @@ export function runRules(input: {
   history: HistRow[];
   today: string;
 }): Finding[] {
-  const { rx, product, patient, history, today } = input;
+  const { rx, product, patient, today } = input;
+  // one fill seen twice (imported history and a sale made here) is one fill
+  const history = dedupeFills(input.history, (h) => ({ on: h.filled_on, drug: h.drug, local: /^sold here$/i.test(h.status) }));
   const out: Finding[] = [];
   const drug = findDrug(product?.name ?? rx.drug) ?? findDrug(rx.drug);
   const sig = parseSig(rx.directions);
@@ -60,7 +63,10 @@ export function runRules(input: {
     return out;
   }
 
-  const active = history.filter((h) => h.status === "Active").map((h) => ({ h, d: findDrug(h.drug) })).filter((x): x is { h: HistRow; d: Drug } => !!x.d);
+  // "currently active" is one shared definition (refills.ts): Active and Sold here alike, supply not run out, not discontinued.
+  const withDrug = (rows: HistRow[]) => rows.map((h) => ({ h, d: findDrug(h.drug) })).filter((x): x is { h: HistRow; d: Drug } => !!x.d);
+  const active = withDrug(currentMedicines(history, today));
+  const lateCandidates = withDrug(currentMedicines(history, today, { ignoreSupply: true })); // a lapsed supply is exactly what the late-refill note is about
   const prior = history.map((h) => ({ h, d: findDrug(h.drug) })).filter((x) => x.d?.id === drug.id);
 
   // 2. frequency vs label (and vs this patient's last prescription)
@@ -148,12 +154,27 @@ export function runRules(input: {
   }
 
   // 9. late refill of other active medicines (information for counseling, not about this order)
-  for (const a of active) {
+  for (const a of lateCandidates) {
     if (a.d.id === drug.id || !a.h.days_supply) continue;
     const late = daysBetween(a.h.filled_on, today) - a.h.days_supply;
     if (late > 14) out.push(F("late-refill", "monitor", `${a.d.generic[0]!.toUpperCase()}${a.d.generic.slice(1)} refill is ${late} days late`, `Last ${a.h.days_supply}-day fill ${a.h.filled_on}. Ask about missed doses or side effects; offer refill sync.`, { late }));
   }
   return out;
+}
+
+/**
+ * Wording that tries to undo, soften or dismiss a rule hit. One definition for every explainer (Rx Watcher, its agent, the Guardian):
+ * a model sentence that matches it is dropped whenever a rule hit exists and the rule-written sentence is shown instead.
+ */
+export const UNDO = /\b(ignore|override|dismiss|disregard|remove|waive|suppress)\b|not a (real |true )?(issue|problem|concern)|false positive|safe to (fill|dispense)|no (issues?|concerns?|problems?)\b|all (checks )?(clear|good)|nothing( that| which)? (needs|to review|requires)/i;
+
+const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+/** A model summary is kept only if it does not undo a hit and names how many items need review. Otherwise the rule summary is used. */
+export function modelSummaryAcceptable(summary: string, flaggedCount: number): boolean {
+  if (!flaggedCount) return true;
+  if (UNDO.test(summary)) return false;
+  const n = String(flaggedCount);
+  return new RegExp(`\\b${n}\\b`).test(summary) || (flaggedCount < NUMBER_WORDS.length && new RegExp(`\\b${NUMBER_WORDS[flaggedCount]}\\b`, "i").test(summary));
 }
 
 export const worst = (f: Finding[]): Severity => f.reduce<Severity>((w, x) => (SEV_RANK[x.severity] > SEV_RANK[w] ? x.severity : w), "pass");
@@ -192,7 +213,7 @@ export async function reviewRx(ctx: Ctx, actor: Actor | null, rxNo: string): Pro
   const started = Date.now();
   const patient = ctx.db.get<{ allergies: string; dob: string }>("SELECT allergies, dob FROM patients WHERE id = ?", rx.patient_id)!;
   const product = ctx.db.get<{ name: string; pack_size: string }>("SELECT name, pack_size FROM products WHERE ndc11 = ?", rx.ndc11) ?? null;
-  const history = ctx.db.all<HistRow>("SELECT filled_on, ndc11, drug, sig, qty, days_supply, status FROM med_history WHERE patient_id = ? ORDER BY filled_on DESC", rx.patient_id);
+  const history: HistRow[] = loadPatientHistory(ctx, rx.patient_id); // imported history plus medicines sold here
   const inputHash = crypto.createHash("sha256").update(JSON.stringify([rx.drug, rx.directions, rx.qty, rx.days_supply, patient.allergies, history.length])).digest("hex").slice(0, 16);
 
   let findings: Finding[];
@@ -209,10 +230,12 @@ export async function reviewRx(ctx: Ctx, actor: Actor | null, rxNo: string): Pro
   const flagged = findings.filter((f) => f.severity === "needs_review" || f.severity === "block");
   if (ctx.llm) {
     try {
-      const active = history.filter((h) => h.status === "Active").map((h) => findDrug(h.drug)?.generic ?? "unknown");
+      const active = currentMedicines(history, todayIso(ctx)).map((h) => findDrug(h.drug)?.generic ?? "unknown");
       const r = await llmExplain(ctx, rx, findings, patient.allergies, active, ageBand(patient.dob, todayIso(ctx)));
       if (r) {
-        summary = r.summary;
+        // The rules decide. A model summary that says nothing needs review, or does not name the hit count, is thrown away.
+        if (modelSummaryAcceptable(r.summary, flagged.length)) summary = r.summary;
+        else audit(ctx, actor, "rxwatcher.summary_dropped", "prescription", rxNo, undefined, { flags: flagged.length, reason: "model summary contradicts or omits the rule hits" });
         for (const p of r.possible) findings.push({ rule: "llm-possible", severity: "monitor", title: `Possible issue: ${p.title}`, body: `${p.body} (AI suggestion, lower confidence. Not a rule hit.)`, evidence: {}, source: "llm" });
         if (r.prescriberDraft && flagged.length) draftCache.set(rxNo, r.prescriberDraft);
         llmInfo = { used: true, model: ctx.llm.name, error: null };
@@ -224,15 +247,20 @@ export async function reviewRx(ctx: Ctx, actor: Actor | null, rxNo: string): Pro
   if (!summary) summary = flagged.length ? `${flagged.length} item${flagged.length === 1 ? "" : "s"} need review: ${flagged.map((f) => f.title.toLowerCase()).join("; ")}.` : "All checks clear.";
 
   const w = worst(findings.filter((f) => f.source === "rule"));
+  const auto = w === "needs_review" || w === "block" ? "pending" : "clear";
+  let kept = null as string | null;
   const runId = ctx.db.tx(() => {
     const id = Number(ctx.db.run("INSERT INTO agent_runs (agent, subject, status, model, prompt_version, rules_version, input_hash, summary, latency_ms, error, at) VALUES ('rx-watcher',?,?,?,?,?,?,?,?,?,?)",
       rxNo, "ok", llmInfo.model, llmInfo.used ? PROMPT_VERSION : null, RULES_VERSION, inputHash, summary, Date.now() - started, llmInfo.error, ctx.now()).lastInsertRowid);
     ctx.db.run("DELETE FROM rx_findings WHERE rx = ?", rxNo);
     for (const f of findings) ctx.db.run("INSERT INTO rx_findings (rx, run_id, agent, rule, severity, title, body, evidence, source, at) VALUES (?,?,?,?,?,?,?,?,?,?)", rxNo, id, "rx-watcher", f.rule, f.severity, f.title, f.body, JSON.stringify(f.evidence), f.source, ctx.now());
-    // A rerun never overwrites a human decision; it only moves an undecided order between "clear" and "pending".
-    if (["none", "clear", "pending"].includes(rx.review)) ctx.db.run("UPDATE prescriptions SET review = ? WHERE id = ?", w === "needs_review" || w === "block" ? "pending" : "clear", rx.id);
+    // A rerun never overwrites a human decision. The model call above was awaited, so `rx.review` is stale: the write itself is
+    // conditional on the CURRENT state (and on the order still being the version that was checked), and a miss keeps the human decision.
+    const res = ctx.db.run("UPDATE prescriptions SET review = ? WHERE id = ? AND COALESCE(version, 0) = ? AND review IN ('none','clear','pending')", auto, rx.id, rx.version ?? 0);
+    if (res.changes !== 1) kept = ctx.db.get<{ review: string }>("SELECT review FROM prescriptions WHERE id = ?", rx.id)?.review ?? "unknown";
     return id;
   });
+  if (kept !== null) audit(ctx, actor, "rxwatcher.kept_human_decision", "prescription", rxNo, undefined, { runId, review: kept, automatic: auto });
   audit(ctx, actor, "rxwatcher.run", "prescription", rxNo, undefined, { runId, worst: w, rules: RULES_VERSION });
   emit(ctx, "rx.reviewed", { rx: rxNo, worst: w, flags: flagged.length });
   return reviewView(ctx, rxNo, { checked: true, runId, summary, llm: llmInfo });

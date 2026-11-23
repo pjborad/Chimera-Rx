@@ -8,5 +8,5 @@
     "5173": { "label": "Chimera Rx (web)", "onAutoForward": "openBrowser" },
     "4000": { "label": "Chimera Rx (API)" }
   },
-  "containerEnv": { "LLM_PROVIDER": "none", "LG_DEMO": "1" }
+  "containerEnv": { "LLM_PROVIDER": "none", "SEED_SYNTHETIC": "1" }
 }

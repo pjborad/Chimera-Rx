@@ -17,6 +17,7 @@ import { addWebhook, deliveries, WEBHOOK_EVENTS } from "./webhooks";
 import { ALL_SCOPES, apiActivity, createPartner, listPartners, rotateSecret, SCOPES, securityPosture, seedPartners, updatePartner, type Scope } from "./integrations";
 import { registerPartnerApi } from "./partner-api";
 import { registerAgentRoutes, listSuggestions } from "./agents";
+import { ruleFor, rolesOf } from "./access";
 import { registerEpcisRoutes } from "./epcis";
 import { registerRefillRoutes } from "./refills-routes";
 import { findPatientByPhone, patientProfile, refillSync, searchPatients } from "./patients";
@@ -30,11 +31,10 @@ import { seedDatabase, expectedPackages, FILL_PACKAGES, PRODUCTS } from "./seed"
 import { gtinOf, ndc11Digits } from "./domain";
 import { ingestFaxInbox, pollOpenFda, todayView } from "./today";
 import { splitStore, withStore } from "./stores";
-import { otherStores, transferPackages } from "./crossstore";
+import { listTransfers, otherStores, reconcileTransfers, transferPackages } from "./crossstore";
 import { corsOriginsFrom, publicError, registerSecurity } from "./security";
-import { listScenarios, resetDemo, scenarioLabels, startScenario } from "./scenarios";
 
-declare module "fastify" { interface FastifyRequest { actor?: Actor; user?: SessionUser } }
+declare module "fastify" { interface FastifyRequest { actor?: Actor; user?: SessionUser } interface FastifyInstance { routeTable: { method: string; url: string }[] } }
 
 const COOKIE = "lg_session";
 const scanBody = z.object({
@@ -46,6 +46,10 @@ const witnessBody = z.object({ email: z.string().email(), password: z.string().m
 
 export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
   const app = Fastify({ logger: false, bodyLimit: 2_000_000, trustProxy: process.env.TRUST_PROXY === "1" });
+  // Every route that gets registered, so a test can prove each one has a row in the access matrix (access.ts).
+  const routeTable: { method: string; url: string }[] = [];
+  app.decorate("routeTable", routeTable);
+  app.addHook("onRoute", (r) => { for (const m of ([] as string[]).concat(r.method as string | string[])) if (m !== "HEAD" && m !== "OPTIONS") routeTable.push({ method: m, url: r.url }); });
   await app.register(cookie);
   // Only the listed origins may call the API from a browser (CORS_ORIGINS); same-origin and non-browser callers need no CORS.
   const corsOrigins = corsOriginsFrom();
@@ -72,7 +76,7 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
   const curStore = () => stores?.current ?? "store-7";
 
   // ---- sessions: everything under /api needs one, except sign-in and the public config
-  const PUBLIC = new Set(["/api/health", "/api/auth/login", "/api/auth/sso", "/api/auth/config", "/api/auth/logout", "/api/auth/verify", "/api/auth/demo-code"]);
+  const PUBLIC = new Set(["/api/health", "/api/auth/login", "/api/auth/config", "/api/auth/logout", "/api/auth/verify", "/api/auth/demo-code"]);
   app.addHook("preHandler", async (req: FastifyRequest, reply: FastifyReply) => {
     const url = req.url.split("?")[0]!;
     if (!url.startsWith("/api/") || PUBLIC.has(url) || url.startsWith("/api/auth/demo-code/")) return;
@@ -80,6 +84,10 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
     if (!s) return reply.code(401).send({ error: "Please sign in.", code: "unauthenticated" });
     req.actor = s.actor;
     req.user = s.user;
+    // Read authorization matrix (access.ts): a route with no row is refused, a row that does not list the role is refused.
+    const roles = rolesOf(ruleFor(req.method, req.routeOptions?.url));
+    if (!roles) return reply.code(403).send({ error: "That route is not open to any role.", code: "route_unlisted" });
+    if (!roles.includes(s.actor.role)) return reply.code(403).send({ error: `A ${s.actor.role} cannot do that.`, code: "forbidden" });
   });
   const A = (req: FastifyRequest) => req.actor!;
   const only = (req: FastifyRequest, ...roles: Actor["role"][]) => {
@@ -91,9 +99,7 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
   // ---- auth
   app.get("/api/auth/config", async () => ({
     stores: stores ? stores.ids.flatMap((id) => stores.run(id, () => ctx.db.all<{ id: string; name: string }>("SELECT id, name FROM stores"))) : ctx.db.all<{ id: string; name: string }>("SELECT id, name FROM stores"),
-    storeDemos: stores ? { "store-2": { email: "s.okoro@birchavenuerx.example" } } : {},
-    mfa: ctx.cfg.mfa,
-    demo: ctx.cfg.demo ? { email: "j.rivera@elmstreetrx.example", password: "moonlight-rx-2026", note: "Demo environment: staff accounts j.rivera, k.patel and m.diaz share this password." } : null
+    mfa: ctx.cfg.mfa
   }));
   const loginBody = z.object({ storeId: z.string(), email: z.string().min(3).max(120), password: z.string().min(1).max(200), trusted: z.boolean().optional() });
   const setCookie = (reply: FastifyReply, token: string, ttl: number) => reply.setCookie(COOKIE, stores ? withStore(curStore(), token) : token, { httpOnly: true, sameSite: "lax", path: "/", maxAge: Math.floor(ttl / 1000), secure: ctx.cfg.cookieSecure });
@@ -107,7 +113,7 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
         const u = checkPassword(ctx, b);
         const c = startChallenge(ctx, u);
         ctx.db.run("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)", `mfa_trust:${c.challenge}`, JSON.stringify({ trusted: !!b.trusted, ws }));
-        return reply.code(202).send({ mfaRequired: true, challenge: stores ? withStore(sid, c.challenge) : c.challenge, expiresAt: c.expiresAt, demoHint: ctx.cfg.demo });
+        return reply.code(202).send({ mfaRequired: true, challenge: stores ? withStore(sid, c.challenge) : c.challenge, expiresAt: c.expiresAt, demoHint: ctx.cfg.seedSynthetic });
       }
       const r = login(ctx, { ...b, trusted: !!b.trusted, workstation: ws });
       setCookie(reply, r.token, r.ttl);
@@ -131,18 +137,10 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
   });
   // Demo only (FR7.3): shows the code from the sandbox outbox on the sign-in page, since a judge has no inbox to read.
   app.get("/api/auth/demo-code/:challenge", async (req) => {
-    if (!ctx.cfg.demo || !ctx.cfg.mfa) throw new HttpError(404, "Not available.");
+    if (!ctx.cfg.seedSynthetic || !ctx.cfg.mfa) throw new HttpError(404, "Not available.");
     const ch = (req.params as { challenge: string }).challenge;
     const sp = stores ? splitStore(ch, stores) : { store: curStore(), token: ch };
     return inStore(sp.store, () => ({ code: demoCodeHint(ctx, sp.token) }));
-  });
-  // Demo stand-in for "badge tap or SSO": signs in the pharmacist on duty. Disabled outside demo mode.
-  app.post("/api/auth/sso", async (req, reply) => {
-    if (!ctx.cfg.demo) throw new HttpError(501, "SSO is not configured.");
-    if (ctx.cfg.mfa) throw new HttpError(501, "The badge stand-in skips the second factor, so it is off while MFA is on.");
-    const r = login(ctx, { storeId: "store-7", email: "j.rivera@elmstreetrx.example", password: "moonlight-rx-2026", trusted: false, workstation: `SSO badge · ${req.ip}` });
-    setCookie(reply, r.token, r.ttl);
-    return { user: r.user };
   });
   app.post("/api/auth/logout", async (req, reply) => { const t = tokenOf(req); if (t) logout(ctx, t); reply.clearCookie(COOKIE, { path: "/" }); return { ok: true }; });
   app.get("/api/me", async (req) => ({ user: req.user, store: ctx.db.get("SELECT * FROM stores WHERE id = ?", A(req).storeId), today: todayIso(ctx) }));
@@ -343,28 +341,11 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
     return addWebhook(ctx, A(req), iid(req), b.url, b.events);
   });
 
-  // ---- demo helpers: the labels a camera can scan, and a reset
-  app.get("/api/demo/labels", async () => {
-    const dm = (p: { ndc10: string; lot: string; expiry: string; serial: string }) => ({ ...p, gtin: gtinOf(p.ndc10), product: PRODUCTS.find((x) => x.ndc10 === p.ndc10)?.name ?? p.ndc10 });
-    const receiving = expectedPackages().map((e) => ({ ...dm(e), group: `Receiving · ${e.delivery}`, scanned: !!ctx.db.get("SELECT 1 FROM packages WHERE gtin = ? AND serial = ?", gtinOf(e.ndc10), e.serial) }));
-    const fill = FILL_PACKAGES.flatMap((f) => {
-      const row = f.serial
-        ? { serial: f.serial }
-        : ctx.db.get<{ serial: string }>("SELECT k.serial FROM packages k JOIN lots l ON l.id = k.lot_id WHERE l.ndc11 = ? AND l.lot = ? AND k.status = 'on_shelf' ORDER BY k.id LIMIT 1", ndc11Digits(f.ndc10), f.lot);
-      const exp = ctx.db.get<{ expiry: string }>("SELECT expiry FROM lots WHERE ndc11 = ? AND lot = ?", ndc11Digits(f.ndc10), f.lot)?.expiry ?? "";
-      return row ? [{ ...dm({ ndc10: f.ndc10, lot: f.lot, expiry: exp, serial: row.serial }), group: "Fill & pickup", note: f.note, scanned: false }] : [];
-    });
-    const extra = scenarioLabels(ctx).map((l) => ({ ...dm(l), group: l.group, note: l.note, scanned: !!ctx.db.get("SELECT 1 FROM packages WHERE gtin = ? AND serial = ?", gtinOf(l.ndc10), l.serial) }));
-    return { labels: [...extra, ...receiving, ...fill] };
-  });
-  app.post("/api/demo/reset", async (req) => {
-    only(req, "pharmacist");
-    await resetDemo(ctx, A(req));
-    return { ok: true };
-  });
   // ---- two stores (FR4): see the other store, move stock to it
   app.get("/api/stores", async (req) => ({ me: A(req).storeId, others: otherStores(ctx, A(req)) }));
-  app.post("/api/transfers", async (req) => transferPackages(ctx, A(req), z.object({ toStore: z.string().max(40), lotId: z.number().int(), qty: z.number().int() }).parse(req.body)));
+  app.get("/api/transfers", async (req) => { only(req, "pharmacist"); return { transfers: listTransfers(ctx) }; });
+  app.post("/api/transfers/recover", async (req) => { only(req, "pharmacist"); return reconcileTransfers(ctx, A(req)); });
+  app.post("/api/transfers", async (req) => transferPackages(ctx, A(req), z.object({ toStore: z.string().max(40), lotId: z.number().int(), qty: z.number().int(), transferId: z.string().uuid().optional() }).parse(req.body)));
 
   // ---- front-store register (FR3)
   app.get("/api/register/items", async (req) => findItems(ctx, A(req), String((req.query as { q?: string }).q ?? "")));
@@ -378,13 +359,6 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
   // ---- AI stock help (FR8): advice only, a pharmacist decides
   app.get("/api/stock-help", async (req) => stockHelp(ctx, A(req)));
   app.post("/api/stock-help/decision", async (req) => decideStock(ctx, A(req), z.object({ kind: z.enum(["reorder", "expiry", "shortage"]), key: z.string().max(80), decision: z.enum(["accepted", "dismissed"]) }).parse(req.body)));
-
-  // ---- scenario library (FR6, US1.1): pick a known state from the app, no terminal needed
-  app.get("/api/demo/scenarios", async () => listScenarios(ctx));
-  app.post("/api/demo/scenarios/:id", async (req) => {
-    only(req, "pharmacist");
-    return startScenario(ctx, A(req), (req.params as { id: string }).id);
-  });
 
   // ---- partner surfaces: /oauth/token, /v1, /mcp, /fhir/r4 (their own auth, scopes and log)
   seedPartners(ctx);

@@ -15,7 +15,8 @@ export interface Config {
   /** run delivery receipts of the sandbox SMS provider faster in tests */
   sandboxDelayMs: number;
   /** "demo" prefills the sign-in form; the API never trusts it */
-  demo: boolean;
+  /** Seed the synthetic dataset on a fresh database (SEED_SYNTHETIC, default on). */
+  seedSynthetic: boolean;
   cookieSecure: boolean;
   /** YYYY-MM-DD override for "today" (tests) */
   today?: string;
@@ -42,7 +43,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     minExpiryMonths: Number(env.MIN_EXPIRY_MONTHS ?? 6),
     nightWatch: env.NIGHT_WATCH !== "0",
     sandboxDelayMs: Number(env.SANDBOX_DELAY_MS ?? 1500),
-    demo: env.LG_DEMO !== "0",
+    seedSynthetic: env.SEED_SYNTHETIC !== "0",
     cookieSecure: env.COOKIE_SECURE === "1",
     today: env.TODAY || undefined,
     dataset: env.DATASET === "large" ? "large" : "demo",

@@ -62,6 +62,7 @@ export async function scanFill(ctx: Ctx, actor: Actor, rx: string, input: ScanIn
   let review: string = r.review ?? "none";
   if (review === "none") review = (await reviewRx(ctx, actor, rx)).review;
   if (!FILLABLE_REVIEW.has(review)) {
+    audit(ctx, actor, "fill.refused", "prescription", rx, undefined, { review, why: "review_state" });
     throw new HttpError(409, review === "on_hold" ? "This order is on hold waiting for the prescriber." : review === "rejected" ? "This order was rejected." : "Rx Watcher flagged this order. A pharmacist must review it first.", "needs_review");
   }
   const { scan, product } = await resolveScan(ctx, input);
@@ -93,15 +94,31 @@ export async function scanFill(ctx: Ctx, actor: Actor, rx: string, input: ScanIn
     { id: "recall", label: "Recall check: clear", state: "pass" },
     exp
   ];
-  const dispenseId = Number(ctx.db.tx(() => {
+  let refusal = null as { review: string; status: string } | null;
+  let dispenseId: number;
+  try {
+  dispenseId = Number(ctx.db.tx(() => {
     // Re-check inside the transaction: the checks above awaited the Rx Watcher and the scan parser, so a second scan of the same
     // order (double submit, two workstations) may have filled it meanwhile. Conditional updates make the second one fail cleanly.
+    // The same goes for the review: a pharmacist hold, rejection or change request, or an edited order, that landed during an
+    // await wins over the automatic review the scan started with. Only "clear" or a pharmacist's "approved" on the SAME order may fill.
+    const cur = ctx.db.get<any>("SELECT status, review, version, directions, qty, days_supply, ndc11, drug FROM prescriptions WHERE id = ?", r.id);
+    if (cur && cur.status !== "to_fill" && cur.status !== "replaced") throw new HttpError(409, "This prescription already has a package scanned.", "already_scanned");
+    const same = !!cur && cur.status === "to_fill" && (cur.version ?? 0) === (r.version ?? 0) && cur.directions === r.directions && cur.qty === r.qty && (cur.days_supply ?? null) === (r.days_supply ?? null) && cur.ndc11 === r.ndc11 && cur.drug === r.drug;
+    if (!cur || !same || !FILLABLE_REVIEW.has(cur.review)) {
+      refusal = { review: cur?.review ?? "missing", status: cur?.status ?? "missing" };
+      throw new HttpError(409, !same ? "This order changed while it was being checked. Open it again and review the current version." : cur!.review === "on_hold" ? "This order was put on hold while it was being checked. Nothing was filled." : cur!.review === "rejected" ? "This order was rejected while it was being checked. Nothing was filled." : "The review of this order changed while it was being checked. A pharmacist must review it first.", "review_changed");
+    }
     if (ctx.db.run("UPDATE prescriptions SET status = 'filled' WHERE id = ? AND status = 'to_fill'", r.id).changes !== 1) throw new HttpError(409, "This prescription already has a package scanned.", "already_scanned");
     if (ctx.db.run("UPDATE packages SET status = 'dispensed' WHERE id = ? AND status = 'on_shelf'", pkg.id).changes !== 1) throw new HttpError(409, `Serial ${pkg.serial} was already dispensed.`, "not_on_shelf");
     const id = Number(ctx.db.run("INSERT INTO dispenses (rx_id, package_id, state, filled_by, filled_at, register, contact_json) VALUES (?,?,?,?,?,?,?)", r.id, pkg.id, "filled", actor.name, ctx.now(), "POS 2", "{}").lastInsertRowid);
     lotEvent(ctx, "Filled", pkg.lot_id, actor.name, `Rx ${rx}`, pkg.id);
     return id;
   }));
+  } catch (e) {
+    if (refusal) audit(ctx, actor, "fill.refused", "prescription", rx, undefined, { ...(refusal as object), why: "review_changed" });
+    throw e;
+  }
   audit(ctx, actor, "fill.scan", "dispense", dispenseId, undefined, { rx, serial: pkg.serial, lot: pkg.lot, source: scan.source });
   return { dispenseId, checks, lot: pkg.lot, serial: pkg.serial, expiry: pkg.expiry ?? scan.expiry, ndc: product.ndc10, inferredSerial: inferred };
 }

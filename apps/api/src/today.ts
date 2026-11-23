@@ -65,9 +65,10 @@ export function todayView(ctx: Ctx, actor: Actor) {
   const tasks: { title: string; sub: string; when: string; href: string; dot: string }[] = [];
   if (banner && actor.role === "pharmacist") tasks.push({ title: `Work recall ${banner.id}`, sub: banner.status === "notified" ? "Messages sent · call list and returns remain" : `Quarantine ${banner.units} units · notify ${banner.patients} patients`, when: "Now", href: "/recalls", dot: "#F87171" });
   // Rx Watcher flags (plan 3.2 "Up next"): orders that need a pharmacist before they can be filled
-  for (const f of ctx.db.all<{ rx: string; name: string; drug: string; n: number; review: string }>(
+  // These tasks name a patient and a clinical flag, so only a pharmacist and a technician get them (cashier and admin see counts only).
+  for (const f of actor.role === "pharmacist" || actor.role === "technician" ? ctx.db.all<{ rx: string; name: string; drug: string; n: number; review: string }>(
     `SELECT r.rx, p.name, r.drug, r.review, (SELECT count(*) FROM rx_findings x WHERE x.rx = r.rx AND x.severity IN ('needs_review','block') AND x.source = 'rule') AS n
-     FROM prescriptions r JOIN patients p ON p.id = r.patient_id WHERE r.status = 'to_fill' AND r.review IN ('pending','on_hold') ORDER BY r.rx`)) {
+     FROM prescriptions r JOIN patients p ON p.id = r.patient_id WHERE r.status = 'to_fill' AND r.review IN ('pending','on_hold') ORDER BY r.rx`) : []) {
     tasks.push({ title: f.review === "on_hold" ? `Waiting on prescriber · Rx ${f.rx}` : `Review Rx ${f.rx} for ${f.name}`, sub: f.review === "on_hold" ? `${f.drug.split(" · ")[0]} · change request sent` : `Rx Watcher: ${f.n} item${f.n === 1 ? "" : "s"} need review · ${f.drug.split(" · ")[0]}`, when: "Now", href: `/fill?rx=${f.rx}`, dot: "#F79009" });
   }
   const callList = ctx.db.get<{ n: number }>("SELECT count(*) AS n FROM outreach_calls c WHERE c.outcome = 'call_list' AND c.id = (SELECT max(id) FROM outreach_calls d WHERE d.patient_id = c.patient_id AND d.recall_id = c.recall_id)")!.n;
@@ -85,7 +86,7 @@ export function todayView(ctx: Ctx, actor: Actor) {
 
   return {
     greeting: { title: `Good ${hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening"}, ${first}`, line: `${nowD.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", timeZone: "UTC" })} · ${shift} · last sync ${Math.max(0, Math.round((now - sync) / 60_000))} min ago` },
-    banner, kpis, tasks: tasks.slice(0, 5), openTasks: tasks.length, expiring, feed,
+    banner: actor.role === "pharmacist" || actor.role === "technician" ? banner : null, kpis, tasks: tasks.slice(0, 5), openTasks: tasks.length, expiring, feed,
     // Rx Guardian: counts and the top three open suggestions. A pharmacist decides; a technician sees them; a cashier and an admin get nothing.
     suggestions: actor.role === "pharmacist" || actor.role === "technician" ? { ...suggestionSummary(ctx), canDecide: actor.role === "pharmacist" } : null,
     agentsOn: agentsOn(ctx),

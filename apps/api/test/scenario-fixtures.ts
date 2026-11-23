@@ -1,16 +1,16 @@
-import { audit, HttpError, todayIso, type Actor, type Ctx } from "./core";
-import { gtinOf, ndc11Digits } from "./domain";
-import { seedPartners } from "./integrations";
-import { reviewPending } from "./rxwatcher";
-import { seedDatabase } from "./seed";
-import { ingestFaxInbox } from "./today";
-import { lookupRecall } from "./recall";
-import { seedStore2 } from "./seed-store2";
-import { STORE_1, STORE_2 } from "./stores";
+import { audit, HttpError, todayIso, type Actor, type Ctx } from "../src/core";
+import { gtinOf, ndc11Digits } from "../src/domain";
+import { seedPartners } from "../src/integrations";
+import { reviewPending } from "../src/rxwatcher";
+import { expectedPackages, FILL_PACKAGES, PRODUCTS, seedDatabase } from "../src/seed";
+import { ingestFaxInbox } from "../src/today";
+import { lookupRecall } from "../src/recall";
+import { seedStore2 } from "../src/seed-store2";
+import { STORE_1, STORE_2 } from "../src/stores";
 
 /**
- * Scenario library (FR6): each scenario resets the demo to a known state, then applies a small, synthetic change and
- * shows a one-paragraph brief of what to try. Only a pharmacist may pick one (US1.1, Q5).
+ * Scenario fixtures for tests and the e2e harness (scripts/e2e/harness.ts). Each scenario reseeds the synthetic data
+ * to a known state, then applies a small, synthetic change. The product UI and API do not expose these.
  */
 
 export interface ScenarioLabel { group: string; ndc10: string; lot: string; expiry: string; serial: string; note: string }
@@ -21,7 +21,7 @@ export interface Scenario {
   brief: string;
   /** where the brief sends the judge first */
   start: string;
-  /** extra printable labels on the Test labels page */
+  /** extra printable labels (printableLabels below) */
   labels?: ScenarioLabel[];
   apply?: (ctx: Ctx) => void;
 }
@@ -163,7 +163,7 @@ const APPLY: Record<string, Apply> = {
   }
 };
 
-/** Wipe and re-seed the synthetic demo, as `POST /api/demo/reset` always did. */
+/** Test fixture: wipe and re-seed the synthetic dataset, then optionally apply a scenario. There is no HTTP route for this. */
 export async function resetDemo(ctx: Ctx, actor: Actor | null, scenarioId: string | null = null) {
   if (ctx.stores) {
     // two stores: rebuild both, so a reset never leaves one store out of step with the other
@@ -185,11 +185,6 @@ export async function resetDemo(ctx: Ctx, actor: Actor | null, scenarioId: strin
   audit(ctx, actor, scenarioId ? "demo.scenario" : "demo.reset", "demo", scenarioId ?? "reset");
 }
 
-export function listScenarios(ctx: Ctx) {
-  const active = ctx.db.get<{ value: string }>("SELECT value FROM meta WHERE key = ?", META_SCENARIO)?.value ?? null;
-  return { active, scenarios: SCENARIOS.map(({ id, title, brief, start }) => ({ id, title, brief, start })) };
-}
-
 export function scenarioLabels(ctx: Ctx): ScenarioLabel[] {
   const raw = ctx.db.get<{ value: string }>("SELECT value FROM meta WHERE key = ?", META_LABELS)?.value;
   return raw ? (JSON.parse(raw) as ScenarioLabel[]) : [];
@@ -200,4 +195,23 @@ export async function startScenario(ctx: Ctx, actor: Actor, id: string) {
   if (!s) throw new HttpError(404, `Unknown scenario ${id}.`, "scenario");
   await resetDemo(ctx, actor, id);
   return { ok: true, scenario: { id: s.id, title: s.title, brief: s.brief, start: s.start } };
+}
+
+/**
+ * Printable GS1 labels for the synthetic stock (test and e2e harness only; the product has no labels route).
+ * Same rows the old demo labels page listed: scenario extras, expected receiving packages, then on-shelf fill packages.
+ */
+export function printableLabels(ctx: Ctx) {
+  const dm = (p: { ndc10: string; lot: string; expiry: string; serial: string }) => ({ ...p, gtin: gtinOf(p.ndc10), product: PRODUCTS.find((x) => x.ndc10 === p.ndc10)?.name ?? p.ndc10 });
+  const scanned = (ndc10: string, serial: string) => !!ctx.db.get("SELECT 1 FROM packages WHERE gtin = ? AND serial = ?", gtinOf(ndc10), serial);
+  const receiving = expectedPackages().map((e) => ({ ...dm(e), group: `Receiving · ${e.delivery}`, scanned: scanned(e.ndc10, e.serial) }));
+  const fill = FILL_PACKAGES.flatMap((f) => {
+    const row = f.serial
+      ? { serial: f.serial }
+      : ctx.db.get<{ serial: string }>("SELECT k.serial FROM packages k JOIN lots l ON l.id = k.lot_id WHERE l.ndc11 = ? AND l.lot = ? AND k.status = 'on_shelf' ORDER BY k.id LIMIT 1", ndc11Digits(f.ndc10), f.lot);
+    const exp = ctx.db.get<{ expiry: string }>("SELECT expiry FROM lots WHERE ndc11 = ? AND lot = ?", ndc11Digits(f.ndc10), f.lot)?.expiry ?? "";
+    return row ? [{ ...dm({ ndc10: f.ndc10, lot: f.lot, expiry: exp, serial: row.serial }), group: "Fill & pickup", note: f.note, scanned: false }] : [];
+  });
+  const extra = scenarioLabels(ctx).map((l) => ({ ...dm(l), group: l.group, note: l.note, scanned: scanned(l.ndc10, l.serial) }));
+  return { labels: [...extra, ...receiving, ...fill] };
 }
