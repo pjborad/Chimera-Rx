@@ -29,7 +29,7 @@ PRON.update({
     "AI-DLC": "A I D L C", "MFA": "M F A", "EHR": "E H R", "PDF": "P D F", "SKU": "sku", "IDs": "I Ds", "ID": "I D",
     "HIPAA-style": "hip-uh style", "Coroner": "Coroner", "DSCSA": "D S C S A", "GS1": "G S one", "F01": "F zero one", "F08": "F zero eight",
     "NDC": "N D C", "NDCs": "N D Cs", "MCP": "M C P", "REST": "rest", "FHIR": "fire", "EPCIS": "E P C I S", "OCR": "O C R",
-    "RX": "R x", "Rx": "R x", "UI": "U I", "JSON": "jason",
+    "RX": "R x", "API": "A P I", "SSO": "S S O", "PHI": "P H I", "KMS": "K M S", "Rx": "R x", "UI": "U I", "JSON": "jason",
 })
 
 
@@ -114,7 +114,7 @@ def srt_time(t: float) -> str:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("mode", choices=["full", "cut"], nargs="?", default="full")
-    ap.add_argument("--voice", default="am_michael")
+    ap.add_argument("--voice", default="am_onyx")
     ap.add_argument("--speed", type=float, default=1.1)
     ap.add_argument("--compare", action="store_true")
     ap.add_argument("--script", default=str(ROOT / "docs/DEMO_VIDEO_SCRIPT.md"))

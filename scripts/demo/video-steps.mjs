@@ -83,7 +83,7 @@ export const A = {
   // ---- inventory ---------------------------------------------------------------------------------------------------
   async invOpen(r) { await r.asUser("j.rivera"); await r.lt(tag("Inventory", "Pharmacist")); await r.go("/inventory", "text=Inventory by lot"); await r.hold(1500); },
   async invFilters(r) {
-    for (const re of [/^Recalled/, /^Expiring/, /^Refrigerated/, /^Controlled/]) { await r.click(r.page.getByRole("button", { name: re }).or(r.page.getByRole("tab", { name: re }))); await r.hold(500); }
+    for (const re of [/^Expiring/, /^Refrigerated/, /^Controlled/]) { await r.click(r.page.getByRole("button", { name: re }).or(r.page.getByRole("tab", { name: re }))); await r.hold(500); }
   },
   async stockHelp(r) { await r.lt(tag("Stock help", "Pharmacist")); await r.go("/stock", "text=Stock help"); await r.hold(600); await r.point("text=Reorder (1)"); await r.hold(800); await r.scrollTo("text=Expiry risk"); await r.hold(800); },
 
@@ -221,7 +221,7 @@ export const A = {
   },
   async agentsList(r) { for (const t of ["Coroner", "Rx Watcher Explainer", "Rx Guardian"]) { await r.scrollTo(r.page.locator(`article[aria-label="${t}"]`)); await r.point(r.page.locator(`article[aria-label="${t}"]`)); await r.hold(500); } },
   async agentsGate(r) {
-    await r.cutWait(async () => { await r.api("POST", "/api/agents/provider", { provider: "openai-compatible", baseUrl: "http://127.0.0.1:4663/v1", model: "stand-in-model" }); await r.page.reload(); await r.page.waitForSelector("text=Rules decide."); });
+    await r.cutWait(async () => { await r.api("POST", "/api/agents/provider", { provider: "openai-compatible", baseUrl: "http://127.0.0.1:4693/v1", model: "stand-in-model" }); await r.page.reload(); await r.page.waitForSelector("text=Rules decide."); });
     await r.lt(tag("Coroner with a stand-in model", "Pharmacist"));
     const card = r.page.locator('article[aria-label="Coroner"]'); await r.scrollTo(card);
     await r.click(card.getByRole("button", { name: "Run with sample input" }));
@@ -274,9 +274,7 @@ export const A = {
   async dscsaVerify(r) {
     await r.scrollTo("text=Verification requests");
     const sec = r.page.locator("section[aria-label='Verification requests']"); const inputs = sec.locator("input");
-    const l = (await r.labels())[0];
-    await inputs.nth(0).fill(l.gtin); await inputs.nth(2).fill(l.lot); await inputs.nth(3).fill(l.expiry.replace(/-/g, "").slice(2, 8));
-    for (const s of ["DEMO-OK-01", "SPOOF-001"]) { await inputs.nth(1).fill(""); await r.type(inputs.nth(1), s); await r.click(sec.getByRole("button", { name: "Ask the sandbox verifier" })); await r.hold(1500); }
+    for (const s of ["DEMO-OK-01", "SPOOF-001"]) { await inputs.nth(1).fill(""); await r.type(inputs.nth(1), s); await inputs.nth(3).fill("2028-02-29"); await r.click(sec.getByRole("button", { name: "Ask the sandbox verifier" })); await r.hold(1500); }
   },
   async dscsaSuspect(r) { await r.scrollTo("section[aria-label='Suspect product cases']"); await r.point("section[aria-label='Suspect product cases']"); await r.hold(1600); },
 
