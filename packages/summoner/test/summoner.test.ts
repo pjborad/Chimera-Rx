@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
 import { OpenFdaClient, RateLimiter, classRoman, parsePaste, recordFromText } from "../src/index";
@@ -27,7 +28,7 @@ describe("RateLimiter (SUM-4)", () => {
 describe("fallback to fixtures (SUM-3)", () => {
   it("serves cached fixtures on HTTP 429", async () => {
     const fetchImpl = (async () => new Response("{}", { status: 429 })) as unknown as typeof fetch;
-    const c = new OpenFdaClient({ fetchImpl, fixtureDir: new URL("../../../fixtures/recalls", import.meta.url).pathname });
+    const c = new OpenFdaClient({ fetchImpl, fixtureDir: fileURLToPath(new URL("../../../fixtures/recalls", import.meta.url)) });
     const r = await c.fetchRecent(7);
     expect(r.cached).toBe(true);
     expect(r.reason).toMatch(/429/);
@@ -35,7 +36,7 @@ describe("fallback to fixtures (SUM-3)", () => {
   });
   it("demo recalls never hit the network", async () => {
     const fetchImpl = (async () => { throw new Error("network used"); }) as unknown as typeof fetch;
-    const c = new OpenFdaClient({ fetchImpl, fixtureDir: new URL("../../../fixtures/recalls", import.meta.url).pathname });
+    const c = new OpenFdaClient({ fetchImpl, fixtureDir: fileURLToPath(new URL("../../../fixtures/recalls", import.meta.url)) });
     const r = await c.fetchByNumber("D-0417-2026");
     expect(r.records[0]?.recall_number).toBe("D-0417-2026");
   });

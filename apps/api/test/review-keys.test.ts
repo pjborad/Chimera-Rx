@@ -22,8 +22,8 @@ describe("REV-API keys", () => {
     const dir = tmp(); const f = path.join(dir, "x.sqlite");
     const db = new Db(f); addPatient(db); db.raw.exec("PRAGMA wal_checkpoint(TRUNCATE)");
     const kf = path.join(dir, ".keys", "data.key");
-    expect(fs.statSync(kf).mode & 0o777).toBe(0o600);
-    expect(fs.statSync(path.join(dir, ".keys")).mode & 0o777).toBe(0o700);
+    if (process.platform !== "win32") expect(fs.statSync(kf).mode & 0o777).toBe(0o600);
+    if (process.platform !== "win32") expect(fs.statSync(path.join(dir, ".keys")).mode & 0o777).toBe(0o700);
     expect(fs.readFileSync(f).toString("latin1")).not.toContain("Test Person");
   });
 

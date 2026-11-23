@@ -1,6 +1,8 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 
 /**
  * Field encryption for patient data at rest (SEC-1). AES-256-GCM with a random 12-byte IV per value.
@@ -110,30 +112,111 @@ export class EnvKeyProvider implements KeyProvider {
   }
 }
 
-/** A key file at <data>/.keys/data.key (mode 0600). Older keys live in retired.keys so rotated rows stay readable. */
+export interface FileKeyOptions {
+  /** defaults to process.platform; tests inject "win32" or "linux" */
+  platform?: NodeJS.Platform;
+  /** runs a fixed executable with an argument array (no shell) and returns stdout; defaults to execFileSync. Tests inject a fake. */
+  exec?: (file: string, args: string[]) => string;
+  /** the account that must own the key files on Windows; defaults to os.userInfo().username */
+  username?: string;
+}
+
+const WIN_ALLOWED = ["system", "administrators"];
+
+/**
+ * A key file at <data>/.keys/data.key. POSIX: directory 0700, files 0600, checked after writing.
+ * Windows: chmod does nothing there, so the ACL is tightened with icacls (inheritance removed, current user only) and
+ * the result is read back; if that fails the file provider refuses to run and DATA_KEY must be supplied instead.
+ * Older keys live in retired.keys so rotated rows stay readable. Neither platform's file mode replaces disk encryption or a KMS.
+ */
 export class FileKeyProvider implements KeyProvider {
   readonly name = "file" as const;
   private next?: Buffer;
-  constructor(readonly dir: string) {}
+  private platform: NodeJS.Platform;
+  private exec: (file: string, args: string[]) => string;
+  private user: string;
+  constructor(readonly dir: string, opts: FileKeyOptions = {}) {
+    this.platform = opts.platform ?? process.platform;
+    this.exec = opts.exec ?? ((file, args) => execFileSync(file, args, { encoding: "utf8", windowsHide: true, timeout: 15000 }));
+    this.user = opts.username ?? os.userInfo().username;
+  }
   private get keyFile() { return path.join(this.dir, "data.key"); }
   private get retiredFile() { return path.join(this.dir, "retired.keys"); }
-  private writeSecret(file: string, content: string) {
+  private get win() { return this.platform === "win32"; }
+
+  private refuse(what: string, why: string): never {
+    throw new CryptoError("not_configured", `Cannot keep ${what} owner-only (${why}). The file key provider refuses to run here. Supply the key through the environment instead: set DATA_KEY (openssl rand -base64 32) and unset KEY_PROVIDER, or set KEY_PROVIDER=env.`);
+  }
+
+  /** Restrict a file or directory to the current user and verify it. Throws instead of continuing with a wider access. */
+  private secure(target: string, isDir: boolean) {
+    if (!this.win) {
+      const want = isDir ? 0o700 : 0o600;
+      try { fs.chmodSync(target, want); } catch (e: any) { this.refuse(target, `chmod failed: ${e.code ?? e.message}`); }
+      const mode = fs.statSync(target).mode & 0o777;
+      if (mode & ~want & 0o777) this.refuse(target, `mode is ${mode.toString(8)}, wider than ${want.toString(8)}`);
+      return;
+    }
+    const grant = `${this.user}:${isDir ? "(OI)(CI)F" : "F"}`;
+    try { this.exec("icacls", [target, "/inheritance:r", "/grant:r", grant]); } catch (e: any) { this.refuse(target, `icacls could not set the ACL: ${String(e.message ?? e).split("\n")[0]}`); }
+    let out: string;
+    try { out = this.exec("icacls", [target]); } catch (e: any) { this.refuse(target, `icacls could not read the ACL back: ${String(e.message ?? e).split("\n")[0]}`); }
+    const bad = this.extraPrincipals(out, target);
+    if (bad === null) this.refuse(target, "the ACL could not be read");
+    if (bad.length) this.refuse(target, `other principals still have access: ${bad.join(", ")}`);
+  }
+
+  /** Principals in `icacls` output other than the current user, SYSTEM and Administrators. null = nothing parseable. */
+  private extraPrincipals(out: string, target: string): string[] | null {
+    const found: string[] = [];
+    for (const raw of out.split(/\r?\n/)) {
+      let line = raw.trim();
+      if (!line || /^successfully processed/i.test(line)) continue;
+      const at = line.toLowerCase().indexOf(target.toLowerCase());
+      if (at === 0) line = line.slice(target.length).trim();
+      const m = /^(.+?):\(/.exec(line);
+      if (m) found.push(m[1].trim());
+    }
+    if (!found.length) return null;
+    const me = this.user.toLowerCase();
+    return found.filter((p) => {
+      const low = p.toLowerCase();
+      const last = low.split("\\").pop() as string;
+      if (WIN_ALLOWED.includes(last) && (low.startsWith("nt authority\\") || low.startsWith("builtin\\"))) return false;
+      return !(low === me || last === me.split("\\").pop());
+    });
+  }
+
+  private ensureDir() {
     fs.mkdirSync(this.dir, { recursive: true, mode: 0o700 });
+    this.secure(this.dir, true);
+  }
+  private writeSecret(file: string, content: string, exclusive = false) {
+    this.ensureDir();
     const tmp = `${file}.${process.pid}.tmp`;
-    fs.writeFileSync(tmp, content, { mode: 0o600 });
-    fs.chmodSync(tmp, 0o600);
-    fs.renameSync(tmp, file);
+    try { fs.unlinkSync(tmp); } catch { /* none left over */ }
+    const fd = fs.openSync(tmp, "wx", 0o600);
+    try {
+      this.secure(tmp, false); // before any key material is written
+      fs.writeSync(fd, content);
+      fs.fsyncSync(fd);
+    } catch (e) { fs.closeSync(fd); try { fs.unlinkSync(tmp); } catch { /* ignore */ } throw e; }
+    fs.closeSync(fd);
+    if (exclusive) {
+      try { fs.linkSync(tmp, file); } catch (e: any) { fs.unlinkSync(tmp); if (e.code === "EEXIST") return; throw e; }
+      fs.unlinkSync(tmp);
+    } else fs.renameSync(tmp, file);
+    this.secure(file, false);
   }
   private retired(): Buffer[] {
     if (!fs.existsSync(this.retiredFile)) return [];
+    this.secure(this.retiredFile, false);
     return fs.readFileSync(this.retiredFile, "utf8").split("\n").map((s) => s.trim()).filter(Boolean).map(parseKey);
   }
   load(): KeyRing {
-    if (!fs.existsSync(this.keyFile)) {
-      fs.mkdirSync(this.dir, { recursive: true, mode: 0o700 });
-      try { fs.writeFileSync(this.keyFile, crypto.randomBytes(32).toString("base64") + "\n", { mode: 0o600, flag: "wx" }); } catch (e: any) { if (e.code !== "EEXIST") throw e; }
-      fs.chmodSync(this.keyFile, 0o600);
-    }
+    this.ensureDir();
+    if (!fs.existsSync(this.keyFile)) this.writeSecret(this.keyFile, crypto.randomBytes(32).toString("base64") + "\n", true);
+    this.secure(this.keyFile, false);
     return ringOf(parseKey(fs.readFileSync(this.keyFile, "utf8")), this.retired());
   }
   beginRotation(): KeyRing {
@@ -160,11 +243,11 @@ export class KmsKeyProvider implements KeyProvider {
   commitRotation(): string { return this.fail(); }
 }
 
-export function createKeyProvider(keyDir: string, env: Record<string, string | undefined> = process.env): KeyProvider {
+export function createKeyProvider(keyDir: string, env: Record<string, string | undefined> = process.env, fileOpts?: FileKeyOptions): KeyProvider {
   const want = env.KEY_PROVIDER || (env.DATA_KEY ? "env" : "file");
   if (want === "env") return new EnvKeyProvider(env);
   if (want === "kms") return new KmsKeyProvider();
-  if (want === "file") return new FileKeyProvider(keyDir);
+  if (want === "file") return new FileKeyProvider(keyDir, fileOpts);
   throw new CryptoError("not_configured", `Unknown KEY_PROVIDER "${want}" (use env, file or kms).`);
 }
 

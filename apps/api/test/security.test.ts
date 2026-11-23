@@ -81,7 +81,7 @@ describe("SEC-1 field cipher", () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "crx-keys-"));
     const a = new FileKeyProvider(path.join(dir, ".keys")).load();
     const f = path.join(dir, ".keys", "data.key");
-    expect(fs.statSync(f).mode & 0o777).toBe(0o600);
+    if (process.platform !== "win32") expect(fs.statSync(f).mode & 0o777).toBe(0o600); // chmod has no effect on Windows; see review-f08.test.ts
     expect(new FileKeyProvider(path.join(dir, ".keys")).load().current.id).toBe(a.current.id);
   });
 });
@@ -161,7 +161,7 @@ describe("SEC-1 database files hold no plaintext PHI", () => {
   it("the key is not in the database files, and the key file is mode 0600", () => {
     const k = fs.readFileSync(path.join(dir, ".keys", "data.key"), "utf8").trim();
     for (const id of reg.ids) for (const b of bytesOf(id)) expect(b.includes(Buffer.from(k))).toBe(false);
-    expect(fs.statSync(path.join(dir, ".keys", "data.key")).mode & 0o777).toBe(0o600);
+    if (process.platform !== "win32") expect(fs.statSync(path.join(dir, ".keys", "data.key")).mode & 0o777).toBe(0o600);
   });
 
   it("routes keep working: name, phone and date-of-birth search return decrypted values", async () => {
