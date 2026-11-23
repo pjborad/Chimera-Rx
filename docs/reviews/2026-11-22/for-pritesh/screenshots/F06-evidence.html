@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>F06 evidence</title><style>*{box-sizing:border-box}body{margin:0;padding:42px;background:#f2f4f8;color:#182235;font:20px/1.5 system-ui,sans-serif}header{border-bottom:2px solid #c9d0de;margin-bottom:26px;padding-bottom:22px}.label{font-size:17px;letter-spacing:.08em;color:#4b5266;text-transform:uppercase}h1{font-size:34px;line-height:1.25;margin:12px 0}.badge{color:#a62030}main{display:grid;grid-template-columns:1fr 1fr;gap:24px}section{background:white;border:1px solid #d3d9e2;padding:25px;border-radius:12px;min-width:0}h2{font-size:23px;margin:0 0 15px}pre{font:16px/1.55 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;margin:0;color:#192333}small{font-size:16px;color:#586477}.why{background:#e9edf9;padding:20px;margin-top:25px;border-left:5px solid #4558a5}footer{margin-top:23px;font-size:16px;color:#586477}</style><header><div class="label">Chimera Rx · F06 · upstream 30408a6 · synthetic data</div><h1><span class="badge">P2</span> Store 2 outputs retain Store 7 identity and contact details</h1><small>Evidence capture: test/API/permissions output with source annotation. This is not an application screen.</small></header><main><section><h2>1 Observed evidence</h2><pre>{
+  &quot;signedInStore&quot;: {
+    &quot;id&quot;: &quot;store-2&quot;,
+    &quot;name&quot;: &quot;Birch Avenue Pharmacy · Store 2&quot;,
+    &quot;ncpdp&quot;: &quot;0000002&quot;,
+    &quot;address&quot;: &quot;2 Birch Avenue (synthetic)&quot;,
+    &quot;phone&quot;: &quot;(555) 010-2300&quot;
+  },
+  &quot;smsPreview&quot;: &quot;Elm Street Pharmacy: Hi Rowan, a medicine you picked up on Nov 2 is part of a safety recall. Please don&#39;t use it. Call (555) 010-2200 for a free replacement.&quot;,
+  &quot;emailBody&quot;: &quot;Dear {first_name},\n\nOn {sold_date} you picked up {drug_name} (Rx {rx_number}) from Elm Street Pharmacy. The maker has recalled this batch because it may not be sterile.\n\nPlease do not use any remaining doses. Bring them to the pharmacy, or call us at (555) 010-2200. We will replace your medicine at no cost and answer any questions.\n\nJ. Rivera, PharmD&quot;
+}</pre></section><section><h2>2 Relevant implementation</h2><small>apps/api/src/recall.ts · lines 215–225 · pinned commit</small><pre style="margin-top:18px">215
+216  export const PHARMACY_PHONE = &quot;(555) 010-2200&quot;;
+217  export const DEFAULT_SMS = `Elm Street Pharmacy: Hi {first_name}, a medicine you picked up on {sold_date} is part of a safety recall. Please don&#39;t use it. Call ${PHARMACY_PHONE} for a free replacement.`;
+218  export const DEFAULT_EMAIL_SUBJECT = &quot;Important: a medicine you received has been recalled&quot;;
+219  export const DEFAULT_EMAIL_BODY = `Dear {first_name},
+220
+221  On {sold_date} you picked up {drug_name} (Rx {rx_number}) from Elm Street Pharmacy. The maker has recalled this batch because it may not be sterile.
+222
+223  Please do not use any remaining doses. Bring them to the pharmacy, or call us at ${PHARMACY_PHONE}. We will replace your medicine at no cost and answer any questions.
+224
+225  J. Rivera, PharmD`;</pre><p class="why">Store 2 identity and phone are correct in /api/me. The draft response still contains Elm Street and Store 7 phone.</p></section></main><footer>Interpret alongside the reproduction and acceptance checks in review.html. Findings remain open. Screenshots show observations, not fixes.</footer></html>

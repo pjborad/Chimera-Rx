@@ -1,0 +1,13 @@
+Pritesh, we reviewed the latest Chimera Rx build (30408a6) and exercised the new workflows with synthetic data. The package includes prioritized findings, exact reproductions, implementation guidance and 21 acceptance checks.
+
+Five P1 groups should come before additional feature work: a slow review can overwrite a pharmacist hold; a pending recall row can prevent confirmation reaching Store 2; cashier/admin users can reach clinical data through agent and recall reads; locally sold medicines can miss some alert rules; and a failed transfer can leave the same serial available in both stores.
+
+The focused run passed all 182 existing checks and seven new controls; fourteen new acceptance checks fail on these five defect groups. Key recovery and rotation checks passed. The browser rehearsal passed 48/49, with the remaining check appearing to be a timing issue.
+
+Please start with START-HERE.txt or review.html. The findings include acceptance criteria so we can verify each fix. Three additional hardening items cover Store 2 document/contact identity, provider URL validation and Windows key permissions. Docker, physical scanning and live providers still need separate verification.
+
+These findings are open; this package contains review tests rather than product fixes.
+
+
+SCREENSHOT UPDATE
+Each finding now has an annotated evidence screenshot in review.html. screenshots/index.html provides a gallery of all 12 images: eight test/API/permissions evidence captures plus four actual app workflow screenshots. Each image is labelled by finding ID and evidence type; workflow context does not prove backend failures. api-evidence.json and key-permissions-evidence.json contain the fresh observations.

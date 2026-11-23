@@ -1,0 +1,22 @@
+[
+  {
+    "Principal": "goodWorkLaptop\\CodexSandboxUsers",
+    "Rights": "ReadAndExecute, Synchronize",
+    "Inherited": true
+  },
+  {
+    "Principal": "NT AUTHORITY\\SYSTEM",
+    "Rights": "FullControl",
+    "Inherited": true
+  },
+  {
+    "Principal": "BUILTIN\\Administrators",
+    "Rights": "FullControl",
+    "Inherited": true
+  },
+  {
+    "Principal": "goodWorkLaptop\\ajfri",
+    "Rights": "FullControl",
+    "Inherited": true
+  }
+]

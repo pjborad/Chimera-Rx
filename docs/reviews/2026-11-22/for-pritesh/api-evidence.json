@@ -1,0 +1,41 @@
+{
+  "scope": "Fresh isolated in-memory synthetic databases. No external network calls. Not the running localhost instance.",
+  "F03": {
+    "role": "cashier",
+    "requests": [
+      {
+        "path": "/api/agents/runs",
+        "status": 200,
+        "patientIds": [
+          "S-0612"
+        ],
+        "clinicalContentPresent": true
+      },
+      {
+        "path": "/api/suggestions",
+        "status": 403,
+        "body": {
+          "error": "A cashier cannot do that.",
+          "code": "forbidden"
+        }
+      }
+    ]
+  },
+  "F06": {
+    "signedInStore": {
+      "id": "store-2",
+      "name": "Birch Avenue Pharmacy · Store 2",
+      "ncpdp": "0000002",
+      "address": "2 Birch Avenue (synthetic)",
+      "phone": "(555) 010-2300"
+    },
+    "smsPreview": "Elm Street Pharmacy: Hi Rowan, a medicine you picked up on Nov 2 is part of a safety recall. Please don't use it. Call (555) 010-2200 for a free replacement.",
+    "emailBody": "Dear {first_name},\n\nOn {sold_date} you picked up {drug_name} (Rx {rx_number}) from Elm Street Pharmacy. The maker has recalled this batch because it may not be sterile.\n\nPlease do not use any remaining doses. Bring them to the pharmacy, or call us at (555) 010-2200. We will replace your medicine at no cost and answer any questions.\n\nJ. Rivera, PharmD"
+  },
+  "F07": {
+    "submittedBaseUrl": "http://[::ffff:169.254.169.254]/latest",
+    "status": 200,
+    "savedBaseUrl": "http://[::ffff:169.254.169.254]/latest",
+    "metadataNetworkRequestMade": false
+  }
+}

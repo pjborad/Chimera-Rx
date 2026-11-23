@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>F08 evidence</title><style>*{box-sizing:border-box}body{margin:0;padding:42px;background:#f2f4f8;color:#182235;font:20px/1.5 system-ui,sans-serif}header{border-bottom:2px solid #c9d0de;margin-bottom:26px;padding-bottom:22px}.label{font-size:17px;letter-spacing:.08em;color:#4b5266;text-transform:uppercase}h1{font-size:34px;line-height:1.25;margin:12px 0}.badge{color:#a62030}main{display:grid;grid-template-columns:1fr 1fr;gap:24px}section{background:white;border:1px solid #d3d9e2;padding:25px;border-radius:12px;min-width:0}h2{font-size:23px;margin:0 0 15px}pre{font:16px/1.55 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;margin:0;color:#192333}small{font-size:16px;color:#586477}.why{background:#e9edf9;padding:20px;margin-top:25px;border-left:5px solid #4558a5}footer{margin-top:23px;font-size:16px;color:#586477}</style><header><div class="label">Chimera Rx · F08 · upstream 30408a6 · synthetic data</div><h1><span class="badge">P2</span> Windows file-key permissions do not meet the owner-only claim</h1><small>Evidence capture: test/API/permissions output with source annotation. This is not an application screen.</small></header><main><section><h2>1 Observed evidence</h2><pre>[
+  {
+    &quot;Principal&quot;: &quot;goodWorkLaptop\\CodexSandboxUsers&quot;,
+    &quot;Rights&quot;: &quot;ReadAndExecute, Synchronize&quot;,
+    &quot;Inherited&quot;: true
+  },
+  {
+    &quot;Principal&quot;: &quot;NT AUTHORITY\\SYSTEM&quot;,
+    &quot;Rights&quot;: &quot;FullControl&quot;,
+    &quot;Inherited&quot;: true
+  },
+  {
+    &quot;Principal&quot;: &quot;BUILTIN\\Administrators&quot;,
+    &quot;Rights&quot;: &quot;FullControl&quot;,
+    &quot;Inherited&quot;: true
+  },
+  {
+    &quot;Principal&quot;: &quot;goodWorkLaptop\\ajfri&quot;,
+    &quot;Rights&quot;: &quot;FullControl&quot;,
+    &quot;Inherited&quot;: true
+  }
+]
+</pre></section><section><h2>2 Relevant implementation</h2><small>apps/api/src/crypto.ts · lines 120–136 · pinned commit</small><pre style="margin-top:18px">120    private writeSecret(file: string, content: string) {
+121      fs.mkdirSync(this.dir, { recursive: true, mode: 0o700 });
+122      const tmp = `${file}.${process.pid}.tmp`;
+123      fs.writeFileSync(tmp, content, { mode: 0o600 });
+124      fs.chmodSync(tmp, 0o600);
+125      fs.renameSync(tmp, file);
+126    }
+127    private retired(): Buffer[] {
+128      if (!fs.existsSync(this.retiredFile)) return [];
+129      return fs.readFileSync(this.retiredFile, &quot;utf8&quot;).split(&quot;\n&quot;).map((s) =&gt; s.trim()).filter(Boolean).map(parseKey);
+130    }
+131    load(): KeyRing {
+132      if (!fs.existsSync(this.keyFile)) {
+133        fs.mkdirSync(this.dir, { recursive: true, mode: 0o700 });
+134        try { fs.writeFileSync(this.keyFile, crypto.randomBytes(32).toString(&quot;base64&quot;) + &quot;\n&quot;, { mode: 0o600, flag: &quot;wx&quot; }); } catch (e: any) { if (e.code !== &quot;EEXIST&quot;) throw e; }
+135        fs.chmodSync(this.keyFile, 0o600);
+136      }</pre><p class="why">POSIX chmod is not a Windows DACL. The inspected key inherits a read grant; no key material is displayed.</p></section></main><footer>Interpret alongside the reproduction and acceptance checks in review.html. Findings remain open. Screenshots show observations, not fixes.</footer></html>
