@@ -34,6 +34,13 @@ export function proposeFix(ctx: Ctx, rxNo: string): Proposal {
   return { directions, daysSupply: days };
 }
 
+/** Write a human review decision only if the order is still in the state the decision was made on (compare and set). */
+function setReview(ctx: Ctx, rx: { id: number; review: string }, review: string, note: string | null) {
+  if (ctx.db.run("UPDATE prescriptions SET review = ?, review_note = ? WHERE id = ? AND status = 'to_fill' AND review = ?", review, note, rx.id, rx.review).changes !== 1) {
+    throw new HttpError(409, "This order changed while you were deciding. Open it again.", "review_changed");
+  }
+}
+
 export function decide(ctx: Ctx, actor: Actor, rxNo: string, body: { action: "approve" | "reject" | "change"; reason?: string; message?: string; proposal?: Proposal }) {
   if (actor.role !== "pharmacist") throw new HttpError(403, `A ${actor.role} cannot do that.`, "forbidden");
   const rx = ctx.db.get<any>("SELECT * FROM prescriptions WHERE rx = ?", rxNo);
@@ -47,7 +54,7 @@ export function decide(ctx: Ctx, actor: Actor, rxNo: string, body: { action: "ap
   if (body.action === "approve") {
     if (blocked) throw new HttpError(409, "A blocking finding cannot be approved as written. Reject the order or ask the prescriber to change it.", "blocked");
     if (needsReview && (body.reason ?? "").trim().length < 5) throw new HttpError(422, "Say why you are approving an order with open findings.", "reason_required");
-    ctx.db.run("UPDATE prescriptions SET review = 'approved', review_note = ? WHERE id = ?", body.reason ?? null, rx.id);
+    setReview(ctx, rx, "approved", body.reason ?? null);
     decideRun(ctx, rxNo, "approved", actor);
     audit(ctx, actor, "rx.approve", "prescription", rxNo, undefined, { open: view.flags }, body.reason);
     emit(ctx, "rx.approved", { rx: rxNo });
@@ -55,7 +62,7 @@ export function decide(ctx: Ctx, actor: Actor, rxNo: string, body: { action: "ap
   }
   if (body.action === "reject") {
     if ((body.reason ?? "").trim().length < 5) throw new HttpError(422, "Say why you are rejecting this order.", "reason_required");
-    ctx.db.run("UPDATE prescriptions SET review = 'rejected', review_note = ? WHERE id = ?", body.reason, rx.id);
+    setReview(ctx, rx, "rejected", body.reason ?? null);
     decideRun(ctx, rxNo, "rejected", actor);
     audit(ctx, actor, "rx.reject", "prescription", rxNo, undefined, undefined, body.reason);
     emit(ctx, "rx.rejected", { rx: rxNo });
@@ -70,7 +77,7 @@ export function decide(ctx: Ctx, actor: Actor, rxNo: string, body: { action: "ap
   const id = ctx.db.tx(() => {
     const mid = Number(ctx.db.run("INSERT INTO prescriber_messages (rx, direction, type, script_id, prescriber, body, status, response_json, created_by, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
       rxNo, "out", "RxChangeRequest", scriptId, rx.prescriber, message, "sent", JSON.stringify({ proposal }), actor.name, ctx.now()).lastInsertRowid);
-    ctx.db.run("UPDATE prescriptions SET review = 'on_hold', review_note = ? WHERE id = ?", `Change requested ${scriptId}`, rx.id);
+    setReview(ctx, rx, "on_hold", `Change requested ${scriptId}`);
     return mid;
   });
   decideRun(ctx, rxNo, "change_requested", actor);

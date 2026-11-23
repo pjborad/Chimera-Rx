@@ -1,6 +1,7 @@
 import type { Ctx } from "./core";
 import { todayIso } from "./core";
 import { DAY } from "./domain";
+import { findDrug } from "./drugs";
 
 /**
  * Recall-aware refills and adherence. Everything here is deterministic: no model is involved (rules before the LLM).
@@ -61,6 +62,48 @@ export function pdc(fills: SupplyFill[], today: string, windowDays = PDC_WINDOW_
   return { pdc: Math.min(1, Math.max(0, raw)), coveredDays: covered, windowDays: days, windowStart: isoOf(start), supplyEndsOn: isoOf(cursor), fills: usable.length };
 }
 
+// ------------------------------------------------------------------ which medicines are current (shared by Guardian, Rx Watcher, refills)
+
+/** A supply that ran out up to this many days ago still counts as current: patients refill late, and the safety rules should not forget them overnight. */
+export const SUPPLY_GRACE_DAYS = 30;
+/** A fill with no days supply on record is assumed to last this long. */
+export const DEFAULT_SUPPLY_DAYS = 30;
+
+/** Statuses that mean "on the profile". "Sold here" (a sale made in this pharmacy) is the same as an imported "Active"; anything else
+ *  (Completed, Replaced, Discontinued, Stopped...) is a finished or discontinued medicine and is never current. */
+export const isOnProfile = (status: string | null | undefined) => /^(active|sold here)$/i.test((status ?? "").trim());
+
+export interface DatedFill { filled_on: string; drug: string; days_supply: number | null; status: string }
+
+/** Is this fill a current medicine today? On the profile, and the supply (filled_on + days supply + grace) has not run out. */
+export function isCurrentMedicine(h: DatedFill, today: string, opts: { ignoreSupply?: boolean } = {}): boolean {
+  if (!isOnProfile(h.status)) return false;
+  if (opts.ignoreSupply) return true;
+  const supply = h.days_supply && h.days_supply > 0 ? h.days_supply : DEFAULT_SUPPLY_DAYS;
+  return dayNum(today) - dayNum(h.filled_on) <= supply + SUPPLY_GRACE_DAYS;
+}
+
+/**
+ * One fill that appears twice (the imported history and our own sale record) is one fill. Same drug (the known drug, else the name
+ * before the "·") and same date; the imported row wins because it carries the prescriber's own record. `local` says which row came from a sale made here.
+ */
+export function dedupeFills<T>(rows: T[], key: (r: T) => { on: string; drug: string; local: boolean }): T[] {
+  const best = new Map<string, T>();
+  const order: string[] = [];
+  for (const r of rows) {
+    const k = key(r);
+    const id = `${findDrug(k.drug)?.id ?? k.drug.split("·")[0]!.trim().toLowerCase()}|${k.on}`;
+    const had = best.get(id);
+    if (!had) { best.set(id, r); order.push(id); } else if (key(had).local && !k.local) best.set(id, r);
+  }
+  return order.map((id) => best.get(id)!);
+}
+
+/** THE definition of "currently active medicine" for the interaction, duplicate-therapy and late-refill rules. */
+export function currentMedicines<T extends DatedFill>(history: T[], today: string, opts: { ignoreSupply?: boolean } = {}): T[] {
+  return dedupeFills(history, (h) => ({ on: h.filled_on, drug: h.drug, local: /^sold here$/i.test(h.status) })).filter((h) => isCurrentMedicine(h, today, opts));
+}
+
 // ------------------------------------------------------------------ fills, from the history and from fills made here
 
 export interface Fill {
@@ -87,6 +130,23 @@ export function loadFills(ctx: Ctx): Fill[] {
     out.push({ patientId: d.patient_id, groupKey: groupKeyOf(d.ndc11 ?? "", d.drug ?? ""), drug: drugBase(d.drug ?? ""), ndc11: d.ndc11 ?? "", filledOn: isoFromMs(at), daysSupply: Number(d.days_supply), lot: d.lot ?? "", rx: d.rx ?? "", refillsLeft: d.refills ?? null, status: "Active", source: "fill", autoRefill: false });
   }
   return out;
+}
+
+/** A patient's fill history as the safety rules read it: the imported history plus medicines sold here (status "Sold here"). */
+export interface PatientFill { filled_on: string; ndc11: string; drug: string; sig: string; qty: number; days_supply: number; status: string; lot: string; prescriber: string }
+
+export function loadPatientHistory(ctx: Ctx, patientId: string): PatientFill[] {
+  const out: PatientFill[] = ctx.db.all<any>("SELECT filled_on, ndc11, drug, sig, qty, days_supply, status, lot, prescriber FROM med_history WHERE patient_id = ? ORDER BY filled_on DESC", patientId)
+    .map((h) => ({ filled_on: h.filled_on, ndc11: h.ndc11 ?? "", drug: h.drug ?? "", sig: h.sig ?? "", qty: h.qty ?? 0, days_supply: Number(h.days_supply ?? 0), status: h.status ?? "", lot: h.lot ?? "", prescriber: h.prescriber ?? "" }));
+  for (const d of ctx.db.all<any>(
+    `SELECT r.ndc11, r.drug, r.qty, r.directions, r.prescriber, r.days_supply, d.sold_at, d.filled_at, l.lot
+     FROM dispenses d JOIN prescriptions r ON r.id = d.rx_id LEFT JOIN packages k ON k.id = d.package_id LEFT JOIN lots l ON l.id = k.lot_id
+     WHERE r.patient_id = ? AND d.state = 'sold'`, patientId)) {
+    const at = d.sold_at ?? d.filled_at;
+    if (!at) continue;
+    out.push({ filled_on: isoFromMs(at), ndc11: d.ndc11 ?? "", drug: d.drug ?? "", sig: d.directions ?? "", qty: d.qty ?? 0, days_supply: Number(d.days_supply ?? 0), status: "Sold here", lot: d.lot ?? "", prescriber: d.prescriber ?? "" });
+  }
+  return out.sort((a, b) => b.filled_on.localeCompare(a.filled_on));
 }
 
 // ------------------------------------------------------------------ Schedule II and lot blocks
@@ -160,9 +220,11 @@ export function refillReport(ctx: Ctx, opts: RefillOptions = {}): RefillReport {
   const adherence: AdherenceRow[] = [];
   for (const fills of groups.values()) {
     fills.sort((a, b) => dayNum(a.filledOn) - dayNum(b.filledOn) || a.daysSupply - b.daysSupply);
+    // the same fill seen twice (imported history and our own sale) is counted once
+    fills.splice(0, fills.length, ...dedupeFills(fills, (f) => ({ on: f.filledOn, drug: f.drug, local: f.source === "fill" })));
     const last = fills[fills.length - 1]!;
     if (dayNum(last.filledOn) > dayNum(today)) continue;
-    if (!/^active$/i.test(last.status)) continue; // a finished short course is not a refill candidate
+    if (!isOnProfile(last.status)) continue; // a finished short course is not a refill candidate
     const m = pdc(fills, today);
     const enough = fills.filter((f) => dayNum(f.filledOn) <= dayNum(today)).length >= 2;
     const flagged = enough && m.pdc < PDC_FLAG_BELOW;

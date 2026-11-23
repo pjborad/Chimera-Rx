@@ -4,8 +4,8 @@ import { audit, emit, HttpError, todayIso, type Actor, type Ctx } from "../core"
 import { daysBetween } from "../domain";
 import { ageBand, findDrug, INTERACTIONS, parseSig, type Drug, type DrugClass } from "../drugs";
 import { decide, proposeFix } from "../prescriber";
-import { lotBlock, pdc, PDC_FLAG_BELOW } from "../refills";
-import { runRules, type Finding } from "../rxwatcher";
+import { currentMedicines, dedupeFills, isOnProfile, loadPatientHistory, lotBlock, pdc, PDC_FLAG_BELOW } from "../refills";
+import { runRules, UNDO, type Finding } from "../rxwatcher";
 import { deidentify, findPhi, numbersIn, parseJsonObject, registerAgent, type AgentResult, type Dropped, type LlmCall } from "./agent";
 
 /**
@@ -38,6 +38,8 @@ export interface Fact {
   promptText?: string;
   /** background about the patient that is shown but never part of the fingerprint */
   context?: boolean;
+  /** the explanation of the order itself (not a history fact): part of the written explanation, never listed as evidence */
+  order?: boolean;
 }
 
 export interface Hit { id?: string; rule: string; key: string; severity: GuardSeverity; title: string; facts: Fact[] }
@@ -91,7 +93,6 @@ const PLAIN: Record<string, string> = {
   "controlled-pattern": "The Schedule II history shows several prescribers. Review the controlled-substance pattern before filling."
 };
 
-const UNDO = /\b(ignore|override|dismiss|disregard|remove|waive|suppress)\b|not a (real |true )?(issue|problem|concern)|false positive|safe to (fill|dispense)|no (issues?|concerns?|problems?)\b|all (checks )?(clear|good)|nothing (needs|to review)/i;
 
 // ------------------------------------------------------------------ the deterministic core
 
@@ -110,11 +111,14 @@ export function guardianHits(input: GuardInput): Hit[] {
   const out: Hit[] = [];
   const drug = findDrug(product?.name ?? order.drug) ?? findDrug(order.drug);
   const sig = parseSig(order.directions);
-  const hist = history.slice().sort((a, b) => b.filled_on.localeCompare(a.filled_on));
+  // one fill seen twice (imported history and a sale made here) is one fill
+  const hist = dedupeFills(history, (h) => ({ on: h.filled_on, drug: h.drug, local: /^sold here$/i.test(h.status) })).sort((a, b) => b.filled_on.localeCompare(a.filled_on));
   const sameDrug = drug ? hist.filter((h) => findDrug(h.drug)?.id === drug.id) : [];
-  const active = hist.filter((h) => h.status === "Active").map((h) => ({ h, d: findDrug(h.drug) })).filter((x): x is { h: Hist; d: Drug } => !!x.d);
+  // "currently active" is one shared definition (refills.ts): Active and Sold here alike, supply not run out, not discontinued.
+  const active = currentMedicines(hist, today).map((h) => ({ h, d: findDrug(h.drug) })).filter((x): x is { h: Hist; d: Drug } => !!x.d);
+  const lateCandidates = currentMedicines(hist, today, { ignoreSupply: true }).map((h) => ({ h, d: findDrug(h.drug) })).filter((x): x is { h: Hist; d: Drug } => !!x.d);
   const add = (h: Hit) => { out.push(h); };
-  const orderFact = (text: string): Fact => ({ text, date: today });
+  const orderFact = (text: string): Fact => ({ text, date: today, order: true });
 
   // ---- reuse the Rx Watcher: the same engine, the same inputs, the same severity. The Guardian only adds the history around a hit.
   const watcher: Finding[] = runRules({
@@ -134,7 +138,7 @@ export function guardianHits(input: GuardInput): Hit[] {
       add({ rule: "dose-history", key: `dose:${f.rule}`, severity: sev, title: f.title, facts: [orderFact(f.body), ...sameDrug.slice(0, 2).map((h) => histFact(h, `earlier fill: ${fillLine(h)}`))] });
     } else if (f.rule === "allergy") {
       const codes = allergyCodes(patient.allergies);
-      add({ rule: "allergy-class", key: `alg:${codes.join("+") || "class"}`, severity: sev, title: f.title, facts: [{ text: f.body, date: today, promptText: `An allergy class code ${codes.join(", ") || "on file"} matches this medicine's class.` }] });
+      add({ rule: "allergy-class", key: `alg:${codes.join("+") || "class"}`, severity: sev, title: f.title, facts: [{ text: f.body, date: today, order: true, promptText: `An allergy class code ${codes.join(", ") || "on file"} matches this medicine's class.` }] });
     } else if (f.rule === "interaction") {
       const w = String(f.evidence.with ?? "");
       const other = active.find((a) => a.d.generic === w);
@@ -148,7 +152,7 @@ export function guardianHits(input: GuardInput): Hit[] {
       add({ rule: "early-refill", key: "early", severity: sev, title: f.title, facts: [orderFact(f.body), ...(last ? [histFact(last, `last fill: ${fillLine(last)}`)] : [])] });
     } else if (f.rule === "late-refill") {
       const generic = findDrug(f.title)?.generic ?? f.title;
-      const h = active.find((a) => a.d.generic === generic)?.h;
+      const h = lateCandidates.find((a) => a.d.generic === generic)?.h;
       add({ rule: "late-refill", key: `late:${generic}`, severity: sev, title: f.title, facts: [orderFact(f.body), ...(h ? [histFact(h, `last fill: ${fillLine(h)}`)] : [])] });
     }
   }
@@ -170,14 +174,14 @@ export function guardianHits(input: GuardInput): Hit[] {
     }
 
     // ---- the same medicine is already active from a different prescriber and has not run out: a possible duplicate prescription
-    const dupSame = sameDrug.find((h) => h.status === "Active" && h.prescriber && order.prescriber && h.prescriber !== order.prescriber && h.days_supply > 0 && daysBetween(h.filled_on, today) < h.days_supply);
+    const dupSame = sameDrug.find((h) => isOnProfile(h.status) && h.prescriber && order.prescriber && h.prescriber !== order.prescriber && h.days_supply > 0 && daysBetween(h.filled_on, today) < h.days_supply);
     if (dupSame) add({ rule: "duplicate-therapy", key: `dup-same:${drug.generic}`, severity: "needs_review", title: "Same medicine already active from another prescriber", facts: [orderFact(`${titleCase(drug.generic)} was filled ${daysBetween(dupSame.filled_on, today)} days ago for ${dupSame.days_supply} days from a different prescriber, and it is on this order too.`), histFact(dupSame, `active fill: ${fillLine(dupSame)}`)] });
 
     // ---- allergy class from the codes (covers a class the Watcher's single drug field does not name)
     const codes = allergyCodes(patient.allergies);
     const drugCode = ALLERGY_CODES.find((a) => a.drugClass === drug.cls)?.code;
     if (drugCode && codes.includes(drugCode) && !watcherRules.has("allergy")) {
-      add({ rule: "allergy-class", key: `alg:${drugCode}`, severity: "block", title: "Allergy class conflict", facts: [{ text: `An allergy to the ${drug.cls} class is on file and this order is a ${drug.cls}-class medicine.`, date: today, promptText: `Allergy class code ${drugCode} matches this medicine's class.` }] });
+      add({ rule: "allergy-class", key: `alg:${drugCode}`, severity: "block", title: "Allergy class conflict", facts: [{ text: `An allergy to the ${drug.cls} class is on file and this order is a ${drug.cls}-class medicine.`, date: today, order: true, promptText: `Allergy class code ${drugCode} matches this medicine's class.` }] });
     }
 
     // ---- early refill of a medicine that is not Schedule II (the Watcher covers Schedule II)
@@ -243,26 +247,18 @@ export function guardianHits(input: GuardInput): Hit[] {
 
 const fpOf = (h: Hit) => crypto.createHash("sha256").update([h.rule, h.key, h.severity, ...h.facts.filter((f) => !f.context).map((f) => f.text)].join("\u241f")).digest("hex").slice(0, 16);
 
-export const ruleExplanation = (h: Hit) => `${PLAIN[h.rule] ?? ""} ${h.facts.filter((f) => !f.context).slice(0, 3).map((f) => f.text).join(" ")}`.trim();
+/** What the card lists as evidence: dated facts from the patient's history only. The explanation text is never repeated as a bullet. */
+const evidenceOf = (h: Hit) => h.facts.filter((f) => !f.context && !f.order).map((f) => ({ text: f.text, date: f.date }));
+
+/** The plain sentence for the rule plus what is true of THIS order. History facts are listed as evidence, not repeated here. */
+export const ruleExplanation = (h: Hit) => `${PLAIN[h.rule] ?? ""} ${h.facts.filter((f) => f.order).slice(0, 3).map((f) => f.text).join(" ")}`.trim() || h.facts.filter((f) => !f.context).slice(0, 3).map((f) => f.text).join(" ");
 
 // ------------------------------------------------------------------ reading the history
 
 interface OrderRow { id: number; rx: string; patient_id: string; ndc11: string; drug: string; qty: number; directions: string; prescriber: string; days_supply: number | null; version: number; status: string; review: string }
 
-/** The fill history, plus medicines sold here (a recalled lot shows up there too). */
-export function loadHistory(ctx: Ctx, patientId: string): Hist[] {
-  const out: Hist[] = ctx.db.all<any>("SELECT filled_on, ndc11, drug, sig, qty, days_supply, status, lot, prescriber FROM med_history WHERE patient_id = ? ORDER BY filled_on DESC", patientId)
-    .map((h) => ({ filled_on: h.filled_on, ndc11: h.ndc11 ?? "", drug: h.drug ?? "", sig: h.sig ?? "", qty: h.qty ?? 0, days_supply: Number(h.days_supply ?? 0), status: h.status ?? "", lot: h.lot ?? "", prescriber: h.prescriber ?? "" }));
-  for (const d of ctx.db.all<any>(
-    `SELECT r.ndc11, r.drug, r.qty, r.directions, r.prescriber, r.days_supply, d.sold_at, d.filled_at, l.lot
-     FROM dispenses d JOIN prescriptions r ON r.id = d.rx_id LEFT JOIN packages k ON k.id = d.package_id LEFT JOIN lots l ON l.id = k.lot_id
-     WHERE r.patient_id = ? AND d.state = 'sold'`, patientId)) {
-    const at = d.sold_at ?? d.filled_at;
-    if (!at) continue;
-    out.push({ filled_on: new Date(at).toISOString().slice(0, 10), ndc11: d.ndc11 ?? "", drug: d.drug ?? "", sig: d.directions ?? "", qty: d.qty ?? 0, days_supply: Number(d.days_supply ?? 0), status: "Sold here", lot: d.lot ?? "", prescriber: d.prescriber ?? "" });
-  }
-  return out.sort((a, b) => b.filled_on.localeCompare(a.filled_on));
-}
+/** The fill history, plus medicines sold here (a recalled lot shows up there too). One reader for every safety rule: refills.ts. */
+export const loadHistory = (ctx: Ctx, patientId: string): Hist[] => loadPatientHistory(ctx, patientId);
 
 const openOrders = (ctx: Ctx, only?: string) =>
   ctx.db.all<OrderRow>(`SELECT id, rx, patient_id, ndc11, drug, qty, directions, prescriber, days_supply, version, status, review FROM prescriptions WHERE status = 'to_fill' ${only ? "AND rx = ?" : ""} ORDER BY rx`, ...(only ? [only] : []));
@@ -321,7 +317,10 @@ export function gateGuardian(ctx: Ctx | null, obj: any, hits: Hit[], history: { 
   for (const k of Object.keys(obj)) if (!["explanations", "note"].includes(k)) dropped.push({ what: `field "${k}"`, why: "Not part of the allowed answer. Rule hits cannot be changed by the model." });
   for (const e of (Array.isArray(obj.explanations) ? obj.explanations : []).slice(0, 40)) {
     const hit = hits.find((h) => h.id === e?.id);
-    const text = typeof e?.text === "string" ? e.text.trim().slice(0, 600) : "";
+    let text = typeof e?.text === "string" ? e.text.trim().slice(0, 600) : "";
+    // A model may start with the raw rule id ("non adherence: ..."). The card shows the human title; the id is its own small field.
+    if (hit && text) text = text.replace(new RegExp(`^${hit.rule.replace(/-/g, "[-\\s_]")}\\s*:\\s*`, "i"), "");
+    if (text) text = text[0]!.toUpperCase() + text.slice(1);
     if (!hit) { dropped.push({ what: `explanation ${String(e?.id ?? "?")}`, why: "It is not about any rule hit." }); continue; }
     if (!text) { dropped.push({ what: `explanation for ${hit.rule}`, why: "Empty. The rule explanation is shown." }); continue; }
     const allowed = new Set(numbersIn(hit.facts.filter((f) => !f.context).map((f) => f.text).join(" ")));
@@ -402,7 +401,7 @@ function upsertForOrder(ctx: Ctx, o: OrderRow, hits: Hit[]): { fresh: Fresh[]; r
     live.add(skey);
     const same = existing.filter((e) => e.skey === skey && e.source === "rule" && e.status !== "resolved");
     const hit = same.find((e) => e.fp === fp);
-    const evidence = JSON.stringify(h.facts.map((f) => ({ text: f.text, date: f.date })));
+    const evidence = JSON.stringify(evidenceOf(h));
     if (hit) {
       // Same facts as before: the decision (or the open state) stands. Context facts and a changed severity label are refreshed.
       if (hit.status === "open") ctx.db.run("UPDATE suggestions SET evidence = ? WHERE id = ?", evidence, hit.id);
@@ -532,7 +531,8 @@ export function acceptSuggestion(ctx: Ctx, actor: Actor, id: number, note?: stri
   if (rx.review === "rejected") throw new HttpError(409, "This order was already rejected.", "decided");
   const reason = `Rx Guardian: ${row.title}${trimmed(note) ? `. ${trimmed(note)}` : ""}`.slice(0, 480);
   ctx.db.tx(() => {
-    if (rx.review !== "on_hold") ctx.db.run("UPDATE prescriptions SET review = 'on_hold', review_note = ? WHERE id = ?", reason, rx.id);
+    // compare and set: a rejection or a fill that landed since the card was read is never overwritten by a hold
+    if (rx.review !== "on_hold" && ctx.db.run("UPDATE prescriptions SET review = 'on_hold', review_note = ? WHERE id = ? AND status = 'to_fill' AND review = ?", reason, rx.id, rx.review).changes !== 1) throw new HttpError(409, "This order changed while you were deciding. Open it again.", "review_changed");
     ctx.db.run("UPDATE suggestions SET status = 'accepted', decided_by = ?, decided_at = ?, decision = 'hold', decision_reason = ? WHERE id = ?", actor.name, ctx.now(), trimmed(note) || null, id);
   });
   audit(ctx, actor, "suggestion.accept", "suggestion", id, { review: rx.review }, { rx: row.rx, rule: row.rule, review: "on_hold" }, trimmed(note) || undefined);

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { HttpError, todayIso, type Ctx } from "../core";
-import { runRules, worst, type Finding } from "../rxwatcher";
+import { loadPatientHistory } from "../refills";
+import { runRules, UNDO, worst, type Finding } from "../rxwatcher";
 import { deidentify, findPhi, parseJsonObject, registerAgent, type AgentResult, type Dropped, type LlmCall } from "./agent";
 
 /**
@@ -20,7 +21,6 @@ The patient is identified only by an ID. Do not guess a name.`;
 interface RxRow { id: number; rx: string; patient_id: string; ndc11: string; drug: string; qty: number; directions: string; days_supply: number | null }
 interface Hist { filled_on: string; ndc11: string; drug: string; sig: string; qty: number; days_supply: number; status: string }
 
-const UNDO = /\b(ignore|override|dismiss|disregard|remove|waive|suppress)\b|not a (real |true )?(issue|problem|concern)|false positive|safe to (fill|dispense)|no (issues?|concerns?|problems?)\b|all (checks )?(clear|good)|nothing (needs|to review)/i;
 
 const ruleSummary = (f: Finding[]) => {
   const flagged = f.filter((x) => x.severity === "needs_review" || x.severity === "block");
@@ -51,7 +51,7 @@ registerAgent({
     if (!rx) throw new HttpError(404, "Unknown prescription.");
     const patient = ctx.db.get<{ allergies: string }>("SELECT allergies FROM patients WHERE id = ?", rx.patient_id) ?? { allergies: "" };
     const product = ctx.db.get<{ name: string; pack_size: string }>("SELECT name, pack_size FROM products WHERE ndc11 = ?", rx.ndc11) ?? null;
-    const history = ctx.db.all<Hist>("SELECT filled_on, ndc11, drug, sig, qty, days_supply, status FROM med_history WHERE patient_id = ? ORDER BY filled_on DESC", rx.patient_id);
+    const history: Hist[] = loadPatientHistory(ctx, rx.patient_id); // imported history plus medicines sold here
     const findings = runRules({ rx, product, patient, history, today: todayIso(ctx) });
     const ruleOut = { findings, worst: worst(findings), summary: ruleSummary(findings) };
     const dropped: Dropped[] = [];

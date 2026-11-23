@@ -35,7 +35,7 @@ export function SuggestionCard({ s, canDecide, showOrder = true }: { s: Suggesti
   return (
     <article aria-label={s.title} style={{ border: `1px solid ${s.severity === "block" ? "var(--danger)" : C.line}`, borderRadius: 12, padding: 16, background: C.well, display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap", alignItems: "baseline" }}>
-        <strong style={{ fontSize: 15 }}>{s.title}</strong>
+        <span><strong style={{ fontSize: 15 }}>{s.title}</strong> <span style={{ fontSize: 11, color: C.dimmer, fontFamily: MONO }} title="Rule id">{s.rule}</span></span>
         <span style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           <Pill tone={SEV_TONE[s.severity]}><span className="sr">Severity: </span>{SEV_LABEL[s.severity]}</Pill>
           {s.source === "llm" && <Pill tone="violet">AI note, lower confidence</Pill>}
@@ -44,12 +44,12 @@ export function SuggestionCard({ s, canDecide, showOrder = true }: { s: Suggesti
       </div>
       {showOrder && <span style={{ fontSize: 12, color: C.dimmer, fontFamily: MONO }}>{s.patientName ? `${s.patientName} · ` : ""}{s.patientId} · Rx {s.rxNumber}{s.drug ? ` · ${s.drug}` : ""}</span>}
       <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5 }}>{s.explanation}{s.explainedBy === "ai" && <span style={{ color: C.violet2 }}> (explained by AI, checked by the gate)</span>}</p>
-      <div>
+      {s.evidence.length > 0 && <div>
         <div style={{ fontSize: 12, color: C.dimmer, marginBottom: 4 }}>Evidence from the history</div>
         <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 1.5, color: C.ink2 }}>
           {s.evidence.map((e, i) => <li key={i}>{e.date && !e.text.startsWith(e.date) ? <span style={{ fontFamily: MONO, color: C.dimmer }}>{e.date} · </span> : null}{e.text}</li>)}
         </ul>
-      </div>
+      </div>}
       {!open && <div style={{ fontSize: 13, color: C.dim }}><strong>{DECISION[s.decision ?? s.status] ?? s.status}</strong>{s.decidedBy && s.decidedBy !== "system" ? ` by ${s.decidedBy}` : ""}{s.decisionReason ? `. ${s.decisionReason}` : ""}</div>}
       {open && canDecide && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
