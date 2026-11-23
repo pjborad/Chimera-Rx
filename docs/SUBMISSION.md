@@ -96,11 +96,29 @@ Follow the 3-minute table in [DEMO.md](DEMO.md) (the recording script, kept outs
 | 2:45 | `.kiro/` folder and `docs/SAFETY.md` table | Steering, specs, hooks, and eleven rules each mapped to a test. |
 | 2:58 | End card | "A modern pharmacy system. The recall is the proof." Repo URL, "synthetic data only". |
 
+## Rules check (2026 submission requirements)
+
+From the requirements the owner pasted on 2026-11-23. Status as of that day.
+
+| Requirement | Status |
+|---|---|
+| Project built with Kiro | Yes. `.kiro/` (specs, steering, hooks, agents) and `docs/KIRO_USAGE.md` |
+| URL to a functional application, login details in the form | **Missing.** Nothing is hosted. Judges can run it locally (`docker compose up`), but the form asks for a URL. Logins: the seeded staff accounts, shared password `moonlight-rx-2026` (synthetic) |
+| Text description of features | Devpost write-up above |
+| Video under 3 minutes, on YouTube, public, link in the form | **Not ready.** The current cut is 3:02.8, over the limit. Not uploaded |
+| Video shows the project running on its device | The cut is a browser screen recording of the running app |
+| No third-party trademarks or copyrighted music | No music. Check the video for logos before upload |
+| Public GitHub repo with source, assets and instructions | Public: `pjborad/Chimera-Rx`. README has setup |
+| Open source licence visible in the About section | `LICENSE` is MIT and GitHub detects it |
+| `/.kiro` at the root, not in `.gitignore` | `.kiro/` is committed. `.gitignore` still lists two generated `.kiro` files (`steering/aidlc-active-memory.md`, `agents/aidlc-scoped-review-*.md`), added by AI-DLC. Remove those lines if you want zero risk |
+| Category | Frankenstein. Bonus categories: owner to choose |
+| How Kiro was used | `docs/KIRO_USAGE.md`, "Answers to the judging questions" |
+
 ## Owner checklist
 
 These need a person. Nothing in this repo can do them.
 
-- [ ] **Record the video** and upload it (confirm the length limit and the upload site on the live rules page); paste the link into Devpost and into `docs/index.html` (replace the "Not recorded yet" line).
+- [ ] **Record the video** (under 3:00) and upload it to YouTube as public; paste the link into Devpost and into `docs/index.html` (replace the "Not recorded yet" line).
 - [ ] **Make the repository public** and check that `.kiro/` is visible and not ignored.
 - [ ] **Choose the licence holder name.** `LICENSE` is MIT and names the current copyright holder; change it if the entry belongs to someone else or to a team.
 - [ ] **Check the Kiroween rules page** (2026). The criteria in `docs/KIROWEEN.md` came from the 2025 launch post and community summaries because the official pages could not be fetched. Fix anything that differs, including the deadline.
