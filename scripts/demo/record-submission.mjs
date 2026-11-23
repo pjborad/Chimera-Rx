@@ -3,7 +3,7 @@
  *   1. .venv-voice/bin/python scripts/demo/make-voice.py full   (two voices, VOICE_A / VOICE_B; docs/DEMO_VIDEO_SCRIPT.md -> timeline.json, voice.wav)
  *   2. this script starts its own stack on ports 4690-4693, records one step per narration unit, composes the picture onto the
  *      audio time axis and writes demo-video/chimera-rx-submission.mp4 (1920x1080, H.264 + AAC) and .srt.
- * Run: pnpm demo:record:submission   (about 6 minutes). Synthetic data only. Never touches ports 4000, 5173, 5174.
+ * Run: pnpm demo:record:submission   (about 6 minutes). Never touches ports 4000, 5173, 5174.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -32,52 +32,66 @@ const card = (r, title, lines, foot = "", step = 1.3) => r.page.evaluate(([t, ls
     <div style="font-size:40px;color:#d9d0ff;margin-top:30px;animation:rise .7s ${(ls.length + 1) * st}s both">${f}</div></div>`;
 }, [title, lines, foot, step, CSS]);
 
-const pharm = (r) => r.asUser("j.rivera");
+const P = "Pharmacist"; // round 6: the whole video is the pharmacist's view; other roles are narration only
+const PLACEHOLDERS = "Designed seams, sandboxed today: SMS · email · phone calls · wholesaler EDI/EPCIS · DSCSA verification · e-prescribing · dispensing system · EHR (FHIR) · payer · secrets manager and KMS · SSO";
 const STEPS = {
   hook: [
-    [0, "signin page", async (r) => { await r.lt(ROLE("Chimera Rx", "Synthetic data only")); await A.idea(r); }],
-    [1, "sign in", async (r) => { await A.signinType(r); await A.showCode(r); await A.codeRefuseThenOk(r); }],
-    [2, "today", async (r) => { await A.todayPharm(r); await A.todayCards(r); }],
+    // signed in as j.rivera once, off camera (asUser runs inside cutWait)
+    [0, "today", async (r) => { await r.asUser("j.rivera"); await r.lt(ROLE("Today", P)); await r.go("/", "text=Good "); await r.hold(1200); await r.point("text=Start recall"); await r.hold(1500); }],
+    [1, "suggestions", async (r) => { await r.point("section[aria-labelledby=sugg]"); await r.hold(2000); }],
+    [2, "deliveries", async (r) => { await r.scrollTo("text=Deliveries to check in"); await r.point("text=Deliveries to check in"); await r.hold(1500); await r.point("text=Fridge F1"); await r.hold(1500); }],
   ],
-  tour: [
-    [0, "technician receives", async (r) => { await A.recvOpen(r); await A.recvScan(r); await A.recvPutAway(r); }],
-    [1, "pharmacist inventory and fill", async (r) => {
-      await A.invOpen(r); await A.invFilters(r);
-      await r.lt(ROLE("Fill & pickup", "Pharmacist")); await r.go("/fill?rx=0072210", "text=Rx Watcher"); await r.point("text=Rx Watcher"); await r.hold(900);
+  receiving: [
+    [0, "scan", async (r) => {
+      await r.lt(ROLE("Receiving", P)); await r.go("/receiving", "text=Check in delivery from");
+      await r.click(r.page.getByRole("button", { name: "Scan with camera" })); await r.page.getByRole("button", { name: "Stop camera" }).waitFor();
+      await r.hold(1200); await A.recvScan(r);
     }],
-    [2, "cashier", async (r) => { await A.regSale(r); await A.regMenu(r); }],
-    [3, "refills and patients", async (r) => {
-      await pharm(r); await r.lt(ROLE("Refills", "Pharmacist")); await r.go("/refills", "text=Refill worklist"); await r.hold(700);
-      await r.lt(ROLE("Patients", "Pharmacist")); await r.go("/patients"); await r.hold(900);
-    }],
+    [1, "putaway", async (r) => { await A.recvPutAway(r); await r.hold(1200); }],
   ],
-  recall: [
-    [0, "fax and lots", async (r) => { await A.recFax(r); await A.recLots(r); }],
-    [1, "confirm quarantine messages", async (r) => { await A.recConfirm(r); await A.recQuarantine(r); await A.recMessages(r); }],
-  ],
-  open: [
-    [0, "dscsa export", async (r) => { await pharm(r); await A.dscsaExport(r); }],
-    [1, "sandbox verifier", async (r) => { await r.scrollTo("text=Verification requests"); await A.dscsaVerify(r); }],
-    [2, "partners and mcp", async (r) => { await A.intPartners(r); await A.intMcp(r); }],
-    [3, "two stores", async (r) => { await pharm(r); await A.transfer(r); await A.store2(r); }],
-    [4, "placeholders", async (r) => {
-      await r.asUser("s.grant"); await r.lt(ROLE("Integrations", "Admin")); await r.go("/integrations", "text=Outbound connections");
-      await A.intPlaceholders(r);
-      await r.lt("Designed seams, sandboxed today: SMS · email · phone calls · wholesaler EDI/EPCIS · DSCSA verification · e-prescribing · dispensing system · EHR (FHIR) · payer · secrets manager and KMS · SSO");
-      await r.hold(600);
+  fill: [
+    [0, "guardian", async (r) => {
+      await r.lt(ROLE("Fill & pickup", P)); await r.go("/fill?rx=0072210", "text=Rx Watcher"); await r.hold(1200);
+      await r.lt(ROLE("Rx Guardian", P)); await r.scrollTo("text=/Rx Guardian found/"); await r.point("text=/Rx Guardian found/"); await r.hold(1500);
+      await r.scrollTo("text=Evidence from the history"); await r.point("text=Evidence from the history"); await r.hold(1500);
     }],
+    [1, "accept", async (r) => { await A.agentsAccept(r); await r.hold(1200); }],
   ],
   agents: [
     [0, "agents page", async (r) => { await A.agentsOpen(r); await A.agentsList(r); }],
     [1, "run now", async (r) => { await A.agentsBackground(r); }],
-    [2, "suggestions and accept", async (r) => { await A.agentsToday(r); await A.agentsAccept(r); }],
-    [3, "coroner gate", async (r) => { await r.go("/agents", "text=Rules decide."); await A.agentsGate(r); }],
-    [4, "providers", async (r) => { await A.agentsProvider(r); await A.agentsRuns(r); }],
+    [2, "providers", async (r) => { await A.agentsProvider(r); await A.agentsRuns(r); }],
   ],
-  security: [[0, "audit chain", async (r) => { await r.asUser("s.grant"); await A.secAudit(r); await r.scrollTo("text=Audit chain"); await r.hold(900); }]],
+  recalls: [
+    [0, "fax", async (r) => { await r.lt(ROLE("Recalls", P)); await r.go("/recalls", "text=Fax inbox"); await r.hold(1000); await A.recFax(r); await A.recLots(r); }],
+    [1, "impact", async (r) => {
+      await A.recConfirm(r); await A.recQuarantine(r);
+      await r.lt(ROLE("Recalls: patient messages", P)); await r.click(r.page.getByRole("button", { name: "Continue to patient messages" })); await r.page.waitForSelector("text=Text message");
+    }],
+    [2, "attest and outbox", async (r) => {
+      await r.click(r.page.getByLabel(/I am the pharmacist/));
+      await r.click(r.page.getByRole("button", { name: /^Start \d+ calls/ }));
+      await r.cutWait(() => r.page.waitForSelector("text=Patients contacted for recall", { timeout: 60000 }));
+      await r.lt(ROLE("Sandbox outbox", P)); await r.go("/outbox", "text=Sandbox outbox"); await r.hold(1500);
+    }],
+  ],
+  integrations: [
+    [0, "standards", async (r) => {
+      await r.lt(ROLE("Integrations & API", P)); await r.go("/integrations", "text=Connected partners"); await r.point("text=Connected partners"); await r.hold(1500);
+      for (const n of ["MCP server", "FHIR R4"]) { await r.click(r.page.getByRole("tab", { name: n })); await r.hold(500); }
+    }],
+    [1, "placeholders", async (r) => {
+      await r.scrollTo("text=Outbound connections"); await r.point("text=Outbound connections"); await r.hold(1500);
+      await r.lt(PLACEHOLDERS); await r.hold(1500);
+    }],
+  ],
+  security: [
+    [0, "roles", async (r) => { await r.lt("Roles, enforced on the server: <b>Pharmacist</b> · Technician · Cashier · Admin"); await r.go("/", "text=Good "); await r.hold(2000); }],
+    [1, "audit chain", async (r) => { await r.lt(ROLE("Audit chain", P)); await r.go("/integrations", "text=Audit chain"); await r.point("text=Audit chain"); await r.hold(1500); }],
+  ],
   kiro: [
     [0, "kiro card", async (r) => { await r.lt(""); await card(r, "Built with Kiro", ["Specs with requirement IDs", "Steering for the safety rules", "Hooks: PHI guard and property tests on save", "A custom agent and a Kiro Crew team, a human at every gate"], "", 1.5); await r.hold(1500); }],
-    [1, "end card", async (r) => { await card(r, "Chimera Rx", ["github.com/pjborad/Chimera-Rx", "pjborad.github.io/Chimera-Rx"], "Synthetic data only. HIPAA-style safeguards, not certified.", 1.2); await r.hold(1500); }],
+    [1, "end card", async (r) => { await card(r, "Chimera Rx", ["github.com/pjborad/Chimera-Rx", "pjborad.github.io/Chimera-Rx"], "", 1.2); await r.hold(1500); }],
   ],
 };
 
@@ -86,7 +100,7 @@ stopStack();
 await startStack();
 const stub = startStub();
 const r = new Recorder("submission");
-const paceFile = path.join(work, "submission-pace5.json");
+const paceFile = path.join(work, "submission-pace6.json");
 const pace = fs.existsSync(paceFile) ? JSON.parse(fs.readFileSync(paceFile, "utf8")) : {};
 const win = {};
 for (const sg of timeline.segments) for (const un of sg.units) win[`${sg.id}#${un.i}`] = un.end - un.start;

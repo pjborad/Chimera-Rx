@@ -21,7 +21,7 @@
     "preview:browser": "pnpm --filter @chimera-rx/browser run preview",
     "e2e:browser": "node scripts/e2e/browser-app.mjs",
     "e2e": "node scripts/e2e/run.mjs",
-    "demo:record:submission": ".venv-voice/bin/python scripts/demo/make-voice.py full --speed 1.1 && node scripts/demo/record-submission.mjs",
+    "demo:record:submission": ".venv-voice/bin/python scripts/demo/make-voice.py full --speed 1.0 && node scripts/demo/record-submission.mjs",
     "evidence": "pnpm --filter @chimera-rx/api run evidence:accuracy && pnpm --filter @chimera-rx/api run evidence:timing",
     "fixtures:refresh": "bash scripts/refresh-fixtures.sh",
     "hooks:install": "bash scripts/install-hooks.sh"

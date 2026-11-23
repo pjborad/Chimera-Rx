@@ -1,184 +1,164 @@
 1
-00:00:00,000 --> 00:00:05,671
+00:00:00,000 --> 00:00:05,902
 A: Most pharmacies still run on fax machines, phone calls, paper logs, and systems that don't talk to each other.
 
 2
-00:00:05,671 --> 00:00:09,252
+00:00:05,902 --> 00:00:09,630
 A: The lot, the patient, and the prescription live in three different places.
 
 3
-00:00:09,252 --> 00:00:15,222
-A: Chimera Rx shows what a modern pharmacy system looks like: one connected ledger, from the dock to the pickup counter.
+00:00:09,690 --> 00:00:17,137
+A: Chimera Rx shows what a modern pharmacy looks like: one connected ledger, from the dock to the pickup counter, with every step on the record.
 
 4
-00:00:15,222 --> 00:00:16,714
-A: Show them how that works.
+00:00:17,197 --> 00:00:19,190
+B: We stay in the pharmacist's view.
 
 5
-00:00:16,774 --> 00:00:17,073
-B: Sure.
+00:00:19,190 --> 00:00:26,500
+B: Today shows their own work: deliveries to check in, stock to watch, and suggestions from the AI agents, all in one place.
 
 6
-00:00:17,073 --> 00:00:21,854
-B: Staff sign in with a password and a six-digit code, and the server checks every role.
+00:00:26,560 --> 00:00:28,178
+B: Receiving starts at the dock.
 
 7
-00:00:21,914 --> 00:00:24,301
-B: Today shows each person only their own work.
+00:00:28,178 --> 00:00:34,972
+B: One scan with the camera reads the lot, serial, and expiry from the label, with no typing and no paper log.
 
 8
-00:00:24,361 --> 00:00:25,935
-B: A technician receives a delivery.
+00:00:35,032 --> 00:00:39,348
+B: Four checks run: the invoice, the paperwork, the expiry, and the recall list.
 
 9
-00:00:25,935 --> 00:00:30,973
-B: Scan the label, and the lot gate checks the paperwork, the expiry, and the recall list.
+00:00:39,348 --> 00:00:42,004
+B: The lot is captured, and put-away is recorded.
 
 10
-00:00:31,033 --> 00:00:39,097
-B: The pharmacist sees stock by lot, with expiry and shelf location, then fills and verifies each order while Rx Watcher checks the rules.
+00:00:42,064 --> 00:00:45,810
+B: At the counter, Rx Guardian reviews an order the moment it arrives.
 
 11
-00:00:39,157 --> 00:00:40,729
-A: Least privilege is the point.
+00:00:45,810 --> 00:00:51,429
+B: It shows what it found, and the evidence from the patient's own history, so nothing is a guess.
 
 12
-00:00:40,729 --> 00:00:44,186
-A: The cashier runs the register and can't see allergies or recalls.
+00:00:51,489 --> 00:00:57,269
+B: Accept the suggestion, and the order goes on hold with the reason recorded in the audit log.
 
 13
-00:00:44,246 --> 00:00:47,406
-A: Refills show who is due, and each patient keeps one history.
+00:00:57,269 --> 00:00:58,629
+B: The pharmacist always decides.
 
 14
-00:00:47,466 --> 00:00:49,204
-A: Here's the gap old systems leave.
-
-15
-00:00:49,204 --> 00:00:53,839
-A: A recall fax arrives, and nobody captured the lot, so you warn everyone, or no one.
-
-16
-00:00:53,899 --> 00:00:55,479
-B: Connected, it takes seconds.
-
-17
-00:00:55,479 --> 00:01:02,983
-B: The pharmacist confirms the lots, stock moves to quarantine, and the exact patients appear, with messages drafted for approval.
-
-18
-00:01:03,043 --> 00:01:04,871
-A: Everything speaks open standards.
-
-19
-00:01:04,871 --> 00:01:08,983
-A: DSCSA and EPCIS exports give every package a history.
-
-20
-00:01:09,043 --> 00:01:15,666
-B: Here the sandbox verifier checks a package: a real serial verifies, and a spoofed one comes back not verified.
-
-21
-00:01:15,726 --> 00:01:21,179
-B: Partners connect through a REST API, an MCP server, FHIR behind OAuth, and signed webhooks.
-
-22
-00:01:21,179 --> 00:01:25,178
-B: The admin controls who gets in, and every call is audited.
-
-23
-00:01:25,238 --> 00:01:28,808
-A: Two stores can transfer stock, and both audit logs record the move.
-
-24
-00:01:28,868 --> 00:01:38,670
-A: The real-world connections, like text, email, phone, wholesaler, e-prescribing, the health record, payer, and single sign-on, are designed seams, sandboxed today, so nothing reaches a real person.
-
-25
-00:01:38,730 --> 00:01:39,925
+00:00:58,689 --> 00:00:59,927
 A: Now the AI agents.
 
-26
-00:01:39,925 --> 00:01:47,993
-A: Eight of them help in the background, and every one follows one rule: rules decide, the model explains, a gate checks the model, and a pharmacist decides.
+15
+00:00:59,927 --> 00:01:08,281
+A: Eight of them work in the background, and every one follows one rule: rules decide, the model explains, a gate checks the model, and a pharmacist decides.
 
-27
-00:01:47,993 --> 00:01:49,487
-A: Take us through Rx Guardian.
+16
+00:01:08,341 --> 00:01:11,906
+B: Rx Guardian works on its own, even when nobody is looking.
 
-28
-00:01:49,547 --> 00:01:55,151
-B: Rx Guardian works on its own, even when nobody is looking, and never changes an order itself.
+17
+00:01:11,906 --> 00:01:15,795
+B: Run it now, and it flags what a busy pharmacist could miss.
 
-29
-00:01:55,151 --> 00:02:02,073
-B: Run it now, and it flags things a busy pharmacist could miss, like duplicate therapy, an interaction, or a late fill.
+18
+00:01:15,795 --> 00:01:17,739
+B: It never changes an order itself.
 
-30
-00:02:02,133 --> 00:02:04,869
-B: Each suggestion shows its evidence from the patient's history.
-
-31
-00:02:04,869 --> 00:02:08,516
-B: Accept one, and the order goes on hold with the reason recorded.
-
-32
-00:02:08,516 --> 00:02:10,948
-B: Dismiss it, and that reason is kept too.
-
-33
-00:02:11,008 --> 00:02:12,941
-A: The Coroner gate is the safety net.
-
-34
-00:02:12,941 --> 00:02:17,913
-A: It keeps only lots printed word for word on the recall notice, and drops anything the model invented.
-
-35
-00:02:17,973 --> 00:02:22,267
+19
+00:01:17,799 --> 00:01:22,303
 B: Pick any provider: Bedrock, Anthropic, an OpenAI-compatible endpoint, or a local model.
 
-36
-00:02:22,267 --> 00:02:27,634
+20
+00:01:22,303 --> 00:01:27,934
 B: Patient names and birth dates stay out of the prompts, and every run is logged.
 
-37
-00:02:27,694 --> 00:02:29,151
+21
+00:01:27,994 --> 00:01:29,885
+A: Here is the gap old systems leave.
+
+22
+00:01:29,885 --> 00:01:36,100
+A: When a recall arrives, nobody knows which patients got which lot, so you either warn everyone, or you warn no one at all.
+
+23
+00:01:36,160 --> 00:01:38,245
+B: Connected, one lookup finds the recall.
+
+24
+00:01:38,245 --> 00:01:43,457
+B: The pharmacist confirms each lot, and the screen shows the units and the patients affected.
+
+25
+00:01:43,517 --> 00:01:47,456
+B: Messages are drafted for exactly those patients, and no one else.
+
+26
+00:01:47,456 --> 00:01:51,753
+B: The pharmacist attests, and only then do they reach the sandbox outbox.
+
+27
+00:01:51,813 --> 00:01:53,123
+A: Everything speaks open standards.
+
+28
+00:01:53,123 --> 00:02:02,618
+A: Partners connect through a REST API, an MCP server, FHIR behind OAuth, and signed webhooks, and every call is checked against its scopes and written to the audit log.
+
+29
+00:02:02,678 --> 00:02:14,161
+A: The real-world connections, like text, email, phone, wholesaler, e-prescribing, the health record, payer, and single sign-on, are designed seams, sandboxed today, so nothing reaches a real person while you evaluate it.
+
+30
+00:02:14,221 --> 00:02:16,537
+A: Roles are enforced on the server.
+
+31
+00:02:16,537 --> 00:02:21,168
+A: A cashier only sees pickup and the register, never allergies or recalls.
+
+32
+00:02:21,168 --> 00:02:24,256
+A: An admin only manages partner access, nothing clinical.
+
+33
+00:02:24,316 --> 00:02:25,844
 A: Security is built in.
 
-38
-00:02:29,151 --> 00:02:34,977
-A: PHI fields are encrypted, roles are enforced on the server, and the audit log is hash-chained.
+34
+00:02:25,844 --> 00:02:31,573
+A: PHI fields are encrypted, and the audit log is hash-chained, so any tampering shows up.
 
-39
-00:02:34,977 --> 00:02:37,162
+35
+00:02:31,573 --> 00:02:33,865
 A: These are HIPAA-style safeguards, not certified.
 
-40
-00:02:37,222 --> 00:02:38,057
+36
+00:02:33,925 --> 00:02:34,819
 A: Built with Kiro.
 
-41
-00:02:38,057 --> 00:02:42,788
+37
+00:02:34,819 --> 00:02:39,888
 A: Specs carry requirement IDs, steering holds the safety rules, and hooks run a PHI guard on save.
 
-42
-00:02:42,788 --> 00:02:47,520
+38
+00:02:39,888 --> 00:02:44,957
 A: A custom agent and a Kiro Crew team did the work, with a human at every gate.
 
-43
-00:02:47,580 --> 00:02:48,489
+39
+00:02:45,017 --> 00:02:45,952
 A: Chimera Rx.
 
-44
-00:02:48,489 --> 00:02:50,306
+40
+00:02:45,952 --> 00:02:47,823
 A: github.com/pjborad/Chimera-Rx.
 
-45
-00:02:50,306 --> 00:02:52,124
+41
+00:02:47,823 --> 00:02:49,694
 A: pjborad.github.io/Chimera-Rx.
-
-46
-00:02:52,124 --> 00:02:53,487
-A: Synthetic data only.
 
