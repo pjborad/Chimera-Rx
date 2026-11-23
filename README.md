@@ -4,6 +4,10 @@
 
 **Kiroween 2026, Frankenstein category. Built with Kiro.** Demo environment: synthetic data only, not for clinical use. Built with HIPAA-style safeguards, not certified; no compliance or certification claim of any kind. See [docs/SAFETY.md](docs/SAFETY.md).
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/pjborad/Chimera-Rx?quickstart=1)
+
+**Try it in the browser:** open the Codespace above (free with a GitHub account). It installs, seeds synthetic data and opens the app on port 5173. Project page: https://pjborad.github.io/Chimera-Rx/
+
 ![Sign-in page with the demo notice](docs/img/sign-in.jpg)
 
 ## The pharmacy runs on yesterday's software
