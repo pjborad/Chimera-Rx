@@ -184,7 +184,18 @@ def main():
     audio = np.concatenate(track)
     raw = out_dir / "voice.raw.wav"
     sf.write(raw, audio, SR)
-    vo.sh(vo.FFMPEG, "-y", "-loglevel", "error", "-i", str(raw), "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-ar", "44100", "-ac", "1", str(out_dir / "voice.wav"))
+    # two-pass loudnorm (linear): final integrated loudness -16 LUFS, true peak kept at or below -2 dBTP so the AAC encode stays under -1.5
+    import subprocess
+    m = subprocess.run([vo.FFMPEG, "-hide_banner", "-i", str(raw), "-af", "loudnorm=I=-16:TP=-2.2:LRA=11:print_format=json", "-f", "null", "-"], capture_output=True, text=True).stderr
+    j = json.loads(m[m.rindex("{"):m.rindex("}") + 1])
+    vo.sh(vo.FFMPEG, "-y", "-loglevel", "error", "-i", str(raw), "-af",
+          f"loudnorm=I=-16:TP=-2.2:LRA=11:measured_I={j['input_i']}:measured_TP={j['input_tp']}:measured_LRA={j['input_lra']}:measured_thresh={j['input_thresh']}:offset={j['target_offset']}:linear=true",
+          "-ar", "44100", "-ac", "1", str(out_dir / "voice.pre.wav"))
+    # trim the remaining gap to -16 LUFS with a brick-wall limiter at -3 dBFS (peaks stay under -1.5 dBTP after AAC)
+    e = subprocess.run([vo.FFMPEG, "-hide_banner", "-i", str(out_dir / "voice.pre.wav"), "-af", "ebur128", "-f", "null", "-"], capture_output=True, text=True).stderr
+    cur = float(re.findall(r"I:\s+(-?\d+\.\d+) LUFS", e)[-1])
+    vo.sh(vo.FFMPEG, "-y", "-loglevel", "error", "-i", str(out_dir / "voice.pre.wav"), "-af", f"volume={-16 - cur + 0.4:.2f}dB,alimiter=limit=0.75:attack=2:release=60:level=disabled", "-ar", "44100", "-ac", "1", str(out_dir / "voice.wav"))
+    (out_dir / "voice.pre.wav").unlink()
     raw.unlink()
     total = len(audio) / SR
     (out_dir / "timeline.json").write_text(json.dumps({"voice_a": a.voice_a, "voice_b": a.voice_b, "speed": a.speed, "seconds": round(total, 2), "words": words, "wpm": round(words / total * 60, 1), "segments": timeline}, indent=1))

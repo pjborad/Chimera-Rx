@@ -32,66 +32,113 @@ const card = (r, title, lines, foot = "", step = 1.3) => r.page.evaluate(([t, ls
     <div style="font-size:40px;color:#d9d0ff;margin-top:30px;animation:rise .7s ${(ls.length + 1) * st}s both">${f}</div></div>`;
 }, [title, lines, foot, step, CSS]);
 
-const P = "Pharmacist"; // round 6: the whole video is the pharmacist's view; other roles are narration only
 const PLACEHOLDERS = "Designed seams, sandboxed today: SMS · email · phone calls · wholesaler EDI/EPCIS · DSCSA verification · e-prescribing · dispensing system · EHR (FHIR) · payer · secrets manager and KMS · SSO";
+const P = "Pharmacist"; // the whole video is the pharmacist's view; other roles are narration only (round 6 and 7)
+const T = (r, name) => r.lt(ROLE(name, P));
 const STEPS = {
   hook: [
-    // signed in as j.rivera once, off camera (asUser runs inside cutWait)
-    [0, "today", async (r) => { await r.asUser("j.rivera"); await r.lt(ROLE("Today", P)); await r.go("/", "text=Good "); await r.hold(1200); await r.point("text=Start recall"); await r.hold(1500); }],
-    [1, "suggestions", async (r) => { await r.point("section[aria-labelledby=sugg]"); await r.hold(2000); }],
-    [2, "deliveries", async (r) => { await r.scrollTo("text=Deliveries to check in"); await r.point("text=Deliveries to check in"); await r.hold(1500); await r.point("text=Fridge F1"); await r.hold(1500); }],
+    // Signed in as j.rivera once, off camera. The agent scenario loads first (off camera) so Today and AI agents have live suggestions.
+    [0, "today", async (r) => {
+      await r.cutWait(async () => { await r.control("POST", "/scenario/agent-catches-it"); });
+      await r.asUser("j.rivera"); await T(r, "Today"); await r.go("/", "text=Good "); await r.hold(1200); await r.point("text=Start recall"); await r.hold(1500);
+    }],
+    [1, "cards", async (r) => { await r.point("section[aria-labelledby=sugg]"); await r.hold(1500); await r.scrollTo("text=Deliveries to check in"); await r.point("text=Deliveries to check in"); await r.hold(1500); await r.point("text=Fridge F1"); await r.hold(1000); }],
   ],
   receiving: [
     [0, "scan", async (r) => {
-      await r.lt(ROLE("Receiving", P)); await r.go("/receiving", "text=Check in delivery from");
+      await T(r, "Receiving"); await r.go("/receiving", "text=Check in delivery from");
       await r.click(r.page.getByRole("button", { name: "Scan with camera" })); await r.page.getByRole("button", { name: "Stop camera" }).waitFor();
-      await r.hold(1200); await A.recvScan(r);
+      await r.hold(900); await A.recvScan(r);
     }],
-    [1, "putaway", async (r) => { await A.recvPutAway(r); await r.hold(1200); }],
+    [1, "putaway", async (r) => { await A.recvPutAway(r); await r.hold(1000); }],
+  ],
+  inventory: [
+    [0, "filters", async (r) => {
+      await T(r, "Inventory"); await r.go("/inventory", "text=Inventory by lot"); await r.hold(900);
+      for (const re of [/^Expiring/, /^Refrigerated/, /^Controlled/]) { await r.click(r.page.getByRole("button", { name: re }).or(r.page.getByRole("tab", { name: re }))); await r.hold(400); }
+    }],
+  ],
+  register: [
+    [0, "sale", async (r) => {
+      await T(r, "Register"); await r.go("/register", "text=Mark paid and print receipt");
+      await r.click("section[aria-labelledby='otc'] li button, section[aria-labelledby='otc'] ul button");
+      await r.click(r.page.getByRole("button", { name: "Mark paid and print receipt" })); await r.page.waitForSelector("section[aria-label='Receipt']", { timeout: 8000 }); await r.hold(900);
+    }],
+  ],
+  stock: [
+    [0, "stock help", async (r) => { await T(r, "Stock help"); await r.go("/stock", "text=Stock help"); await r.hold(600); await r.point("text=Reorder (1)"); await r.hold(800); await r.scrollTo("text=Expiry risk"); await r.point("text=Expiry risk"); await r.hold(800); }],
+  ],
+  transfers: [
+    [0, "transfer", async (r) => {
+      await T(r, "Transfers"); await r.go("/transfers", "#lot");
+      const opt = await r.page.locator("#lot option").nth(1).getAttribute("value"); await r.page.selectOption("#lot", opt); await r.hold(400);
+      await r.click(r.page.getByRole("button", { name: "Move stock" })); await r.page.waitForSelector("text=Recorded in both audit logs", { timeout: 8000 }); await r.hold(900);
+    }],
   ],
   fill: [
     [0, "guardian", async (r) => {
-      await r.lt(ROLE("Fill & pickup", P)); await r.go("/fill?rx=0072210", "text=Rx Watcher"); await r.hold(1200);
-      await r.lt(ROLE("Rx Guardian", P)); await r.scrollTo("text=/Rx Guardian found/"); await r.point("text=/Rx Guardian found/"); await r.hold(1500);
+      await T(r, "Fill & pickup"); await r.go("/fill?rx=0072210", "text=Rx Watcher"); await r.hold(1000);
+      await T(r, "Rx Guardian"); await r.scrollTo("text=/Rx Guardian found/"); await r.point("text=/Rx Guardian found/"); await r.hold(1500);
       await r.scrollTo("text=Evidence from the history"); await r.point("text=Evidence from the history"); await r.hold(1500);
     }],
     [1, "accept", async (r) => { await A.agentsAccept(r); await r.hold(1200); }],
+    [2, "handover", async (r) => { await r.hold(1500); }],
   ],
-  agents: [
-    [0, "agents page", async (r) => { await A.agentsOpen(r); await A.agentsList(r); }],
-    [1, "run now", async (r) => { await A.agentsBackground(r); }],
-    [2, "providers", async (r) => { await A.agentsProvider(r); await A.agentsRuns(r); }],
+  patients: [
+    [0, "profile", async (r) => {
+      await T(r, "Patients"); await r.go("/patients", "#psearch"); await r.hold(400);
+      await r.page.locator("#psearch").fill("Brooks"); await r.click(r.page.getByRole("button", { name: "Search", exact: true }));
+      await r.click(r.page.locator("[aria-label=Matches] button").first());
+      await r.click(r.page.locator("form.enter .pill").first());
+      await r.click(r.page.getByRole("button", { name: "Open profile" })); await r.hold(1200);
+    }],
   ],
   recalls: [
-    [0, "fax", async (r) => { await r.lt(ROLE("Recalls", P)); await r.go("/recalls", "text=Fax inbox"); await r.hold(1000); await A.recFax(r); await A.recLots(r); }],
-    [1, "impact", async (r) => {
-      await A.recConfirm(r); await A.recQuarantine(r);
-      await r.lt(ROLE("Recalls: patient messages", P)); await r.click(r.page.getByRole("button", { name: "Continue to patient messages" })); await r.page.waitForSelector("text=Text message");
-    }],
-    [2, "attest and outbox", async (r) => {
+    [0, "fax", async (r) => { await T(r, "Recalls"); await r.go("/recalls", "text=Fax inbox"); await r.hold(700); await A.recFax(r); await A.recLots(r); }],
+    [1, "impact", async (r) => { await A.recConfirm(r); await A.recQuarantine(r); }],
+    [2, "attest and send", async (r) => {
+      await T(r, "Recalls: patient messages"); await r.click(r.page.getByRole("button", { name: "Continue to patient messages" })); await r.page.waitForSelector("text=Text message");
       await r.click(r.page.getByLabel(/I am the pharmacist/));
       await r.click(r.page.getByRole("button", { name: /^Start \d+ calls/ }));
-      await r.cutWait(() => r.page.waitForSelector("text=Patients contacted for recall", { timeout: 60000 }));
-      await r.lt(ROLE("Sandbox outbox", P)); await r.go("/outbox", "text=Sandbox outbox"); await r.hold(1500);
+      await r.cutWait(() => r.page.waitForSelector("text=Patients contacted for recall", { timeout: 60000 })); await r.hold(900);
     }],
+  ],
+  refills: [
+    [0, "worklist", async (r) => {
+      await T(r, "Refills"); await r.go("/refills", "text=Refill worklist"); await r.hold(600);
+      await r.click(r.page.getByRole("button", { name: "Draft reminders" })); await r.hold(900);
+      await r.scrollTo("text=Need a new prescription"); await r.point("text=Need a new prescription"); await r.hold(700);
+    }],
+  ],
+  dscsa: [
+    [0, "trace", async (r) => {
+      await T(r, "DSCSA & trace"); await r.go("/dscsa", "text=Verification requests");
+      await r.click(r.page.getByRole("button", { name: "Preview" })); await r.hold(800);
+      await r.scrollTo("text=Verification requests"); await r.hold(600);
+    }],
+  ],
+  outbox: [
+    [0, "outbox", async (r) => { await T(r, "Sandbox outbox"); await r.go("/outbox", "text=Sandbox outbox"); await r.hold(1500); await r.point(r.page.locator("main").first()); await r.hold(800); }],
+  ],
+  agents: [
+    [0, "agents page", async (r) => { await T(r, "AI agents"); await r.go("/agents", "text=Rules decide. The model explains."); await r.hold(700); await A.agentsList(r); }],
+    [1, "run now", async (r) => { await A.agentsBackground(r); await r.hold(900); }],
+    [2, "providers", async (r) => { await A.agentsProvider(r); await A.agentsRuns(r); }],
   ],
   integrations: [
     [0, "standards", async (r) => {
-      await r.lt(ROLE("Integrations & API", P)); await r.go("/integrations", "text=Connected partners"); await r.point("text=Connected partners"); await r.hold(1500);
-      for (const n of ["MCP server", "FHIR R4"]) { await r.click(r.page.getByRole("tab", { name: n })); await r.hold(500); }
+      await T(r, "Integrations"); await r.go("/integrations", "text=Connected partners"); await r.point("text=Connected partners"); await r.hold(1000);
+      for (const n of ["MCP server", "FHIR R4"]) { await r.click(r.page.getByRole("tab", { name: n })); await r.hold(400); }
     }],
-    [1, "placeholders", async (r) => {
-      await r.scrollTo("text=Outbound connections"); await r.point("text=Outbound connections"); await r.hold(1500);
-      await r.lt(PLACEHOLDERS); await r.hold(1500);
-    }],
+    [1, "placeholders", async (r) => { await r.scrollTo("text=Outbound connections"); await r.point("text=Outbound connections"); await r.hold(1500); await r.lt(PLACEHOLDERS); await r.hold(1500); }],
   ],
   security: [
     [0, "roles", async (r) => { await r.lt("Roles, enforced on the server: <b>Pharmacist</b> · Technician · Cashier · Admin"); await r.go("/", "text=Good "); await r.hold(2000); }],
-    [1, "audit chain", async (r) => { await r.lt(ROLE("Audit chain", P)); await r.go("/integrations", "text=Audit chain"); await r.point("text=Audit chain"); await r.hold(1500); }],
+    [1, "audit chain", async (r) => { await T(r, "Audit chain"); await r.go("/integrations", "text=Audit chain"); await r.point("text=Audit chain"); await r.hold(1500); }],
   ],
   kiro: [
-    [0, "kiro card", async (r) => { await r.lt(""); await card(r, "Built with Kiro", ["Specs with requirement IDs", "Steering for the safety rules", "Hooks: PHI guard and property tests on save", "A custom agent and a Kiro Crew team, a human at every gate"], "", 1.5); await r.hold(1500); }],
-    [1, "end card", async (r) => { await card(r, "Chimera Rx", ["github.com/pjborad/Chimera-Rx", "pjborad.github.io/Chimera-Rx"], "", 1.2); await r.hold(1500); }],
+    [0, "kiro card", async (r) => { await r.lt(""); await card(r, "Built with Kiro", ["Specs with requirement IDs", "Steering for the safety rules", "Hooks: PHI guard and property tests on save", "A custom agent and a Kiro Crew team, a human at every gate"], "", 1.2); await r.hold(1500); }],
+    [1, "end card", async (r) => { await card(r, "Chimera Rx", ["github.com/pjborad/Chimera-Rx", "pjborad.github.io/Chimera-Rx"], "", 1.0); await r.hold(1500); }],
   ],
 };
 
@@ -100,7 +147,7 @@ stopStack();
 await startStack();
 const stub = startStub();
 const r = new Recorder("submission");
-const paceFile = path.join(work, "submission-pace6.json");
+const paceFile = path.join(work, "submission-pace7.json");
 const pace = fs.existsSync(paceFile) ? JSON.parse(fs.readFileSync(paceFile, "utf8")) : {};
 const win = {};
 for (const sg of timeline.segments) for (const un of sg.units) win[`${sg.id}#${un.i}`] = un.end - un.start;
