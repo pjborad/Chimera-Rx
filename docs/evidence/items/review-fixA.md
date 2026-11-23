@@ -5,7 +5,7 @@ Branch `fix/review-2026-11-22`. Synthetic data only. Nothing pushed.
 ## What changed
 
 F03
-- `apps/api/src/access.ts` (new): `ACCESS`, one table of `"METHOD /pattern"` to allowed roles (or `public`, `partner`, `static` with a reason per entry). 147 rows, one per registered route.
+- `apps/api/src/access.ts` (new): `ACCESS`, one table of `"METHOD /pattern"` to allowed roles (or `public`, `partner`, `static` with a reason per entry). 129 rows, one per registered route.
 - `apps/api/src/app.ts`: an `onRoute` hook records every registered route (`app.routeTable`, used by the test), and the session `preHandler` now applies the table after the session check: 401 without a session, 403 for an unlisted role, 403 `route_unlisted` for a route with no row (default deny). Existing handler checks are untouched and can still be stricter.
 - `apps/api/src/today.ts` `todayView`: the Rx Watcher tasks ("Review Rx ... for <patient name>") went to every role, including cashier and admin. They are now built for pharmacist and technician only.
 - `apps/api/src/agents/routes.ts`: no per-route edits were needed for F03; reads such as `/api/agents/runs`, `/api/agents/:id` are gated by the table (pharmacist, technician).
