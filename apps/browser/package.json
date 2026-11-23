@@ -1,0 +1,32 @@
+{
+  "name": "@chimera-rx/browser",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser-only build of Chimera Rx: the real API runs inside the page (sql.js for SQLite), for GitHub Pages.",
+  "scripts": {
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4680 --strictPort",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@noble/hashes": "^2.4.0",
+    "@types/sql.js": "^1.16.0",
+    "@vitejs/plugin-react": "5.2.0",
+    "assert": "^2.1.0",
+    "browserify-aes": "^1.2.0",
+    "buffer": "^6.0.3",
+    "create-hash": "^1.2.0",
+    "create-hmac": "^1.1.7",
+    "events": "^3.3.0",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "randombytes": "^2.1.0",
+    "sql.js": "^1.17.0",
+    "stream-browserify": "^3.0.0",
+    "typescript": "5.9.3",
+    "util": "^0.12.5",
+    "vite": "7.3.7",
+    "vite-plugin-node-polyfills": "^0.28.0"
+  }
+}

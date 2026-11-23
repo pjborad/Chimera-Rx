@@ -100,7 +100,7 @@ From the requirements the owner pasted on 2026-11-23. Status as of that day.
 | Requirement | Status |
 |---|---|
 | Project built with Kiro | Yes. `.kiro/` (specs, steering, hooks, agents) and `docs/KIRO_USAGE.md` |
-| URL to a functional application, login details in the form | **Missing.** Nothing is hosted. Judges can run it locally (`docker compose up`), but the form asks for a URL. Logins: the seeded staff accounts, shared password `moonlight-rx-2026` (synthetic) |
+| URL to a functional application, login details in the form | **https://pjborad.github.io/Chimera-Rx/app/** (browser preview: the real app and API code run inside the page, no server, no login to GitHub; built by `.github/workflows/pages.yml`). Full server version: `docker compose up` or Codespaces. Logins: the seeded staff accounts, shared password `moonlight-rx-2026` (synthetic) |
 | Text description of features | Devpost write-up above |
 | Video under 3 minutes, on YouTube, public, link in the form | **Video ready, not uploaded.** `chimera-rx-submission.mp4` is 2:50. Only the owner can upload it to YouTube as public |
 | Video shows the project running on its device | The video is a browser screen recording of the running app |
@@ -123,6 +123,6 @@ These need a person. Nothing in this repo can do them.
 - [ ] **Set the git author.** Existing commits carry a work email as the author. Decide whether to rewrite author identity before the repository is public, and set `git config user.name` and `user.email` to the identity that should own the entry.
 - [ ] **Run `docker compose up` once** on a machine with a working Docker daemon and confirm the sign-in page loads at http://localhost:4000.
 - [ ] **Do one live model check** if you want to claim it: set `LLM_PROVIDER=bedrock` with AWS credentials, press **Test connection** on AI agents, and run one agent.
-- [ ] **Add a hosted URL** if you want one (none exists).
+- [x] **Hosted URL:** https://pjborad.github.io/Chimera-Rx/app/ (GitHub Pages, browser preview). Switch Pages source to "GitHub Actions" once so the workflow can deploy.
 - [ ] **Choose the category** on the entry form: Frankenstein.
 - [ ] **Remove screenshots or text you do not want public** (the `docs/img/` pictures are of synthetic data only).

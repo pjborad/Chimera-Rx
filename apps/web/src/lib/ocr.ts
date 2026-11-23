@@ -8,9 +8,9 @@ export function ocrWorker() {
   workerP ??= (async () => {
     const { createWorker } = await import("tesseract.js");
     return createWorker("eng", 1, {
-      workerPath: "/ocr/worker.min.js",
-      corePath: "/ocr",
-      langPath: "/ocr",
+      workerPath: `${import.meta.env.BASE_URL}ocr/worker.min.js`,
+      corePath: `${import.meta.env.BASE_URL}ocr`,
+      langPath: `${import.meta.env.BASE_URL}ocr`,
       gzip: false
     });
   })();

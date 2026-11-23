@@ -29,7 +29,12 @@ export function ThemeSwitch() {
 
 /** Required on every page (pharmacy-safety rule 10). */
 export const SafetyBanner = () => (
-  <div className="safety" role="note">Demo environment · synthetic data only · not for clinical use · not HIPAA-compliant · a pharmacist approves every message</div>
+  <>
+    <div className="safety" role="note">Demo environment · synthetic data only · not for clinical use · not HIPAA-compliant · a pharmacist approves every message</div>
+    {import.meta.env.VITE_BROWSER_API === "1" && (
+      <div className="safety" role="note" data-testid="browser-preview" style={{ borderTop: "1px solid var(--border)" }}>Browser preview: runs entirely in your browser with synthetic data; the full server version runs with Docker or Codespaces.</div>
+    )}
+  </>
 );
 
 const NavIcon = {

@@ -1,0 +1,47 @@
+name: pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.16.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @chimera-rx/web run ocr:assets
+      # the browser build: the real web app and API code bundled into one page, base path /Chimera-Rx/app/
+      - run: pnpm build:browser
+      - name: Assemble the site (docs/ as the root, the app under app/)
+        run: |
+          mkdir -p _site
+          cp -R docs/. _site/
+          rm -rf _site/app && mkdir -p _site/app
+          cp -R apps/browser/dist/. _site/app/
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

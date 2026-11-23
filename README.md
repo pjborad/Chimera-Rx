@@ -6,7 +6,7 @@
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/pjborad/Chimera-Rx?quickstart=1)
 
-**Try it in the browser:** open the Codespace above (free with a GitHub account). It installs, seeds synthetic data and opens the app on port 5173. Project page: https://pjborad.github.io/Chimera-Rx/
+**Try it now, no install and no login:** open the live app at https://pjborad.github.io/Chimera-Rx/app/ (the real app and API running inside your browser tab, synthetic data, resets on reload; sign-in logins are listed below). The full server version runs in the Codespace above (free with a GitHub account). It installs, seeds synthetic data and opens the app on port 5173. Project page: https://pjborad.github.io/Chimera-Rx/
 
 ## Demo video (2:50)
 
@@ -76,6 +76,10 @@ The recall is the sharpest proof because it needs every silo at once: the lot (r
 Long version, by role, with a 90-day pilot plan: [docs/MODERNIZATION.md](docs/MODERNIZATION.md).
 
 ## Try it in 60 seconds
+
+In your browser, nothing to install: https://pjborad.github.io/Chimera-Rx/app/ (browser preview: the same React app and the same API code run in the page, with an in-memory SQLite. Not available there: webhook delivery to outside URLs, live AI providers (the mock provider stands in), voice audio (the browser reads scripts aloud), nothing is saved between reloads. Build it yourself with `pnpm build:browser` and `pnpm preview:browser`, then open http://127.0.0.1:4680/Chimera-Rx/app/).
+
+Or run the full server version:
 
 Docker (one command):
 

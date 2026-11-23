@@ -152,6 +152,8 @@ Residual risk: DNS rebinding. The name is resolved for the check and resolved ag
 
 ## What is NOT covered
 
+- **The browser preview is not a security boundary.** At https://pjborad.github.io/Chimera-Rx/app/ the API, its role checks, encryption and audit log run in the same page as the UI, with a per-session key and an in-memory database. It shows the behaviour (who may do what, what is refused) but anyone with the page can change that code. The server build (Docker, Codespaces, `pnpm dev`) is the real boundary.
+
 - **No TLS in the app.** The API speaks HTTP. Put it behind a TLS-terminating proxy and set `COOKIE_SECURE=1` and `TRUST_PROXY=1`. Traffic between browser and API is unprotected without it.
 - **No KMS or HSM.** The default key sits on the same host as the data. The KMS provider is a stub.
 - **No encryption of everything.** Columns not in the table above (including message subjects, patient ids, lot and Rx numbers) are plaintext. SQLite page-level encryption (SQLCipher) is not used, so the file layout, table names and row counts are visible.
