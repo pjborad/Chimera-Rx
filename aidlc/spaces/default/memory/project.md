@@ -60,7 +60,7 @@
 
 - NEVER git push to any remote; commit everything locally only (learned 2026-11-16) <!-- cid:261116-judge-ready-pilot:intent-capture:dbc5b94ff44ab44f27667492f59427bf72b7d10bebd4021c8b6a5d91bb93ab19 -->
 
-- NEVER write the KoinArc name, or any company name, anywhere in the project (learned 2026-11-16) <!-- cid:261116-judge-ready-pilot:intent-capture:0aaa5451408c7820c4d2b56be3db8682d43391c6de133cf7e477564f7330ca0e -->
+- NEVER write any company or employer name anywhere in the project (learned 2026-11-16) <!-- cid:261116-judge-ready-pilot:intent-capture:0aaa5451408c7820c4d2b56be3db8682d43391c6de133cf7e477564f7330ca0e -->
 
 - NEVER git push to any remote; commit everything locally only (project.md, learned 2026-11-16). (affirmed 2026-11-18)
 

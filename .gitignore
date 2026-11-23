@@ -50,7 +50,9 @@ aidlc/spaces/*/intents/*/.aidlc-*
 aidlc/diagnostics/
 .aidlc/worktree-meta.json
 .aidlc/base-source-listing.tsv
-.kiro/steering/aidlc-active-memory.md
-.kiro/agents/aidlc-scoped-review-*.md
 # END AI-DLC:gitignore
 .logs/
+
+.venv-voice/
+voiceover-out/
+demo-video/
