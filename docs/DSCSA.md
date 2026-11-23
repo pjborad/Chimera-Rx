@@ -82,7 +82,7 @@ Pharmacies must keep product tracing data (lot, serial, expiry, who handled it a
 
 ## Try it in 60 seconds
 
-1. `pnpm dev`, sign in as the pharmacist (the demo notice on the sign-in page has the password).
+1. `pnpm dev`, sign in as the pharmacist (type the email and shared synthetic password from `README.md`; the form is not pre-filled).
 2. Open **DSCSA & trace**. Press **Preview**, then **Download .jsonld**.
 3. Drop that file back into the import box. The dry run shows events as duplicates or new, and "Stock unchanged".
 4. In **Verification requests**, press **Ask the sandbox verifier** with the prefilled `DEMO-OK-01` (verified). Change the serial to `SPOOF-001` (not verified).

@@ -66,11 +66,11 @@ In Recalls, on the patient-messages step, **Use AI draft** runs the Recall Outre
 
 ## Try it in 60 seconds
 
-1. Sign in as the pharmacist (J. Rivera). On Today, pick the scenario **Recall-aware refill**.
-2. Open **Refills**. Priya Natarajan's insulin is offered. James Okafor's oxycodone needs a new prescription. Grace Miller has a one-trip sync. Thomas Reyes is flagged for low adherence.
-3. Open **Recalls**, look up `D-0611-2026` (insulin glargine lot GX4471C).
-4. Back on **Refills**, Priya's insulin row is red and links to the recall. No refill is offered for it.
-5. Click **Draft reminders**. The drafts appear; Priya's insulin gets none. Tick the attestation and send. The messages land in the Outbox.
-6. In Recalls, on the patient-messages step, try **Use AI draft**.
+1. Sign in as the pharmacist (J. Rivera; type the email and the shared synthetic password from `README.md`).
+2. Open **Refills**. On a fresh seed four refills are due and offered.
+3. Click **Draft reminders**, tick the attestation and send. The messages land in the **Sandbox outbox** (sidebar).
+4. In **Recalls**, look up `D-0611-2026` (insulin glargine lot GX4471C) and, on the patient-messages step, try **Use AI draft**.
+
+The recall-hold walkthrough with named patients (an insulin row that turns red and links to the recall, an oxycodone refill that needs a new prescription, a one-trip sync, a low-adherence flag) uses the **Recall-aware refill** fixture in `apps/api/test/scenario-fixtures.ts`. `apps/api/test/refills.test.ts` and `pnpm e2e` load it; the product has no button that does, because the app ships without demo scaffolding.
 
 API: `GET /api/refills`, `POST /api/refills/draft`, `POST /api/refills/send` (pharmacist, with `attest: true`), `GET /api/refills/drafts`.

@@ -1,6 +1,6 @@
 # Submission pack
 
-Ready-to-paste Devpost text, a shot list for the video, and what the owner still has to do. Category: **Frankenstein**. Synthetic data only; no claim of compliance, certification or clinical validity.
+Ready-to-paste Devpost text, a shot list for the video, and what the owner still has to do. Category: **Frankenstein**. Synthetic data only. Built with HIPAA-style safeguards, not certified; no claim of compliance, certification or clinical validity.
 
 ## Devpost write-up
 
@@ -53,7 +53,7 @@ The honest account, including gaps, is in `docs/KIRO_USAGE.md`.
 ### Accomplishments
 
 - A recall goes from a faxed notice to a patient list and approved messages, end to end, in one flow.
-- 364 unit, API and property tests pass, and the end-to-end browser run passes against the real UI (49 passed, 1 skipped; see `docs/evidence/items/bgagents.md`).
+- 469 unit, API and property tests pass in 24 files, and the end-to-end browser run passes against the real UI (49 of 49; 51 of 51 with `MFA=1`; see `docs/evidence/items/final-round.md`).
 - Every safety rule has an enforcing file and a proving test.
 - An agent platform where a lying model cannot remove a rule hit, add a lot, or put a name into a voicemail.
 
@@ -77,11 +77,11 @@ TypeScript, Node 22+, Fastify, node:sqlite, React, Vite, zod, tesseract.js, bwip
 
 ### Try it
 
-`docker compose up` and open http://localhost:4000, or `pnpm install --frozen-lockfile && pnpm setup && pnpm dev` and open http://localhost:5173. Sign in as `j.rivera@elmstreetrx.example` / `moonlight-rx-2026`. The Docker image build was not run on the machine that wrote this repo.
+`docker compose up` and open http://localhost:4000, or `pnpm install --frozen-lockfile && pnpm setup && pnpm dev` and open http://localhost:5173. Type `j.rivera@elmstreetrx.example` / `moonlight-rx-2026` on the sign-in page (synthetic pharmacist; the form is not pre-filled). The Docker image build was not run on the machine that wrote this repo.
 
 ## 3-minute demo video shot list
 
-Follow the 3-minute table in [DEMO.md](DEMO.md). Record at 1080p, browser at 100% zoom, system sounds off. Keep the demo notice visible in every shot.
+Follow the 3-minute table in [DEMO.md](DEMO.md) (the recording script, kept outside the app). Confirm the length limit and upload site on the live rules page first. Record at 1080p, browser at 100% zoom, system sounds off. Keep the demo notice visible in every shot.
 
 | Time | Shot | Voice-over |
 | --- | --- | --- |
@@ -100,7 +100,7 @@ Follow the 3-minute table in [DEMO.md](DEMO.md). Record at 1080p, browser at 100
 
 These need a person. Nothing in this repo can do them.
 
-- [ ] **Record the video** (under 3 minutes) and upload it; paste the link into Devpost and into `docs/index.html` (replace the "Not recorded yet" line).
+- [ ] **Record the video** and upload it (confirm the length limit and the upload site on the live rules page); paste the link into Devpost and into `docs/index.html` (replace the "Not recorded yet" line).
 - [ ] **Make the repository public** and check that `.kiro/` is visible and not ignored.
 - [ ] **Choose the licence holder name.** `LICENSE` is MIT and names the current copyright holder; change it if the entry belongs to someone else or to a team.
 - [ ] **Check the Kiroween rules page** (2026). The criteria in `docs/KIROWEEN.md` came from the 2025 launch post and community summaries because the official pages could not be fetched. Fix anything that differs, including the deadline.

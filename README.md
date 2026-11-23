@@ -2,9 +2,9 @@
 
 **A modern, agent-assisted pharmacy system. One ledger holds the lot, the patient and the prescription history, agents watch it in the background, and a pharmacist decides. A recall is the sharpest proof.**
 
-**Kiroween 2026, Frankenstein category. Built with Kiro.** Demo environment: synthetic data only, not for clinical use, not HIPAA-compliant, no compliance or certification claim of any kind. See [docs/SAFETY.md](docs/SAFETY.md).
+**Kiroween 2026, Frankenstein category. Built with Kiro.** Demo environment: synthetic data only, not for clinical use. Built with HIPAA-style safeguards, not certified; no compliance or certification claim of any kind. See [docs/SAFETY.md](docs/SAFETY.md).
 
-![Sign-in page with the demo accounts and the demo notice](docs/img/sign-in.jpg)
+![Sign-in page with the demo notice](docs/img/sign-in.jpg)
 
 ## The pharmacy runs on yesterday's software
 
@@ -85,9 +85,9 @@ pnpm dev                 # API on :4000, web app on :5173 -> open http://localho
 
 `docker compose up` was **not run on the machine that wrote this repo** (no reachable Docker daemon). `docker-compose config` validated the file, and the same app was installed, built and served from source (`pnpm install --frozen-lockfile`, `pnpm setup`, `pnpm build:web`, API from source).
 
-### Demo accounts
+### Synthetic staff accounts
 
-All accounts share the password `moonlight-rx-2026`. Pick the pharmacy on the sign-in page.
+The sign-in form is empty: type one of these. All accounts share the password `moonlight-rx-2026`. Pick the pharmacy on the sign-in page.
 
 | Store | Email | Role | Sees |
 | --- | --- | --- | --- |
@@ -99,15 +99,17 @@ All accounts share the password `moonlight-rx-2026`. Pick the pharmacy on the si
 | Birch Avenue, Store 2 | `t.lund@birchavenuerx.example` | Technician | Store 2 receiving, inventory, fill |
 | Birch Avenue, Store 2 | `c.reyes@birchavenuerx.example` | Cashier | Store 2 register and pickup |
 
-The "Badge tap / SSO" button is a demo stand-in that signs in the Store 7 pharmacist. `MFA=1` turns on a second sign-in factor (a 6-digit code delivered to the sandbox outbox) and disables that button.
+There is no badge or SSO button. `MFA=1` turns on a second sign-in factor: a 6-digit code goes to the sandbox outbox, and the sign-in page offers a link that shows the code from the outbox (no real message is ever sent).
 
-### Three scenarios to click first
+### Three things to try on the seeded data
 
-Sign in as the pharmacist and open **Demo guide** in the sidebar for the scenarios (each one resets the data and shows a short brief).
+The app ships with no demo pages or scenario launcher: the screens are the product. A fresh database is seeded with synthetic data (`SEED_SYNTHETIC=1`, the default).
 
-1. **Agent catches it.** Start the scenario and stay on Today. A new insulin order arrives for a patient with late fills, an active semaglutide pen and a last fill from a recalled lot. Within about a minute the Rx Guardian raises suggestions with the evidence. Accept one and the order goes on hold.
-2. **Class I recall with patients to reach.** Recalls, look up `D-0611-2026`: the lot is confirmed, every on-shelf pen moves to quarantine, the impact list names the patients. Draft messages (try **Use AI draft**), tick the attestation, send. They land in the sandbox outbox.
-3. **Recall-aware refill.** Open Refills, then look up `D-0611-2026` in Recalls. The patient's refill row turns red and links to the recall.
+1. **Class I recall with patients to reach.** Sign in as the pharmacist, open Recalls and look up `D-0611-2026`. The lot is confirmed, on-shelf units move to quarantine and the impact list names the patients who took one home (on a fresh seed: 17 units held, 5 patients). Draft messages (try **Use AI draft**), tick the attestation, send. They land in the **Sandbox outbox** (sidebar).
+2. **Rx Guardian.** Open AI agents. The seed switches the Rx Guardian on; press **Run now** or wait about a minute, then open Today and Fill & pickup to see suggestions with their evidence. Accept one and the order goes on hold.
+3. **Register.** Sign in as the cashier (`m.diaz`), sell an over-the-counter item and pick up a verified prescription. Patient records, allergies and dates of birth stay hidden from this role.
+
+The scripted scenarios used in development (Agent catches it, Recall-aware refill, misread fax, receiving problems, suspect product) are now test fixtures in `apps/api/test/scenario-fixtures.ts`. `pnpm test` and `pnpm e2e` load them; the product has no route that does.
 
 ![Today screen after a Class I recall: refills tile](docs/img/today.jpg)
 
@@ -140,7 +142,7 @@ A pilot threat model, not a compliance claim. Full text: [docs/SECURITY.md](docs
 - **Roles on the server.** Every state-changing route and every route in the read authorization matrix is role-checked on the server (pharmacist, technician, cashier, admin); see [docs/SECURITY.md](docs/SECURITY.md). Partners get scoped tokens.
 - **Audit.** A hash-chained log of every decision, with a verify route.
 - **Sandbox messaging.** SMS, email and voice go to an outbox; nothing is dialled or sent. The prescriber loop and the DSCSA verifier are stand-ins.
-- **No compliance claims.** No HIPAA, DSCSA, certification or clinical-validity claim. This is not a medical device.
+- **No compliance claims.** Built with HIPAA-style safeguards, not certified. No DSCSA, certification or clinical-validity claim. This is not a medical device.
 
 ## Architecture
 
@@ -251,26 +253,27 @@ Eleven rules in [`.kiro/steering/pharmacy-safety.md`](.kiro/steering/pharmacy-sa
 
 ## Testing
 
-Measured on 2026-11-20 on the machine that built this repo:
+Measured on 2026-11-23 on the machine that built this repo:
 
 | Command | Result |
 | --- | --- |
-| `pnpm test` | 20 files, 364 tests passed |
+| `pnpm test` | 24 files, 469 tests passed |
 | `pnpm typecheck` | clean in all workspaces |
 | `pnpm build:web` | builds |
-| `pnpm e2e` | 49 passed and 1 skipped against a fresh data directory (the MFA check is skipped unless the API runs with `MFA=1`); run by the Rx Guardian build item, see [docs/evidence/items/bgagents.md](docs/evidence/items/bgagents.md) |
+| `pnpm e2e` | 49 of 49 passed; with `MFA=1`, 51 of 51 (the two MFA checks only run when MFA is on). See [docs/evidence/items/final-round.md](docs/evidence/items/final-round.md) |
 
 Property tests (fast-check, in 9 test files) check that on-hand stock always equals received minus dispensed, returned and adjusted, that no serial is dispensed twice, that the Coroner never emits a lot that is not in the source even when a stub model lies, that GS1 parsing round-trips, and that EPCIS events stay valid. Hostile-provider tests feed lying models to every agent and check the gates.
 
-End-to-end (needs the app running, uses Chromium with a fake webcam and real OCR; `npx playwright install chromium` once if the browser is missing):
+End-to-end (Chromium with a fake webcam and real OCR; `npx playwright install chromium` once if the browser is missing):
 
 ```bash
-pnpm dev                                  # in one terminal
-pnpm e2e                                  # in another; BASE=http://localhost:5173 by default
-BASE=http://localhost:5530 pnpm e2e       # against another web port
+pnpm build:web                            # once, the harness serves the built web app
+pnpm e2e                                  # starts its own stack on :4650 (control port :4651), fresh data dir
+E2E_PORT=4655 E2E_CONTROL_PORT=4656 pnpm e2e
+MFA=1 pnpm e2e                            # also drives the second factor through the sign-in form
 ```
 
-The e2e run resets the data. If the API is not on a dev origin, set `CORS_ORIGINS` (below) or the browser's POSTs are refused. A physical webcam, printed labels and live model providers were not tested.
+`pnpm e2e` (`scripts/e2e/run.mjs`) starts `scripts/e2e/harness.ts`: the real API on a temporary data directory, serving the built web app, plus a loopback-only control port that reseeds, loads scenario fixtures and lists printable test labels. It does not touch a running `pnpm dev` stack. A physical webcam, printed labels and live model providers were not tested.
 
 ## Configuration
 
@@ -284,7 +287,7 @@ Every variable is optional. Copy `.env.example` to `.env` to set them.
 | `DATASET` | `demo` | `large` adds a generated six-month history (about 5,000 fills) |
 | `TWO_STORES` | `1` | `0` runs one store |
 | `MFA` | `0` | `1` requires a 6-digit code after the password |
-| `LG_DEMO` | `1` | Show the demo accounts on sign-in and allow the SSO stand-in |
+| `SEED_SYNTHETIC` | `1` | Seed the synthetic dataset on a fresh database and re-seed it when the seed version changes; `0` never seeds and leaves the database as it is. On, it also switches the Rx Guardian on in the seed |
 | `TODAY` | real date | Pretend today is this date (`YYYY-MM-DD`) |
 | `NIGHT_WATCH` | on | `0` stops the openFDA poll |
 | `MIN_EXPIRY_MONTHS` | `6` | Shortest remaining shelf life accepted at receiving |
@@ -328,7 +331,7 @@ packages/summoner      openFDA client with fixture fallback
 packages/coroner       lot, NDC and expiry extraction (regex plus optional LLM, verbatim gate)
 packages/epcis         EPCIS 2.0 events, validator and parser
 fixtures/recalls       50 real 2025 openFDA records and demo recalls
-scripts/               dev launcher, end-to-end run, PHI guard
+scripts/               dev launcher, end-to-end harness and run, PHI guard
 prototype/             the clickable design prototype the screens were built from
 .kiro/                 steering, specs, hooks, agents, MCP config
 docs/                  architecture, safety, security, agents, demo, DSCSA, refills, submission
@@ -337,7 +340,7 @@ Dockerfile, docker-compose.yml, .devcontainer/
 
 ## Built with Kiro
 
-Steering files hold the safety rules and the stack, specs cover the Coroner and Summoner, a PHI-guard hook blocks risky writes, and a property-test hook runs on save. The honest account, including what Kiro did not do, is in [docs/KIRO_USAGE.md](docs/KIRO_USAGE.md). Criteria mapping: [docs/KIROWEEN.md](docs/KIROWEEN.md). Demo script: [docs/DEMO.md](docs/DEMO.md). Devpost write-up: [docs/SUBMISSION.md](docs/SUBMISSION.md).
+Steering files hold the safety rules and the stack, specs cover the Coroner and Summoner, a PHI-guard hook blocks risky writes, and a property-test hook runs on save. The honest account, including what Kiro did not do, is in [docs/KIRO_USAGE.md](docs/KIRO_USAGE.md). Criteria mapping: [docs/KIROWEEN.md](docs/KIROWEEN.md). Demo recording script (outside the app): [docs/DEMO.md](docs/DEMO.md). Devpost write-up: [docs/SUBMISSION.md](docs/SUBMISSION.md).
 
 ## Limitations and non-goals
 

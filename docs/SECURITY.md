@@ -1,6 +1,6 @@
 # Security and patient data: pilot threat model
 
-Chimera Rx is a sandbox pilot. It holds **synthetic data only** and is **not HIPAA-compliant, not certified and not clinically validated**. This page says what the code does to protect patient data, what it does not, and how to operate the key. Read it as a description of controls, not as a claim of compliance.
+Chimera Rx is a sandbox pilot. It holds **synthetic data only**. It is built with HIPAA-style safeguards, **not certified**, not HIPAA-compliant and not clinically validated. This page says what the code does to protect patient data, what it does not, and how to operate the key. Read it as a description of controls, not as a claim of compliance.
 
 ## What is encrypted
 
@@ -115,9 +115,9 @@ Reads, by who may call them:
 | Who | Reads |
 | --- | --- |
 | Anyone signed in | `/api/me`, `/api/voice`, `/api/today` (counts and generic tasks; tasks that name a patient or an Rx Watcher flag go to pharmacist and technician only), `/api/search` (lots; fill-queue rows except for the admin), `/api/agents` (agent names and what the caller may run) |
-| Pharmacist, technician, cashier | `/api/rx` and `/api/rx/:rx` (cashier: pickup columns, no allergies, DOB or email), `/api/lots`, `/api/deliveries`, `/api/demo/labels` |
+| Pharmacist, technician, cashier | `/api/rx` and `/api/rx/:rx` (cashier: pickup columns, no allergies, DOB or email), `/api/lots`, `/api/deliveries` |
 | Pharmacist, cashier | `/api/register/*` |
-| Pharmacist, technician | Agent run history `/api/agents/runs`, per-agent records `/api/agents/:id`, `/api/suggestions`, `/api/recalls`, `/api/recalls/:id`, `/results`, `/messages`, `/api/fax`, `/api/audio/:id`, `/api/outbox`, `/api/patients*`, `/api/refills*`, `/api/dscsa/*`, `/api/epcis/*`, `/api/stock-help`, `/api/rx/:rx/review`, `/api/prescriber-messages`, `/api/demo/scenarios` |
+| Pharmacist, technician | Agent run history `/api/agents/runs`, per-agent records `/api/agents/:id`, `/api/suggestions`, `/api/recalls`, `/api/recalls/:id`, `/results`, `/messages`, `/api/fax`, `/api/audio/:id`, `/api/outbox`, `/api/patients*`, `/api/refills*`, `/api/dscsa/*`, `/api/epcis/*`, `/api/stock-help`, `/api/rx/:rx/review`, `/api/prescriber-messages` |
 | Pharmacist only | Recall voicemail draft, call list, audit PDF and trace export; agent drafts; `/api/rx/:rx/change-draft`; `/api/stores` |
 | Pharmacist, admin | `/api/audit`, `/api/audit/verify`, `/api/integrations` |
 | Pharmacist, technician, admin | `/api/agents/provider` |

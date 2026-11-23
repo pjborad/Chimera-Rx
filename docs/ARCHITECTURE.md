@@ -127,9 +127,9 @@ Each store has its own database, staff, patients and stock, and each request is 
 | Outreach | `POST /api/outreach/run`, `POST /api/calls/inbound`, `POST /api/sms/inbound` (STOP), `GET /api/outbox`, `GET /api/audio/:id`, `GET /api/voice` |
 | Audit | `GET /api/audit`, `/verify`, `/export` |
 | Integrations | `GET/POST /api/integrations`, `POST /api/integrations/:id`, `/rotate`, `/webhooks` |
-| Demo | `GET /api/demo/labels`, `GET /api/demo/scenarios`, `POST /api/demo/scenarios/:id`, `POST /api/demo/reset`, `POST /api/night-watch/run`, `POST /api/ocr/parse` |
+| Other | `POST /api/night-watch/run`, `POST /api/ocr/parse` |
 
-The role of each route is checked on the server. `apps/api/test/review-matrix.test.ts` calls every route as every role.
+The role of each route is checked on the server. `apps/api/test/review-matrix.test.ts` calls every route as every role. There are no demo routes: reseeding and scenario fixtures live in `apps/api/test/scenario-fixtures.ts` and the e2e harness (`scripts/e2e/harness.ts`), never in the product API.
 
 ## Partner API (OAuth 2.0 client credentials, per-partner scopes)
 
@@ -144,13 +144,13 @@ Patient data needs the `patient.read` scope, a BAA flag on the partner record an
 
 ## Serving and deployment
 
-In production the API serves the built web app from `apps/web/dist`, looked up on disk per request, so a rebuild needs no restart. The Dockerfile builds the web app and runs the API on port 4000. `docker-compose.yml` adds a volume for `/app/data`, a health check on `/api/health` and the `DATASET`, `MFA` and `TWO_STORES` switches. In development, Vite on 5173 proxies `/api`, `/v1`, `/mcp`, `/fhir`, `/oauth` and `/hooks` to the API. If the web app runs on another origin, add it to `CORS_ORIGINS`.
+In production the API serves the built web app from `apps/web/dist`, looked up on disk per request, so a rebuild needs no restart. The Dockerfile builds the web app and runs the API on port 4000. `docker-compose.yml` adds a volume for `/app/data`, a health check on `/api/health` and the `DATASET`, `MFA`, `TWO_STORES` and `SEED_SYNTHETIC` switches (`SEED_SYNTHETIC=1`, the default, seeds the synthetic dataset on a fresh database). In development, Vite on 5173 proxies `/api`, `/v1`, `/mcp`, `/fhir`, `/oauth` and `/hooks` to the API. If the web app runs on another origin, add it to `CORS_ORIGINS`.
 
 ## Known limits
 
 - One SQLite file per store. No multi-tenant isolation or row-level security.
-- SSO is a demo stand-in. MFA is built and tested but off by default.
+- There is no SSO. MFA is built and tested but off by default; its codes go to the sandbox outbox.
 - No TLS in the app; the key sits on the same host as the data by default. See [SECURITY.md](SECURITY.md).
-- The model paths were exercised with test doubles and a deterministic mock, not a live model.
+- The model paths were exercised with test doubles and a deterministic mock, plus one live Bedrock check (2026-11-20).
 - The camera path was rehearsed with a fake camera, not a physical webcam.
 - The Docker image build was not run on the machine that wrote this repo.

@@ -1,6 +1,6 @@
 # Safety
 
-Chimera Rx is a hackathon demo. It is **not** a medical device, **not** HIPAA-compliant, not certified and not clinically validated. Nothing here is legal or regulatory advice. Patient-data controls are in [SECURITY.md](SECURITY.md).
+Chimera Rx is a hackathon demo. It is **not** a medical device. It is built with HIPAA-style safeguards, **not certified**, not HIPAA-compliant and not clinically validated. Nothing here is legal or regulatory advice. Patient-data controls are in [SECURITY.md](SECURITY.md).
 
 The eleven rules below are the project's steering file ([`.kiro/steering/pharmacy-safety.md`](../.kiro/steering/pharmacy-safety.md)). The table maps each rule to where code enforces it and which test proves it. Paths are relative to the repo root. The independent review that checked each row is in [docs/evidence/items/review-api.md](evidence/items/review-api.md).
 
