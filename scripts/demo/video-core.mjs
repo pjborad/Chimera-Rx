@@ -162,13 +162,13 @@ export class Recorder {
     await this.clearRings(0);
     await this.page.goto(`${BASE}/#${route}`);
     if (waitFor) await this.page.waitForSelector(waitFor, { timeout: 20000 });
-    await this.page.waitForTimeout(250);
+    await this.page.waitForTimeout(700);
   }
   async moveTo(x, y) {
-    const d = Math.hypot(x - this.cx, y - this.cy), n = Math.max(8, Math.min(26, Math.round(d / 30)));
+    const n = 34; // slow glide: about 700 ms
     const x0 = this.cx, y0 = this.cy;
-    for (let i = 1; i <= n; i++) { const t = i / n, e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; await this.page.mouse.move(x0 + (x - x0) * e, y0 + (y - y0) * e); await sleep(12); }
-    this.cx = x; this.cy = y; await sleep(80);
+    for (let i = 1; i <= n; i++) { const t = i / n, e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; await this.page.mouse.move(x0 + (x - x0) * e, y0 + (y - y0) * e); await sleep(20); }
+    this.cx = x; this.cy = y; await sleep(150);
   }
   async click(loc, { ring = true } = {}) {
     const el = typeof loc === "string" ? this.page.locator(loc).first() : loc.first();
@@ -179,8 +179,9 @@ export class Recorder {
       await this.moveTo(b.x + b.width / 2, b.y + b.height / 2);
       if (ring) await el.evaluate((n) => window.__ring?.(n)).catch(() => {});
     }
+    await sleep(250);
     await el.click();
-    await sleep(180);
+    await sleep(1300); // round 6: at least 1.2 s before the next action
   }
   async type(loc, text) {
     const el = typeof loc === "string" ? this.page.locator(loc).first() : loc.first();
