@@ -3,93 +3,342 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chimera Rx</title>
-<style>
-  body { margin: 0; font: 16px/1.6 system-ui, sans-serif; background: #12101c; color: #ece9f7; }
-  main { max-width: 800px; margin: 0 auto; padding: 48px 20px; }
-  h1 { font-size: 40px; margin: 0 0 8px; }
-  h2 { margin-top: 36px; }
-  a { color: #b9a8ff; }
-  code, pre { background: #1d1a2e; border-radius: 6px; }
-  code { padding: 2px 6px; }
-  pre { padding: 14px 16px; overflow-x: auto; }
-  img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #3a3456; margin: 12px 0; }
-  table { border-collapse: collapse; width: 100%; font-size: 15px; }
-  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #2b2644; vertical-align: top; }
-  .notice { margin-top: 40px; padding: 12px 14px; border: 1px solid #3a3456; border-radius: 8px; font-size: 14px; }
-</style>
+<title>Chimera Rx: from a recalled lot to the exact patients</title>
+<meta name="description" content="Chimera Rx is an agent-assisted pharmacy system that links the lot on the shelf to the patient who took it home. Synthetic data only. Built with Kiro for Kiroween 2026.">
+<meta name="theme-color" content="#0B0D12">
+<meta property="og:title" content="Chimera Rx">
+<meta property="og:description" content="When a lot is recalled, know the exact units on your shelf and the exact patients who took one home.">
+<meta property="og:image" content="media/chimera-rx-demo-poster.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2312151C'/%3E%3Cpath d='M21 6a10 10 0 1 0 5 15 8 8 0 0 1-5-15z' fill='%238B73FF'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="site.css">
 </head>
 <body>
-<main>
-  <h1>Chimera Rx</h1>
-  <p>A modern, agent-assisted pharmacy system. One ledger holds the lot, the patient and the prescription history. Agents watch it in the background, and a pharmacist decides. A recall is the sharpest proof: it turns a drug lot into the units on the shelf and the patients who took one home.</p>
-  <p>Kiroween 2026, Frankenstein category. Built with Kiro.</p>
+<a class="skip" href="#main">Skip to content</a>
 
-  <h2>The pharmacy runs on yesterday's software</h2>
-  <ul>
-    <li>Wholesalers track a package by lot and serial. Dispensing software tracks the patient and the drug. Nothing links the two, so a recall means warning everyone or no one.</li>
-    <li>Recalls and prescriber changes still travel by fax and phone. Cold-chain and count checks are paper or a spreadsheet.</li>
-    <li>Alerts get overridden. In a study of community pharmacies, <a href="https://pubmed.ncbi.nlm.nih.gov/17381663/">289 of 510 relevant interaction alerts</a> were overridden with no action.</li>
-    <li>Staff are stretched: <a href="https://www.pharmacytimes.com/view/pharmacist-burnout-poses-challenges-to-patient-access">74.9 percent of 412 surveyed community pharmacists</a> reported burnout in at least one domain.</li>
-    <li>Package-level traceability is the rule under the DSCSA. Small dispensers have an <a href="https://www.fda.gov/drugs/drug-supply-chain-security-act-dscsa/exemptions-under-drug-supply-chain-security-act">FDA exemption to November 27, 2027</a>. Check your own status with the FDA.</li>
-  </ul>
-  <p>Sources and the full case: <a href="../README.md">README</a> and <a href="MODERNIZATION.md">MODERNIZATION.md</a>.</p>
-  <img src="img/today.jpg" alt="Chimera Rx Today screen with a recall banner and the refills tile" width="1360" height="820">
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Chimera Rx, top of page">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#12151C" stroke="#2F3546"/><path d="M21 6a10 10 0 1 0 5 15 8 8 0 0 1-5-15z" fill="#8B73FF"/></svg>
+      <span>Chimera Rx</span>
+    </a>
+    <nav aria-label="Sections">
+      <ul>
+        <li><a href="#demo-video">Demo</a></li>
+        <li><a href="#gap">The gap</a></li>
+        <li><a href="#flow">How it works</a></li>
+        <li><a href="#roles">Roles</a></li>
+        <li><a href="#agents">Agents</a></li>
+        <li><a href="#integrations">Integrations</a></li>
+        <li><a href="#security">Security</a></li>
+        <li><a href="#kiro">Built with Kiro</a></li>
+        <li><a href="#screens">Screens</a></li>
+        <li><a href="#try">Try it</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
 
-  <h2>Try it</h2>
-  <p><a href="https://codespaces.new/pjborad/Chimera-Rx?quickstart=1">Open in GitHub Codespaces</a>: it installs, seeds synthetic data and opens the app in your browser. Or run it locally:</p>
-<pre>git clone &lt;this repo&gt;
-cd chimera-rx
-docker compose up        # then open http://localhost:4000
+<main id="main">
+<section class="hero" id="top">
+  <svg class="stars" aria-hidden="true" width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 1000 600">
+    <g fill="#fff">
+      <circle class="star" cx="60" cy="80" r="1.4"/><circle class="star" cx="180" cy="320" r="1"/><circle class="star" cx="300" cy="60" r="1.2"/>
+      <circle class="star" cx="420" cy="500" r="1"/><circle class="star" cx="520" cy="140" r="1.4"/><circle class="star" cx="640" cy="40" r="1"/>
+      <circle class="star" cx="760" cy="420" r="1.2"/><circle class="star" cx="880" cy="90" r="1.5"/><circle class="star" cx="940" cy="300" r="1"/>
+      <circle class="star" cx="110" cy="520" r="1.2"/><circle class="star" cx="700" cy="560" r="1"/><circle class="star" cx="350" cy="260" r="0.9"/>
+    </g>
+  </svg>
+  <div class="wrap grid">
+    <div>
+      <p class="eyebrow">Kiroween 2026 · Frankenstein category</p>
+      <h1>Chimera <span>Rx</span></h1>
+      <p class="tag">When a lot is recalled, know the exact units on your shelf and the exact patients who took one home.</p>
+      <div class="btns">
+        <a class="btn primary" href="#demo-video">Watch the demo (2:50)</a>
+        <a class="btn" href="https://codespaces.new/pjborad/Chimera-Rx?quickstart=1">Try it in Codespaces</a>
+        <a class="btn" href="https://github.com/pjborad/Chimera-Rx">GitHub repo</a>
+      </div>
+      <div class="badges">
+        <span class="pill">Synthetic data only</span>
+        <span class="pill">Eight AI agents</span>
+        <span class="pill ok">A pharmacist approves every message</span>
+        <span class="pill gray">MIT licence</span>
+      </div>
+    </div>
+    <div class="moon" aria-hidden="true">
+      <svg viewBox="0 0 200 200"><defs><radialGradient id="g" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#E4DCFF"/><stop offset="1" stop-color="#8B73FF"/></radialGradient>
+        <mask id="m"><rect width="200" height="200" fill="#fff"/><circle cx="128" cy="86" r="62" fill="#000"/></mask></defs>
+        <circle cx="90" cy="104" r="72" fill="url(#g)" mask="url(#m)"/></svg>
+    </div>
+  </div>
+</section>
 
-# or, with Node 22.5+ and pnpm 12:
-pnpm install --frozen-lockfile
+<section id="demo-video" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">Demo video</p>
+      <h2>See a recall from fax to patient list</h2>
+      <p class="lead">A 2:50 walkthrough of the running app: receiving, fill, cashier, admin, a recall end to end, the AI agents and the integration placeholders. Synthetic data only, with captions.</p>
+    </div>
+    <div class="video">
+      <video controls preload="metadata" poster="media/chimera-rx-demo-poster.jpg">
+        <source src="media/chimera-rx-demo.mp4" type="video/mp4">
+        <track kind="captions" src="media/chimera-rx-demo.vtt" srclang="en" label="English" default>
+        <a href="media/chimera-rx-demo.mp4">Download the video</a>
+      </video>
+    </div>
+  </div>
+</section>
+
+<section id="gap">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">The gap</p>
+      <h2>Nothing links the lot to the patient</h2>
+      <p class="lead">Wholesalers track a package by lot and serial. Dispensing software tracks the patient and the drug. The two never meet, so a recall means warning everyone or no one.</p>
+    </div>
+    <div class="cards">
+      <div class="card"><div class="stat">289 / 510</div><h3>Alerts overridden</h3><p>Relevant drug interaction alerts in community pharmacies were overridden with no action.</p><p class="src"><a href="https://pubmed.ncbi.nlm.nih.gov/17381663/">Source: PubMed 17381663</a></p></div>
+      <div class="card"><div class="stat">74.9%</div><h3>Pharmacists report burnout</h3><p>Of 412 surveyed community pharmacists, in at least one domain.</p><p class="src"><a href="https://www.pharmacytimes.com/view/pharmacist-burnout-poses-challenges-to-patient-access">Source: Pharmacy Times</a></p></div>
+      <div class="card"><div class="stat">Fax and phone</div><h3>Recalls still travel on paper</h3><p>Recalls and prescriber changes arrive by fax and phone. Cold-chain and count checks sit on paper or a spreadsheet.</p><p class="src"><a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/MODERNIZATION.md">Source: MODERNIZATION.md</a></p></div>
+      <div class="card"><div class="stat">DSCSA</div><h3>Package-level traceability</h3><p>Small dispensers have an FDA exemption to November 27, 2027. Check your own status with the FDA.</p><p class="src"><a href="https://www.fda.gov/drugs/drug-supply-chain-security-act-dscsa/exemptions-under-drug-supply-chain-security-act">Source: FDA</a></p></div>
+    </div>
+    <p class="flowrow">Chimera Rx captures the lot when it is in your hand, at receiving and at fill, so one ledger holds the lot, the patient and the prescription history. Full case with all sources: <a href="https://github.com/pjborad/Chimera-Rx/blob/main/README.md">README</a> and <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/MODERNIZATION.md">docs/MODERNIZATION.md</a>.</p>
+  </div>
+</section>
+
+<section id="flow" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">How it works</p>
+      <h2>One ledger, from the dock to the medicine cabinet</h2>
+      <p class="lead">Each step writes to the same record, so the recall step can answer in seconds.</p>
+    </div>
+    <ol class="flow">
+      <li><h3>Receive</h3><p>Scan the GS1 DataMatrix, or read a label with OCR. Lot, expiry and serial are captured. Transaction information and statement (TI/TS) are kept for DSCSA.</p></li>
+      <li><h3>Shelve</h3><p>Each unit gets a put-away spot. Warm-fridge items, extra Schedule II and expired packages are flagged at the dock.</p></li>
+      <li><h3>Fill and verify</h3><p>Rx Watcher rules and the Rx Guardian check the order. Scanning the package links the exact lot and serial to the prescription and the patient.</p></li>
+      <li><h3>Pickup and register</h3><p>The cashier sees pickup columns only. A prescription is verified before it can be sold.</p></li>
+      <li class="hot"><h3>Recall</h3><p>Enter the recall number or upload the fax. The Coroner reads the lots. A lot must appear verbatim in the notice, and the pharmacist confirms each uncertain lot.</p></li>
+      <li class="hot"><h3>Quarantine</h3><p>Every on-shelf unit of a confirmed lot moves to quarantine. A recalled lot stays blocked at receiving and at fill, even after the recall closes.</p></li>
+      <li class="hot"><h3>Patients</h3><p>The impact list names each patient who took a unit home, matched by the lot recorded at fill, with their consented contact channels.</p></li>
+      <li class="hot"><h3>Sandbox messages</h3><p>Drafts go out only after the pharmacist attests. They land in the sandbox outbox. Nothing reaches a real person.</p></li>
+    </ol>
+    <p class="flowrow">Red steps are the recall path. Where the serial is missing at fill, the app assumes the oldest on-shelf unit of that lot and labels it <em>inferred</em>, never as scanned.</p>
+    <figure style="margin:28px 0 0" class="panel">
+      <img src="img/recall-impact.jpg" alt="Recall impact screen: 197 units quarantined, 17 patients matched by lot recorded at fill, with a list of affected patients and contact channels" width="1360" height="820" loading="lazy" style="border-radius:10px;border:1px solid var(--border)">
+      <figcaption style="margin-top:10px;color:var(--muted);font-size:14px">Recall impact for a synthetic recall: units on shelf, patients already served, and who can be reached by which channel.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="roles">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">Roles</p>
+      <h2>Four roles, enforced on the server</h2>
+      <p class="lead">Every route is checked against one access table, with default deny. A cashier or admin gets 403 on every clinical read. <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/SECURITY.md">Read matrix in SECURITY.md</a>.</p>
+    </div>
+    <div class="cards">
+      <article class="card"><h3>Pharmacist</h3><p>Final decision on every clinical and patient-facing action.</p>
+        <div class="can"><h4>Can</h4><ul class="tick"><li>Confirm recall lots, verify fills, approve flagged orders</li><li>Draft and send patient messages after attestation</li><li>Switch background agents on, change the AI provider</li><li>Read the audit log and verify its chain</li></ul></div></article>
+      <article class="card"><h3>Technician</h3><p>Runs receiving, fill queue and worklists.</p>
+        <div class="can"><h4>Can</h4><ul class="tick"><li>Receive, shelve and prepare fills</li><li>Read recalls, patients, refills and DSCSA records</li><li>Run read-only agents</li></ul></div>
+        <div class="cant"><h4>Cannot</h4><ul class="tick cross"><li>Send recall voicemail or read the call list</li><li>Read the audit log or other stores</li></ul></div></article>
+      <article class="card"><h3>Cashier</h3><p>Hands over prescriptions and runs the register.</p>
+        <div class="can"><h4>Can</h4><ul class="tick"><li>See pickup columns and register sales</li></ul></div>
+        <div class="cant"><h4>Cannot</h4><ul class="tick cross"><li>See allergies, date of birth or email</li><li>Read recalls, patient profiles or agent output</li></ul></div></article>
+      <article class="card"><h3>Admin</h3><p>Runs the site, not the clinic.</p>
+        <div class="can"><h4>Can</h4><ul class="tick"><li>Read the audit log, export it, view integrations</li><li>Switch background agents on</li></ul></div>
+        <div class="cant"><h4>Cannot</h4><ul class="tick cross"><li>Read any clinical data or fill-queue rows</li><li>Send anything to patients</li></ul></div></article>
+    </div>
+  </div>
+</section>
+
+<section id="agents" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">AI agents</p>
+      <h2>Eight agents, one rule</h2>
+    </div>
+    <p class="rule">Rules decide, the model explains, a <b>gate</b> checks the model, a <b>pharmacist</b> decides.</p>
+    <p class="lead" style="margin:0 0 28px">Every agent has a deterministic core that always runs, an optional model layer, and a gate that drops anything the rules or the source text do not back up. With no model, or when a call fails, the agent shows its output labelled &ldquo;rules only&rdquo;.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th scope="col">Agent</th><th scope="col">What it does</th><th scope="col">Gate on the model</th></tr></thead>
+        <tbody>
+          <tr><td>Coroner</td><td>Reads a recall notice, lists lots and NDCs</td><td>A lot must appear verbatim in the notice</td></tr>
+          <tr><td>Rx Watcher Explainer</td><td>Explains rule findings for one order, drafts a prescriber message</td><td>Rule hits copied through unchanged; &ldquo;looks fine&rdquo; is dropped</td></tr>
+          <tr><td>Recall Outreach Drafter</td><td>Rewrites the approved SMS, email and voicemail templates</td><td>Names, other phones and unknown placeholders are refused</td></tr>
+          <tr><td>Refill Outreach</td><td>Drafts refill reminders for due patients</td><td>Same gates, and recalled or Schedule II is skipped</td></tr>
+          <tr><td>Night Watch</td><td>Digest of open recalls, shortages, expiring lots and held orders</td><td>Every number must exist in the digest; never confirms a lot</td></tr>
+          <tr><td>Stock and Shortage Advisor</td><td>Reorder, expiry risk, shortages</td><td>A number not in its item is dropped</td></tr>
+          <tr><td>Pharmacist Copilot</td><td>Answers questions with up to three read-only tools</td><td>Tools outside the list never run; only tool-result numbers allowed</td></tr>
+          <tr><td>Rx Guardian</td><td>Checks each order against the patient&rsquo;s whole history (duplicate therapy, interactions, allergy class, dose, fill gaps)</td><td>Every rule hit stays; unbacked claims are dropped</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="two" style="margin-top:28px">
+      <div class="panel"><h3>Background mode</h3>
+        <p style="color:var(--muted);margin-top:10px">A pharmacist or admin can switch four agents on: Rx Guardian (checked each minute), Night Watch, Stock Advisor and Refill Outreach (daily). Each switch is audited. The Guardian never changes an order: it raises a suggestion with evidence, and a pharmacist accepts or dismisses it.</p></div>
+      <div class="panel"><h3>Bring your own model</h3>
+        <p style="color:var(--muted);margin-top:10px">Providers: Amazon Bedrock (default), Anthropic, any OpenAI-compatible endpoint (including Ollama, LM Studio and vLLM), an offline mock, or none. A key pasted in the UI stays in server memory only. <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/AGENTS.md">docs/AGENTS.md</a></p></div>
+    </div>
+  </div>
+</section>
+
+<section id="integrations">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">Integrations</p>
+      <h2>Open to other systems, honest about the edges</h2>
+    </div>
+    <div class="cards">
+      <div class="card"><h3>REST and MCP</h3><p>Scoped partner API, plus MCP (JSON-RPC) with read-only agent tools behind OAuth scopes.</p></div>
+      <div class="card"><h3>FHIR R4</h3><p>Read access for partner systems, behind OAuth 2.0 client credentials and per-partner scopes.</p></div>
+      <div class="card"><h3>Signed webhooks</h3><p>HMAC-signed events to a sandbox sink.</p></div>
+      <div class="card"><h3>DSCSA and EPCIS 2.0</h3><p>Export and dry-run import, sandbox verification requests, suspect-product cases. A sandbox, not a filing.</p></div>
+      <div class="card"><h3>Two stores</h3><p>Stock transfers between stores, and recalls mirrored from one store to the other.</p></div>
+    </div>
+    <div class="panel" style="margin-top:28px">
+      <h3>Placeholder map</h3>
+      <p style="color:var(--muted);margin:8px 0 0"><strong style="color:var(--warn-text)">Designed seam, not wired, sandbox today.</strong> The repo has no provider code, SDK or credentials for these. Each one throws &ldquo;not configured in this demo&rdquo; and has its env var, allowed data and pharmacist attestation written down in <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/INTEGRATION_PLACEHOLDERS.md">docs/INTEGRATION_PLACEHOLDERS.md</a>.</p>
+      <div class="seams">
+        <div class="seam"><b>SMS</b><span>Carrier or CPaaS API</span><em>Sandbox outbox today</em></div>
+        <div class="seam"><b>Email</b><span>Transactional email API</span><em>Sandbox outbox today</em></div>
+        <div class="seam"><b>Outbound voice</b><span>Telephony API</span><em>Rendered, never dialled</em></div>
+        <div class="seam"><b>e-Prescribing</b><span>NCPDP SCRIPT network</span><em>Stored locally</em></div>
+        <div class="seam"><b>Wholesaler feed</b><span>EDI and EPCIS</span><em>Sandbox today</em></div>
+        <div class="seam"><b>DSCSA verification</b><span>Verification router</span><em>Simulated today</em></div>
+        <div class="seam"><b>Pharmacy system</b><span>Dispensing system (PMS)</span><em>Not wired</em></div>
+        <div class="seam"><b>EHR</b><span>FHIR</span><em>Not wired</em></div>
+        <div class="seam"><b>Payer</b><span>Claims switch</span><em>Not wired</em></div>
+        <div class="seam"><b>Secrets manager</b><span>Credential store</span><em>Not wired</em></div>
+        <div class="seam"><b>KMS</b><span>Data key in a managed service</span><em>Throws today</em></div>
+        <div class="seam"><b>Identity</b><span>OIDC or SAML SSO</span><em>Not wired</em></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="security" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">Security and safety</p>
+      <h2>HIPAA-style safeguards, not certified</h2>
+      <p class="lead">Chimera Rx is a sandbox pilot with synthetic data. It makes no compliance claim. <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/SECURITY.md">SECURITY.md</a> lists what is encrypted and what is not.</p>
+    </div>
+    <div class="cards">
+      <div class="card"><h3>Encryption at rest</h3><p>Patient fields (name, date of birth, contact, allergies, conditions, message bodies) are encrypted with AES-256-GCM, each value with its own IV. Keys can rotate.</p></div>
+      <div class="card"><h3>Server-side roles</h3><p>One access table with default deny. Tests walk the live route table for anonymous users and all four roles.</p></div>
+      <div class="card"><h3>Hash-chained audit</h3><p>Every change and every profile view is logged with a patient ID, never a name. The chain can be verified from the app.</p></div>
+      <div class="card"><h3>Independent review</h3><p>An independent review found eight issues (five P1, three P2). All eight are fixed on the branch. <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/reviews/2026-11-22/README.md">Read the review</a>.</p></div>
+    </div>
+    <div class="panel" style="margin-top:28px">
+      <h3>Pharmacy safety rules, in short</h3>
+      <ul class="tick" style="margin-top:12px">
+        <li>Synthetic data only. Nothing reaches a real person.</li>
+        <li>A pharmacist decides: only a pharmacist confirms lots, verifies fills and sends patient messages.</li>
+        <li>Never invent a lot: a lot must appear verbatim in the source. Below 0.95 confidence, or without an expiry, one lot at a time.</li>
+        <li>Rules run before the model, and the model can never remove a rule hit.</li>
+        <li>An inferred serial is never shown as scanned. A recalled lot stays blocked.</li>
+        <li>Messages name only the patient they go to. Voicemail never names the medicine.</li>
+      </ul>
+      <p style="margin:12px 0 0"><a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/SAFETY.md">All rules mapped to code and tests</a></p>
+    </div>
+  </div>
+</section>
+
+<section id="kiro">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">Built with Kiro</p>
+      <h2>Spec-driven, with the gaps stated</h2>
+      <p class="lead">Kiro wrote most of this repo from a written spec and uploaded mockups, with a person directing each step. The account in <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/KIRO_USAGE.md">docs/KIRO_USAGE.md</a> marks what was not measured or run.</p>
+    </div>
+    <div class="cards">
+      <div class="card"><h3>Specs</h3><p>Coroner and Summoner specs with EARS requirements, design and tasks. Requirement IDs travel into tests.</p></div>
+      <div class="card"><h3>Steering</h3><p>Product, tech and pharmacy-safety files load on every request. GS1 and Coroner prompt steering load on demand.</p></div>
+      <div class="card"><h3>Hooks</h3><p>A PHI guard blocks commits that look like patient data. Property tests run on save.</p></div>
+      <div class="card"><h3>Custom agent</h3><p>A Coroner agent scoped to its packages that must finish with property tests passing.</p></div>
+      <div class="card"><h3>Property-based tests</h3><p>fast-check properties on lot extraction and GS1 parsing found real bugs.</p></div>
+      <div class="card"><h3>Kiro Crew</h3><p>Parallel workers built the agents, the encryption and the reviews, each with an evidence file.</p></div>
+      <div class="card"><h3>AI-DLC</h3><p>The planning record reached User Stories. The build then ran outside the approval gates, because the tool could not record gate approvals. This is stated in the repo.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="screens" class="alt">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">Screens</p>
+      <h2>The running app</h2>
+      <p class="lead">Screenshots of the current build with synthetic data.</p>
+    </div>
+    <div class="gallery">
+      <figure><img src="img/sign-in.jpg" alt="Sign-in screen with a moon illustration and the pitch: from the delivery dock to the medicine cabinet, every lot accounted for" width="1360" height="820" loading="lazy"><figcaption>Sign in. The persistent demo notice is on every page.</figcaption></figure>
+      <figure><img src="img/today.jpg" alt="Today screen with a recall banner, refills tile, Rx Guardian suggestions and counters" width="1360" height="820" loading="lazy"><figcaption>Today: the recall banner, Rx Guardian suggestions and live counters.</figcaption></figure>
+      <figure><img src="img/recall-lookup.jpg" alt="Recall workflow step one: enter the recall number beside an incoming fax with the number highlighted" width="1360" height="820" loading="lazy"><figcaption>Recall, step 1: look up the number or read the fax with OCR.</figcaption></figure>
+      <figure><img src="img/recall-impact.jpg" alt="Recall workflow step two: 197 units quarantined and 17 patients matched by lot" width="1360" height="820" loading="lazy"><figcaption>Recall, step 2: units quarantined and patients matched by lot.</figcaption></figure>
+      <figure><img src="img/agents.jpg" alt="AI agents screen with provider settings and agent cards for Coroner and Rx Watcher Explainer" width="1360" height="820" loading="lazy"><figcaption>AI agents: provider, guardrails and a run button for each agent.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="try">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">Try it</p>
+      <h2>Running in a minute</h2>
+      <p class="lead">Codespaces installs, seeds synthetic data and opens the app in your browser.</p>
+      <div class="btns"><a class="btn primary" href="https://codespaces.new/pjborad/Chimera-Rx?quickstart=1">Open in GitHub Codespaces</a></div>
+    </div>
+    <div class="two">
+      <div>
+        <h3 style="margin-bottom:10px">Docker</h3>
+<pre><code>git clone https://github.com/pjborad/Chimera-Rx
+cd Chimera-Rx
+docker compose up
+# open http://localhost:4000</code></pre>
+        <h3 style="margin:22px 0 10px">Node 22.5+ and pnpm</h3>
+<pre><code>pnpm install --frozen-lockfile
 pnpm setup
-pnpm dev                 # open http://localhost:5173</pre>
-  <p>Sign in as <code>j.rivera@elmstreetrx.example</code> with <code>moonlight-rx-2026</code> (pharmacist). Type them on the sign-in page (synthetic accounts; the form is not pre-filled), then look up recall <code>D-0611-2026</code> on Recalls. The Docker image build was not run on the machine that wrote this repo.</p>
-
-  <h2>Gaps we close</h2>
-  <table>
-    <tr><th>Old way</th><th>Chimera Rx way</th></tr>
-    <tr><td>A recall does not say who got the lot</td><td>Recall to shelf units and patients, quarantine, approved outreach</td></tr>
-    <tr><td>The lot is never captured</td><td>GS1 DataMatrix and OCR at receiving and at fill</td></tr>
-    <tr><td>Alerts come one at a time and get overridden</td><td>Rx Watcher rules and the Rx Guardian, a patient-history check that cites its evidence</td></tr>
-    <tr><td>Refills ignore recalls and adherence</td><td>Recall-aware refills, adherence, med sync</td></tr>
-    <tr><td>Traceability data is hard to exchange</td><td>EPCIS 2.0 export, sandbox verifier, suspect cases</td></tr>
-    <tr><td>Cold chain and counts on paper</td><td>Receiving temperature check (simulated data), witnessed Schedule II counts</td></tr>
-    <tr><td>Front store is separate</td><td>Register with verified prescriptions</td></tr>
-    <tr><td>Each store is an island</td><td>Two stores, transfers, mirrored recalls</td></tr>
-    <tr><td>Other systems cannot ask</td><td>REST, MCP and FHIR with scoped keys</td></tr>
-    <tr><td>Logs can be edited</td><td>Hash-chained audit log</td></tr>
-  </table>
-
-  <h2>Agents that work while you work</h2>
-  <p>Eight agents follow one rule: rules decide, the model explains, a gate checks the model, a pharmacist decides. Four can run in the background once a pharmacist switches them on. The Rx Guardian checks each new order against the patient's history and raises suggestions that a pharmacist accepts or dismisses. Amazon Bedrock is the default model provider, and you can bring your own.</p>
-  <img src="img/agents.jpg" alt="AI agents screen after running an agent" width="1360" height="820">
-
-  <h2>Documents</h2>
-  <ul>
-    <li><a href="DEMO.md">Demo recording script: 3-minute and 8-minute paths</a></li>
-    <li><a href="ARCHITECTURE.md">Architecture</a></li>
-    <li><a href="MODERNIZATION.md">Modernization: the case by role, roadmap and 90-day pilot plan</a></li>
-    <li><a href="AGENTS.md">AI agents and providers</a></li>
-    <li><a href="SAFETY.md">Safety rules mapped to code and tests</a></li>
-    <li><a href="SECURITY.md">Security and patient data: what is encrypted and what is not</a></li>
-    <li><a href="DSCSA.md">DSCSA traceability with EPCIS</a> and <a href="REFILLS.md">refills</a></li>
-    <li><a href="KIRO_USAGE.md">How Kiro was used, and what was not verified</a></li>
-    <li><a href="evidence/accuracy.md">Lot extraction on 50 real openFDA recall records</a></li>
-    <li><a href="evidence/timing.md">Recall to affected-patient list timing</a></li>
-  </ul>
-
-  <h2 id="demo-video">Demo video</h2>
-  <p>A 2:50 walkthrough of the running app: receiving, fill, cashier, admin, a recall end to end, the AI agents and the integration placeholders. Synthetic data only.</p>
-  <video controls preload="metadata" poster="media/chimera-rx-demo-poster.jpg" style="width:100%;max-width:960px;border-radius:10px">
-    <source src="media/chimera-rx-demo.mp4" type="video/mp4">
-    <track kind="captions" src="media/chimera-rx-demo.vtt" srclang="en" label="English" default>
-    <a href="media/chimera-rx-demo.mp4">Download the video</a>
-  </video>
-
-  <p class="notice">Demo environment · synthetic data only · not for clinical use · not HIPAA-compliant · a pharmacist approves every message</p>
+pnpm dev
+# open http://localhost:5173</code></pre>
+      </div>
+      <div class="panel">
+        <h3>Synthetic logins</h3>
+        <p style="color:var(--muted);margin:8px 0 14px;font-size:15px">Type them on the sign-in page. The form is not pre-filled.</p>
+        <dl class="login">
+          <dt>Pharmacist</dt><dd>j.rivera@elmstreetrx.example</dd>
+          <dt>Technician</dt><dd>k.patel@elmstreetrx.example</dd>
+          <dt>Cashier</dt><dd>m.diaz@elmstreetrx.example</dd>
+          <dt>Admin</dt><dd>s.grant@elmstreetrx.example</dd>
+          <dt>Password</dt><dd>moonlight-rx-2026</dd>
+        </dl>
+        <p style="color:var(--muted);margin:16px 0 0;font-size:15px">Then open <strong>Recalls</strong> and look up <code>D-0417-2026</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
 </main>
+
+<footer>
+  <div class="wrap">
+    <p class="notice" role="note">Demo environment · synthetic data only · not for clinical use · not HIPAA-compliant · a pharmacist approves every message</p>
+    <div class="links">
+      <a href="https://github.com/pjborad/Chimera-Rx">GitHub repo</a>
+      <a href="https://github.com/pjborad/Chimera-Rx/blob/main/LICENSE">MIT licence</a>
+      <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/ARCHITECTURE.md">Architecture</a>
+      <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/DSCSA.md">DSCSA</a>
+      <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/REFILLS.md">Refills</a>
+      <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/DEMO.md">Demo script</a>
+      <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/evidence/accuracy.md">Lot extraction accuracy</a>
+      <a href="https://github.com/pjborad/Chimera-Rx/blob/main/docs/evidence/timing.md">Recall timing</a>
+    </div>
+    <p style="margin:18px 0 0">Kiroween 2026 · Frankenstein category · Built with Kiro.</p>
+  </div>
+</footer>
+<script src="site.js"></script>
 </body>
 </html>
