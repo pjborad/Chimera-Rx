@@ -2,6 +2,8 @@
 
 Ready-to-paste Devpost text, a shot list for the video, and what the owner still has to do. Category: **Frankenstein**. Synthetic data only. Built with HIPAA-style safeguards, not certified; no claim of compliance, certification or clinical validity.
 
+**The ready-to-paste version of every form field, with the category decided, is in [DEVPOST.md](DEVPOST.md).**
+
 ## Devpost write-up
 
 ### Project name
