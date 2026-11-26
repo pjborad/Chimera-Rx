@@ -1,0 +1,44 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Chimera Rx thumbnail</title>
+<!-- Source for the Devpost and YouTube thumbnails. Render: scripts/demo/thumbnail.mjs -->
+<style>
+  html,body{margin:0}
+  body{width:var(--w);height:var(--h);overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#ECEDF2;
+    background:radial-gradient(ellipse at 78% 30%,#2a2160 0%,#14112b 42%,#0B0D12 75%)}
+  .stars{position:absolute;inset:0}
+  .moon{position:absolute;right:calc(var(--w)*.055);top:calc(var(--h)*.08);width:calc(var(--h)*.30);height:calc(var(--h)*.30);filter:drop-shadow(0 0 60px rgba(139,115,255,.55))}
+  .shot{position:absolute;right:calc(var(--w)*-.03);bottom:calc(var(--h)*-.06);width:calc(var(--w)*.52);border-radius:18px;border:2px solid #3a3360;
+    box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 8px rgba(139,115,255,.10);transform:rotate(-4deg)}
+  .copy{position:absolute;left:calc(var(--w)*.06);top:50%;transform:translateY(-52%);width:calc(var(--w)*.56)}
+  body.wide .shot{width:calc(var(--w)*.44);right:calc(var(--w)*-.05);bottom:calc(var(--h)*-.10)}
+  body.wide .copy{width:calc(var(--w)*.50)}
+  body.wide .tag{font-size:calc(var(--h)*.052)}
+  body.tall h1{font-size:calc(var(--h)*.13)}
+  body.tall .shot{width:calc(var(--w)*.46);bottom:calc(var(--h)*-.14);z-index:0}
+  body.tall .copy{z-index:1;width:calc(var(--w)*.60)}
+  body.tall .pills{max-width:calc(var(--w)*.46)}
+  .tag .l{display:block;white-space:nowrap}
+  .eyebrow{font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#BDAEFF;font-size:calc(var(--h)*.032)}
+  h1{margin:calc(var(--h)*.015) 0 0;font-weight:800;letter-spacing:-.03em;line-height:1;font-size:calc(var(--h)*.165)}
+  h1 span{color:#9E8BFF}
+  .tag{margin-top:calc(var(--h)*.03);font-weight:600;line-height:1.22;font-size:calc(var(--h)*.058)}
+  .pills{display:flex;flex-wrap:wrap;gap:calc(var(--h)*.016);margin-top:calc(var(--h)*.045)}
+  .pill{padding:calc(var(--h)*.012) calc(var(--h)*.026);border-radius:999px;font-weight:700;font-size:calc(var(--h)*.032);
+    background:rgba(139,115,255,.18);border:2px solid rgba(139,115,255,.55);color:#E4DCFF}
+  .pill.ok{background:rgba(50,213,131,.14);border-color:rgba(50,213,131,.55);color:#A6F4C5}
+</style>
+<svg class="stars" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true"><g fill="#fff" opacity=".8">
+  <circle cx="60" cy="70" r="1.6"/><circle cx="210" cy="520" r="1.2"/><circle cx="320" cy="40" r="1.4"/><circle cx="470" cy="300" r="1"/>
+  <circle cx="560" cy="90" r="1.6"/><circle cx="640" cy="560" r="1.1"/><circle cx="930" cy="420" r="1.4"/><circle cx="980" cy="60" r="1.2"/>
+  <circle cx="120" cy="300" r="1"/><circle cx="410" cy="580" r="1.3"/><circle cx="700" cy="30" r="1"/><circle cx="520" cy="470" r="1.2"/></g></svg>
+<svg class="moon" viewBox="0 0 200 200" aria-hidden="true"><defs><radialGradient id="g" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#E4DCFF"/><stop offset="1" stop-color="#8B73FF"/></radialGradient>
+  <mask id="m"><rect width="200" height="200" fill="#fff"/><circle cx="128" cy="86" r="62" fill="#000"/></mask></defs>
+  <circle cx="90" cy="104" r="72" fill="url(#g)" mask="url(#m)"/></svg>
+<img class="shot" src="../img/today.jpg" alt="">
+<div class="copy">
+  <div class="eyebrow">Kiroween 2026 · Frankenstein</div>
+  <h1>Chimera <span>Rx</span></h1>
+  <div class="tag"><span class="l">The pharmacy, modernized.</span><span class="l">AI agents watch.</span><span class="l">A pharmacist decides.</span></div>
+  <div class="pills"><span class="pill">One lot ledger</span><span class="pill">8 AI agents</span><span class="pill ok">Built with Kiro</span></div>
+</div>
