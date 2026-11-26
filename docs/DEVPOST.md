@@ -141,6 +141,7 @@ TypeScript, Node.js, Fastify, SQLite, React, Vite, Zod, Tesseract.js, bwip-js, f
 - **File:** `demo-video/chimera-rx-submission.mp4` (2:55, 1920x1080). It is the same as `docs/media/chimera-rx-demo.mp4`.
 - **Visibility:** Public, not Unlisted or Private. Audience: "No, it's not made for kids".
 - **Captions:** upload `demo-video/chimera-rx-submission.srt` under Subtitles.
+- **Thumbnail:** `docs/media/thumbnail-youtube.png` (1280x720). The Devpost project thumbnail is `docs/media/thumbnail-devpost.png` (1500x1000, 3:2). Re-render both with `node scripts/demo/thumbnail.mjs`.
 - **Title:** Chimera Rx: a modern pharmacy system with AI agents (Kiroween 2026)
 - **Description:**
 
