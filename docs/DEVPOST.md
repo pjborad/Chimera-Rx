@@ -145,18 +145,42 @@ None were used for this build.
 - **Visibility:** Public, not Unlisted or Private. Audience: "No, it's not made for kids".
 - **Captions:** upload `demo-video/chimera-rx-submission.srt` under Subtitles.
 - **Thumbnail:** `docs/media/thumbnail-youtube.png` (1280x720). The Devpost project thumbnail is `docs/media/thumbnail-devpost.png` (1500x1000, 3:2). Re-render both with `node scripts/demo/thumbnail.mjs`.
-- **Title:** Chimera Rx: a modern pharmacy system with AI agents (Kiroween 2026)
+- **Title:** Chimera Rx: an AI-assisted pharmacy system, built with Kiro (Kiroween 2026)
 - **Description:**
 
 ```text
-Chimera Rx modernizes the pharmacy counter: one connected ledger for every lot, patient and prescription, AI agents working in the background, and a pharmacist who decides. A walkthrough of all fourteen tabs of the pharmacist's workspace.
+Pharmacies still run on fax machines, phone calls and separate systems that never talk to each other. The wholesaler knows which lot is in the box, the dispensing system knows which patient took it home, and nothing connects the two.
 
-Try it: https://pjborad.github.io/Chimera-Rx/app/
-Code: https://github.com/pjborad/Chimera-Rx
-Built with Kiro for Kiroween 2026 (Frankenstein category).
+Chimera Rx modernizes the pharmacy counter: one connected ledger for every lot, patient and prescription, eight AI agents working in the background, and a pharmacist who makes every decision. This video walks through all fourteen tabs of the pharmacist's workspace in the order the work happens.
 
-Synthetic data only. Not for clinical use. Narration voices: Kokoro (open-source text-to-speech). No music.
+▶ Try the live app (no install): https://pjborad.github.io/Chimera-Rx/app/
+▶ Project website: https://pjborad.github.io/Chimera-Rx/
+▶ Source code (MIT): https://github.com/pjborad/Chimera-Rx
+
+CHAPTERS
+0:00 Modernizing the pharmacy, and the Today screen
+0:18 Receiving and inventory: the lot is captured from the barcode
+0:40 Register, stock help and transfers between stores
+1:02 Fill and pickup: Rx Guardian reads the patient's history
+1:23 Patients and recalls: from a faxed notice to the exact patients
+1:47 Refills, DSCSA traceability and the sandbox outbox
+2:02 AI agents: rules decide, the model explains, a pharmacist decides
+2:22 Integrations: REST, MCP, FHIR, signed webhooks
+2:33 Roles enforced on the server, and the audit chain
+2:45 Built with Kiro
+
+HOW IT WAS BUILT
+Built with Kiro for the Kiroween 2026 hackathon (Frankenstein category): steering files for eleven pharmacy safety rules, spec-driven development with requirement IDs carried into tests, hooks that block commits containing patient-like data, a custom agent, property-based tests, and Kiro Crew running the build as a team of agents.
+
+Stack: TypeScript, Fastify, SQLite, React, Vite, Tesseract.js OCR, GS1 DataMatrix, openFDA, EPCIS 2.0, FHIR R4, MCP, Amazon Bedrock.
+
+Synthetic data only. Not for clinical use. No message reaches a real person. Built with HIPAA-style safeguards, not certified.
+Narration: two Kokoro text-to-speech voices (open source, Apache-2.0). No music.
+
+#Kiro #Kiroween #KiroweenHackathon26 #PharmacyTech #AIAgents
 ```
+
+YouTube needs every chapter to be at least 10 seconds long, so the 14 tabs are grouped into 10 chapters. The description has no angle brackets, which YouTube rejects.
 
 - **Rights check:** no music; narration is Kokoro-82M (Apache-2.0); all screens are our own app with synthetic data. No third-party logos appear.
 - After upload, send the link and it goes into the README and the website.
