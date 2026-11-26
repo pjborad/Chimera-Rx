@@ -132,9 +132,12 @@ KIRO POWERS
 None were used for this build.
 ```
 
-## 7. Built with (tags)
+## 7. Project story, built with, links and gallery
 
-TypeScript, Node.js, Fastify, SQLite, React, Vite, Zod, Tesseract.js, bwip-js, fast-check, Vitest, Playwright, Amazon Bedrock, Anthropic, OpenAI-compatible APIs, Kokoro TTS, openFDA, GS1, EPCIS, FHIR, MCP, OAuth 2.0, GitHub Pages, Kiro
+- **Project story (About the project):** paste [DEVPOST_STORY.md](DEVPOST_STORY.md) as is. It is Markdown with LaTeX, and its images load from the project website.
+- **Built with (25 tags, the limit):** typescript, node.js, react, vite, fastify, sqlite, zod, tesseract.js, bwip-js, webassembly, fast-check, vitest, playwright, amazon-bedrock, anthropic, openai, ollama, kokoro, openfda, gs1, epcis, fhir, mcp, oauth, kiro
+- **Try it out links:** https://pjborad.github.io/Chimera-Rx/app/ · https://pjborad.github.io/Chimera-Rx/ · https://github.com/pjborad/Chimera-Rx
+- **Image gallery (3:2, upload in this order):** `docs/media/gallery/00-cover.png`, then `01-today.jpg` to `10-refills.jpg`. Re-render with `node scripts/demo/gallery.mjs`.
 
 ## 8. YouTube upload (**YOU**)
 
